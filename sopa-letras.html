@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sopa de Letras</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        const WordSearch = () => {
+          const [grid, setGrid] = useState([]);
+          const [words, setWords] = useState([]);
+          const [foundWords, setFoundWords] = useState([]);
+          const [selectedCells, setSelectedCells] = useState([]);
+          const [gameStarted, setGameStarted] = useState(false);
+          const [difficulty, setDifficulty] = useState(null);
+          const [score, setScore] = useState(0);
+
+          const wordLists = {
+            facil: ['GATO', 'PERRO', 'CASA', 'SOL', 'MAR'],
+            medio: ['AVION', 'LIBRO', 'ARBOL', 'FLOR', 'MESA', 'SILLA'],
+            dificil: ['MARIPOSA', 'ELEFANTE', 'DINOSAURIO', 'MONTAÑA', 'COMPUTADORA']
+          };
+
+          const generateGrid = (wordList, size) => {
+            const newGrid = Array(size).fill(null).map(() => Array(size).fill(''));
+            const placedWords = [];
+
+            wordList.forEach(word => {
+              let placed = false;
+              let attempts = 0;
+
+              while (!placed && attempts < 100) {
+                const direction = Math.random() > 0.5 ? 'horizontal' : 'vertical';
+                const row = Math.floor(Math.random() * size);
+                const col = Math.floor(Math.random() * size);
+
+                if (direction === 'horizontal' && col + word.length <= size) {
+                  let canPlace = true;
+                  for (let i = 0; i < word.length; i++) {
+                    if (newGrid[row][col + i] !== '' && newGrid[row][col + i] !== word[i]) {
+                      canPlace = false;
+                      break;
+                    }
+                  }
+                  if (canPlace) {
+                    const positions = [];
+                    for (let i = 0; i < word.length; i++) {
+                      newGrid[row][col + i] = word[i];
+                      positions.push(`${row}-${col + i}`);
+                    }
+                    placedWords.push({ word, positions });
+                    placed = true;
+                  }
+                } else if (direction === 'vertical' && row + word.length <= size) {
+                  let canPlace = true;
+                  for (let i = 0; i < word.length; i++) {
+                    if (newGrid[row + i][col] !== '' && newGrid[row + i][col] !== word[i]) {
+                      canPlace = false;
+                      break;
+                    }
+                  }
+                  if (canPlace) {
+                    const positions = [];
+                    for (let i = 0; i < word.length; i++) {
+                      newGrid[row + i][col] = word[i];
+                      positions.push(`${row + i}-${col}`);
+                    }
+                    placedWords.push({ word, positions });
+                    placed = true;
+                  }
+                }
+                attempts++;
+              }
+            });
+
+            for (let i = 0; i < size; i++) {
+              for (let j = 0; j < size; j++) {
+                if (newGrid[i][j] === '') {
+                  newGrid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                }
+              }
+            }
+
+            return { grid: newGrid, words: placedWords };
+          };
+
+          const startGame = (level) => {
+            setDifficulty(level);
+            const size = level === 'facil' ? 8 : level === 'medio' ? 10 : 12;
+            const { grid: newGrid, words: placedWords } = generateGrid(wordLists[level], size);
+            setGrid(newGrid);
+            setWords(placedWords);
+            setFoundWords([]);
+            setSelectedCells([]);
+            setGameStarted(true);
+            setScore(0);
+          };
+
+          const handleCellClick = (row, col) => {
+            const cellId = `${row}-${col}`;
+            const newSelected = [...selectedCells];
+
+            if (newSelected.includes(cellId)) {
+              setSelectedCells(newSelected.filter(c => c !== cellId));
+            } else {
+              newSelected.push(cellId);
+              setSelectedCells(newSelected);
+
+              words.forEach(wordObj => {
+                const allSelected = wordObj.positions.every(pos => newSelected.includes(pos));
+                if (allSelected && !foundWords.includes(wordObj.word)) {
+                  setFoundWords([...foundWords, wordObj.word]);
+                  setScore(s => s + 20);
+                }
+              });
+            }
+          };
+
+          if (!gameStarted) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-green-400 to-teal-500 p-4">
+                <div className="max-w-4xl mx-auto text-white">
+                  <a
+                    href="index.html"
+                    className="mb-4 inline-block bg-white text-teal-600 px-4 py-2 rounded-lg font-bold no-underline"
+                  >
+                    🏠 Volver al Menú
+                  </a>
+                  
+                  <h2 className="text-4xl font-bold mb-8 text-center">Sopa de Letras 🔤</h2>
+                  <p className="text-xl text-center mb-8">Elige tu nivel:</p>
+                  
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <button
+                      onClick={() => startGame('facil')}
+                      className="bg-green-500 hover:bg-green-600 rounded-xl p-8"
+                    >
+                      <h3 className="text-3xl font-bold mb-2">😊 Fácil</h3>
+                      <p className="text-sm">Palabras cortas</p>
+                      <p className="text-sm">Cuadrícula 8×8</p>
+                    </button>
+                    
+                    <button
+                      onClick={() => startGame('medio')}
+                      className="bg-yellow-500 hover:bg-yellow-600 rounded-xl p-8"
+                    >
+                      <h3 className="text-3xl font-bold mb-2">🤔 Medio</h3>
+                      <p className="text-sm">Palabras medianas</p>
+                      <p className="text-sm">Cuadrícula 10×10</p>
+                    </button>
+                    
+                    <button
+                      onClick={() => startGame('dificil')}
+                      className="bg-red-500 hover:bg-red-600 rounded-xl p-8"
+                    >
+                      <h3 className="text-3xl font-bold mb-2">🔥 Difícil</h3>
+                      <p className="text-sm">Palabras largas</p>
+                      <p className="text-sm">Cuadrícula 12×12</p>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          const allWordsFound = foundWords.length === words.length;
+
+          return (
+            <div className="min-h-screen bg-gradient-to-b from-green-400 to-teal-500 p-4">
+              <div className="max-w-6xl mx-auto text-white">
+                <div className="flex justify-between items-center mb-4">
+                  <a
+                    href="index.html"
+                    className="bg-white text-teal-600 px-4 py-2 rounded-lg font-bold no-underline"
+                  >
+                    🏠 Menú
+                  </a>
+                  <div className="text-2xl font-bold">Puntos: {score}</div>
+                </div>
+
+                {allWordsFound && (
+                  <div className="bg-green-500 text-white text-center p-4 rounded-xl mb-4">
+                    <h3 className="text-3xl font-bold mb-2">¡Felicidades! 🎉</h3>
+                    <p className="text-xl">¡Encontraste todas las palabras!</p>
+                    <div className="flex gap-4 justify-center mt-4 flex-wrap">
+                      <button
+                        onClick={() => startGame(difficulty)}
+                        className="bg-white text-green-600 px-6 py-2 rounded-lg font-bold"
+                      >
+                        Jugar de Nuevo
+                      </button>
+                      <button
+                        onClick={() => setGameStarted(false)}
+                        className="bg-white text-green-600 px-6 py-2 rounded-lg font-bold"
+                      >
+                        Cambiar Nivel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid lg:grid-cols-4 gap-6">
+                  <div className="lg:col-span-3">
+                    <div className="bg-white rounded-xl p-4 inline-block">
+                      <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${grid.length}, minmax(0, 1fr))` }}>
+                        {grid.map((row, i) =>
+                          row.map((cell, j) => {
+                            const cellId = `${i}-${j}`;
+                            const isSelected = selectedCells.includes(cellId);
+                            const isPartOfFoundWord = words.some(
+                              w => foundWords.includes(w.word) && w.positions.includes(cellId)
+                            );
+
+                            return (
+                              <button
+                                key={cellId}
+                                onClick={() => handleCellClick(i, j)}
+                                className={`w-10 h-10 font-bold text-lg rounded transition ${
+                                  isPartOfFoundWord
+                                    ? 'bg-green-400 text-white'
+                                    : isSelected
+                                    ? 'bg-blue-400 text-white'
+                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                }`}
+                              >
+                                {cell}
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white bg-opacity-20 rounded-xl p-6">
+                    <h3 className="text-2xl font-bold mb-4">Palabras a encontrar:</h3>
+                    <ul className="space-y-2">
+                      {words.map(wordObj => (
+                        <li
+                          key={wordObj.word}
+                          className={`text-xl font-bold ${
+                            foundWords.includes(wordObj.word)
+                              ? 'line-through text-green-300'
+                              : 'text-white'
+                          }`}
+                        >
+                          {foundWords.includes(wordObj.word) ? '✓' : '○'} {wordObj.word}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<WordSearch />);
+    </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Práctica de Escritura</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        const TypingPractice = () => {
+          const [level, setLevel] = useState(null);
+          const [gameStarted, setGameStarted] = useState(false);
+          const [currentText, setCurrentText] = useState('');
+          const [userInput, setUserInput] = useState('');
+          const [completed, setCompleted] = useState(false);
+          const [mistakes, setMistakes] = useState(0);
+          const [score, setScore] = useState(0);
+
+          const texts = {
+            facil: [
+              'El gato juega con la pelota',
+              'Me gusta el helado de chocolate',
+              'El sol brilla en el cielo',
+              'Los perros son muy divertidos'
+            ],
+            medio: [
+              'En el jardín hay muchas flores de colores',
+              'Los dinosaurios vivieron hace millones de años',
+              'Me encanta leer libros de aventuras',
+              'El arcoíris aparece después de la lluvia'
+            ],
+            dificil: [
+              'La computadora es una herramienta muy útil para aprender',
+              'Los astronautas viajan al espacio en cohetes espaciales',
+              'La fotosíntesis es el proceso por el cual las plantas producen su alimento',
+              'El océano Pacífico es el más grande de todos los océanos del mundo'
+            ]
+          };
+
+          const startGame = (selectedLevel) => {
+            setLevel(selectedLevel);
+            setGameStarted(true);
+            setCompleted(false);
+            setMistakes(0);
+            setUserInput('');
+            const randomText = texts[selectedLevel][Math.floor(Math.random() * texts[selectedLevel].length)];
+            setCurrentText(randomText);
+          };
+
+          const handleInputChange = (e) => {
+            const input = e.target.value;
+            setUserInput(input);
+
+            if (input === currentText) {
+              setCompleted(true);
+              const points = level === 'facil' ? 10 : level === 'medio' ? 20 : 30;
+              setScore(s => s + points - mistakes);
+            } else if (input.length > 0 && input[input.length - 1] !== currentText[input.length - 1]) {
+              setMistakes(m => m + 1);
+            }
+          };
+
+          const nextText = () => {
+            const randomText = texts[level][Math.floor(Math.random() * texts[level].length)];
+            setCurrentText(randomText);
+            setUserInput('');
+            setCompleted(false);
+            setMistakes(0);
+          };
+
+          if (!gameStarted) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-purple-400 to-pink-500 p-4">
+                <div className="max-w-4xl mx-auto text-white">
+                  <a
+                    href="index.html"
+                    className="mb-4 inline-block bg-white text-purple-600 px-4 py-2 rounded-lg font-bold no-underline"
+                  >
+                    🏠 Volver al Menú
+                  </a>
+                  
+                  <h2 className="text-4xl font-bold mb-8 text-center">Práctica de Escritura ✍️</h2>
+                  <p className="text-xl text-center mb-8">Elige tu nivel:</p>
+                  
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <button
+                      onClick={() => startGame('facil')}
+                      className="bg-green-500 hover:bg-green-600 rounded-xl p-8"
+                    >
+                      <h3 className="text-3xl font-bold mb-2">😊 Fácil</h3>
+                      <p className="text-sm">Frases cortas</p>
+                      <p className="text-sm">Palabras simples</p>
+                    </button>
+                    
+                    <button
+                      onClick={() => startGame('medio')}
+                      className="bg-yellow-500 hover:bg-yellow-600 rounded-xl p-8"
+                    >
+                      <h3 className="text-3xl font-bold mb-2">🤔 Medio</h3>
+                      <p className="text-sm">Frases medianas</p>
+                      <p className="text-sm">Vocabulario intermedio</p>
+                    </button>
+                    
+                    <button
+                      onClick={() => startGame('dificil')}
+                      className="bg-red-500 hover:bg-red-600 rounded-xl p-8"
+                    >
+                      <h3 className="text-3xl font-bold mb-2">🔥 Difícil</h3>
+                      <p className="text-sm">Frases largas</p>
+                      <p className="text-sm">Palabras complejas</p>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="min-h-screen bg-gradient-to-b from-purple-400 to-pink-500 p-4">
+              <div className="max-w-4xl mx-auto text-white">
+                <div className="flex justify-between items-center mb-4">
+                  <a
+                    href="index.html"
+                    className="bg-white text-purple-600 px-4 py-2 rounded-lg font-bold no-underline"
+                  >
+                    🏠 Menú
+                  </a>
+                  <div className="text-2xl font-bold">Puntos: {score}</div>
+                  <div className="text-xl">Errores: {mistakes}</div>
+                </div>
+
+                {completed && (
+                  <div className="bg-green-500 text-white text-center p-6 rounded-xl mb-6">
+                    <h3 className="text-3xl font-bold mb-2">¡Excelente! 🎉</h3>
+                    <p className="text-xl mb-4">¡Escribiste todo correctamente!</p>
+                    <div className="flex gap-4 justify-center flex-wrap">
+                      <button
+                        onClick={nextText}
+                        className="bg-white text-green-600 px-6 py-3 rounded-lg font-bold text-lg"
+                      >
+                        Siguiente Texto
+                      </button>
+                      <button
+                        onClick={() => setGameStarted(false)}
+                        className="bg-white text-green-600 px-6 py-3 rounded-lg font-bold text-lg"
+                      >
+                        Cambiar Nivel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-white rounded-xl p-8 mb-6">
+                  <h3 className="text-gray-700 text-xl mb-4 font-bold">Escribe este texto:</h3>
+                  <div className="text-3xl font-bold text-gray-800 mb-6 leading-relaxed">
+                    {currentText.split('').map((char, index) => {
+                      let color = 'text-gray-400';
+                      if (index < userInput.length) {
+                        color = userInput[index] === char ? 'text-green-600' : 'text-red-600';
+                      }
+                      return (
+                        <span key={index} className={color}>
+                          {char}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl p-6">
+                  <input
+                    type="text"
+                    value={userInput}
+                    onChange={handleInputChange}
+                    placeholder="Empieza a escribir aquí..."
+                    className="w-full text-2xl p-4 border-4 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500 text-gray-800"
+                    autoFocus
+                    disabled={completed}
+                  />
+                </div>
+
+                <div className="mt-6 text-center">
+                  <p className="text-lg">
+                    Progreso: {userInput.length} / {currentText.length} letras
+                  </p>
+                  <div className="w-full bg-white bg-opacity-30 rounded-full h-4 mt-2">
+                    <div
+                      className="bg-green-400 h-4 rounded-full transition-all duration-300"
+                      style={{ width: `${(userInput.length / currentText.length) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<TypingPractice />);
+    </script>
+</body>
+</html>

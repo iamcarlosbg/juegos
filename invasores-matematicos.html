@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invasores Matemáticos</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        const MathInvaders = () => {
+          const [level, setLevel] = useState(null);
+          const [gameStarted, setGameStarted] = useState(false);
+          const [enemies, setEnemies] = useState([]);
+          const [playerX, setPlayerX] = useState(50);
+          const [question, setQuestion] = useState(null);
+          const [gameOver, setGameOver] = useState(false);
+          const [lives, setLives] = useState(3);
+          const [score, setScore] = useState(0);
+
+          const levels = {
+            facil: { range: 10, operations: ['suma'], fallSpeed: 0.283 },
+            medio: { range: 20, operations: ['suma', 'resta'], fallSpeed: 0.386 },
+            dificil: { range: 50, operations: ['suma', 'resta', 'multiplicar'], fallSpeed: 0.607 }
+          };
+
+          const generateQuestion = (levelConfig) => {
+            const operations = levelConfig.operations;
+            const op = operations[Math.floor(Math.random() * operations.length)];
+            let num1, num2, answer, questionText;
+
+            if (op === 'suma') {
+              num1 = Math.floor(Math.random() * levelConfig.range) + 1;
+              num2 = Math.floor(Math.random() * levelConfig.range) + 1;
+              answer = num1 + num2;
+              questionText = `${num1} + ${num2}`;
+            } else if (op === 'resta') {
+              num1 = Math.floor(Math.random() * levelConfig.range) + 1;
+              num2 = Math.floor(Math.random() * num1) + 1;
+              answer = num1 - num2;
+              questionText = `${num1} - ${num2}`;
+            } else {
+              num1 = Math.floor(Math.random() * 10) + 1;
+              num2 = Math.floor(Math.random() * 10) + 1;
+              answer = num1 * num2;
+              questionText = `${num1} × ${num2}`;
+            }
+
+            return { questionText, answer };
+          };
+
+          const startGame = (selectedLevel) => {
+            setLevel(selectedLevel);
+            setGameStarted(true);
+            setScore(0);
+            setLives(3);
+            setGameOver(false);
+            const newQuestion = generateQuestion(levels[selectedLevel]);
+            setQuestion(newQuestion);
+            spawnEnemies(newQuestion.answer);
+          };
+
+          const spawnEnemies = (correctAnswer) => {
+            const answers = [correctAnswer];
+            while (answers.length < 4) {
+              const wrong = correctAnswer + Math.floor(Math.random() * 20) - 10;
+              if (wrong !== correctAnswer && wrong > 0 && !answers.includes(wrong)) {
+                answers.push(wrong);
+              }
+            }
+            
+            const shuffled = answers.sort(() => Math.random() - 0.5);
+            const newEnemies = shuffled.map((ans, i) => ({
+              id: Date.now() + i,
+              value: ans,
+              x: 20 + (i * 20),
+              y: 0,
+              isCorrect: ans === correctAnswer
+            }));
+            
+            setEnemies(newEnemies);
+          };
+
+          useEffect(() => {
+            if (!gameStarted || gameOver) return;
+
+            const interval = setInterval(() => {
+              setEnemies(prev => {
+                const updated = prev.map(enemy => ({
+                  ...enemy,
+                  y: enemy.y + levels[level].fallSpeed
+                }));
+
+                const reachedBottom = updated.filter(e => e.y >= 85);
+                if (reachedBottom.length > 0) {
+                  const correctReached = reachedBottom.find(e => e.isCorrect);
+                  if (correctReached) {
+                    setLives(l => l - 1);
+                    if (lives <= 1) {
+                      setGameOver(true);
+                      return [];
+                    }
+                  }
+                  
+                  const newQuestion = generateQuestion(levels[level]);
+                  setQuestion(newQuestion);
+                  spawnEnemies(newQuestion.answer);
+                  return [];
+                }
+
+                return updated;
+              });
+            }, 50);
+
+            return () => clearInterval(interval);
+          }, [gameStarted, level, gameOver, lives]);
+
+          useEffect(() => {
+            const handleKeyPress = (e) => {
+              if (!gameStarted || gameOver) return;
+              
+              if (e.key === 'ArrowLeft') {
+                setPlayerX(x => Math.max(5, x - 5));
+              } else if (e.key === 'ArrowRight') {
+                setPlayerX(x => Math.min(85, x + 5));
+              }
+            };
+
+            window.addEventListener('keydown', handleKeyPress);
+            return () => window.removeEventListener('keydown', handleKeyPress);
+          }, [gameStarted, gameOver]);
+
+          const shootEnemy = (enemy) => {
+            if (enemy.isCorrect) {
+              setScore(s => s + 10);
+              const newQuestion = generateQuestion(levels[level]);
+              setQuestion(newQuestion);
+              spawnEnemies(newQuestion.answer);
+            } else {
+              setLives(l => l - 1);
+              if (lives <= 1) {
+                setGameOver(true);
+              }
+            }
+          };
+
+          if (!gameStarted) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-blue-400 to-purple-500 p-4">
+                <div className="max-w-4xl mx-auto text-white">
+                  <a
+                    href="index.html"
+                    className="mb-4 inline-block bg-white text-purple-600 px-4 py-2 rounded-lg font-bold no-underline"
+                  >
+                    🏠 Volver al Menú
+                  </a>
+                  
+                  <h2 className="text-4xl font-bold mb-8 text-center">Invasores Matemáticos 🚀</h2>
+                  <p className="text-xl text-center mb-8">Elige tu nivel de dificultad:</p>
+                  
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <button
+                      onClick={() => startGame('facil')}
+                      className="bg-green-500 hover:bg-green-600 rounded-xl p-8"
+                    >
+                      <h3 className="text-3xl font-bold mb-2">😊 Fácil</h3>
+                      <p className="text-sm">Sumas hasta 10</p>
+                      <p className="text-sm">15 segundos</p>
+                    </button>
+                    
+                    <button
+                      onClick={() => startGame('medio')}
+                      className="bg-yellow-500 hover:bg-yellow-600 rounded-xl p-8"
+                    >
+                      <h3 className="text-3xl font-bold mb-2">🤔 Medio</h3>
+                      <p className="text-sm">Sumas y restas hasta 20</p>
+                      <p className="text-sm">11 segundos</p>
+                    </button>
+                    
+                    <button
+                      onClick={() => startGame('dificil')}
+                      className="bg-red-500 hover:bg-red-600 rounded-xl p-8"
+                    >
+                      <h3 className="text-3xl font-bold mb-2">🔥 Difícil</h3>
+                      <p className="text-sm">Todas las operaciones</p>
+                      <p className="text-sm">7 segundos</p>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (gameOver) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-blue-400 to-purple-500 p-4">
+                <div className="max-w-4xl mx-auto text-white text-center mt-20">
+                  <h2 className="text-5xl font-bold mb-4">¡Juego Terminado! 🎮</h2>
+                  <p className="text-3xl mb-4">Puntuación Final: {score}</p>
+                  <div className="text-6xl mb-8">🏆</div>
+                  <div className="flex gap-4 justify-center flex-wrap">
+                    <button
+                      onClick={() => startGame(level)}
+                      className="bg-green-500 hover:bg-green-600 px-8 py-4 rounded-xl text-xl font-bold"
+                    >
+                      Jugar de Nuevo
+                    </button>
+                    <button
+                      onClick={() => {
+                        setGameStarted(false);
+                        setLevel(null);
+                      }}
+                      className="bg-blue-500 hover:bg-blue-600 px-8 py-4 rounded-xl text-xl font-bold"
+                    >
+                      Cambiar Nivel
+                    </button>
+                    <a
+                      href="index.html"
+                      className="bg-purple-500 hover:bg-purple-600 px-8 py-4 rounded-xl text-xl font-bold no-underline inline-block"
+                    >
+                      Menú Principal
+                    </a>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="min-h-screen bg-gradient-to-b from-blue-400 to-purple-500 p-4">
+              <div className="max-w-4xl mx-auto text-white">
+                <div className="flex justify-between items-center mb-4">
+                  <a
+                    href="index.html"
+                    className="bg-white text-purple-600 px-4 py-2 rounded-lg font-bold no-underline"
+                  >
+                    🏠 Menú
+                  </a>
+                  <div className="text-2xl font-bold">Puntos: {score}</div>
+                  <div className="text-2xl font-bold">Vidas: {'❤️'.repeat(lives)}</div>
+                </div>
+
+                <div className="bg-black bg-opacity-50 rounded-xl p-4 mb-4">
+                  <h3 className="text-3xl font-bold text-center">¿Cuánto es {question?.questionText}?</h3>
+                </div>
+
+                <div className="relative bg-blue-900 rounded-xl h-96 overflow-hidden">
+                  {enemies.map(enemy => (
+                    <button
+                      key={enemy.id}
+                      onClick={() => shootEnemy(enemy)}
+                      className="absolute bg-red-500 hover:bg-red-600 text-white font-bold rounded-full w-16 h-16 flex items-center justify-center cursor-pointer"
+                      style={{
+                        left: `${enemy.x}%`,
+                        top: `${enemy.y}%`,
+                        transform: 'translate(-50%, -50%)'
+                      }}
+                    >
+                      {enemy.value}
+                    </button>
+                  ))}
+
+                  <div
+                    className="absolute bottom-4 bg-green-500 rounded-t-full w-12 h-16 flex items-end justify-center"
+                    style={{ left: `${playerX}%`, transform: 'translateX(-50%)' }}
+                  >
+                    <div className="text-2xl">🚀</div>
+                  </div>
+                </div>
+
+                <p className="text-center mt-4 text-lg">
+                  Usa las flechas ← → para moverte. Haz clic en la respuesta correcta!
+                </p>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MathInvaders />);
+    </script>
+</body>
+</html>
