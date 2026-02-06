@@ -1,0 +1,165 @@
+<!-- 
+==========================================
+CONFIGURACIÓN DE GOOGLE ADSENSE
+==========================================
+
+INSTRUCCIONES:
+1. Ve a https://adsense.google.com
+2. Crea una cuenta si no la tienes
+3. Obtén tu código de publisher ID (empieza con ca-pub-)
+4. Reemplaza "TU-PUBLISHER-ID-AQUI" con tu ID real
+5. Copia los códigos de abajo y pégalos en tus páginas
+
+==========================================
+PASO 1: Código de cabecera (HEAD)
+==========================================
+Copia este código y pégalo en el <head> de TODAS tus páginas HTML
+(justo antes de </head>)
+-->
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-TU-PUBLISHER-ID-AQUI"
+     crossorigin="anonymous"></script>
+
+<!-- 
+==========================================
+PASO 2: Bloques de anuncios
+==========================================
+
+ANUNCIO HORIZONTAL (728x90 - Leaderboard)
+Para usar en la parte superior e inferior de las páginas
+Reemplaza los bloques con borde punteado con este código:
+-->
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-TU-PUBLISHER-ID-AQUI"
+     data-ad-slot="TU-AD-SLOT-ID-1"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- 
+ANUNCIO CUADRADO (300x250 - Rectangle)
+Para usar en los lados de las páginas
+-->
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:250px"
+     data-ad-client="ca-pub-TU-PUBLISHER-ID-AQUI"
+     data-ad-slot="TU-AD-SLOT-ID-2"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- 
+ANUNCIO RESPONSIVE (se adapta al tamaño de pantalla)
+Recomendado para móviles
+-->
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-TU-PUBLISHER-ID-AQUI"
+     data-ad-slot="TU-AD-SLOT-ID-3"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- 
+==========================================
+EJEMPLO COMPLETO: Cómo quedaría index.html
+==========================================
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Divertida</title>
+    
+    <!-- PASO 1: Código de AdSense en el HEAD -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-TU-PUBLISHER-ID-AQUI"
+         crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <!-- Contenido de tu página aquí -->
+    
+    <!-- PASO 2: Bloque de anuncio superior -->
+    <div class="bg-white bg-opacity-90 py-2 text-center">
+        <div class="max-w-7xl mx-auto">
+            <!-- REEMPLAZA ESTE DIV CON EL CÓDIGO DE ANUNCIO DE ARRIBA -->
+            <ins class="adsbygoogle"
+                 style="display:inline-block;width:728px;height:90px"
+                 data-ad-client="ca-pub-TU-PUBLISHER-ID-AQUI"
+                 data-ad-slot="TU-AD-SLOT-ID-1"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </div>
+    
+    <!-- Tu contenido principal aquí -->
+    
+    <!-- Bloque de anuncio inferior -->
+    <div class="bg-white bg-opacity-90 py-2 text-center mt-8">
+        <div class="max-w-7xl mx-auto">
+            <ins class="adsbygoogle"
+                 style="display:inline-block;width:728px;height:90px"
+                 data-ad-client="ca-pub-TU-PUBLISHER-ID-AQUI"
+                 data-ad-slot="TU-AD-SLOT-ID-1"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </div>
+</body>
+</html>
+
+<!-- 
+==========================================
+IMPORTANTE - NOTAS:
+==========================================
+
+1. TU-PUBLISHER-ID-AQUI: Es tu ID de editor de AdSense (ejemplo: ca-pub-1234567890123456)
+   - Lo encuentras en tu cuenta de AdSense
+
+2. TU-AD-SLOT-ID-1, TU-AD-SLOT-ID-2, etc.: Son los IDs de cada bloque de anuncio
+   - Los obtienes al crear cada unidad de anuncio en AdSense
+   - Cada bloque puede tener un ID diferente
+
+3. PROCESO COMPLETO:
+   a) Regístrate en Google AdSense
+   b) Espera la aprobación (puede tardar unos días)
+   c) Crea unidades de anuncio en tu panel de AdSense
+   d) Copia el código que te da AdSense
+   e) Pégalo en tus páginas HTML reemplazando los bloques con borde punteado
+
+4. TESTING:
+   - Los anuncios pueden tardar hasta 24 horas en aparecer
+   - Al principio pueden aparecer anuncios en blanco - es normal
+   - NO hagas clic en tus propios anuncios (viola las políticas de AdSense)
+
+5. ARCHIVOS A MODIFICAR:
+   - index.html (página principal)
+   - matematicas-menu.html
+   - mecanografia-menu.html
+   - lengua-menu.html
+   - logica-menu.html
+
+6. VERSIÓN RESPONSIVE (recomendada para móviles):
+   Si quieres que los anuncios se adapten automáticamente al tamaño
+   de pantalla, usa el código "RESPONSIVE" de arriba en lugar del
+   código de tamaño fijo.
+
+==========================================
+AYUDA Y SOPORTE:
+==========================================
+- Documentación oficial: https://support.google.com/adsense
+- Centro de ayuda: https://support.google.com/adsense/answer/9183460
+
+¡Buena suerte con tus anuncios!
+-->

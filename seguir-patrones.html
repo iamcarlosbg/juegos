@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguir Patrones</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        const SeguirPatrones = () => {
+          const [level, setLevel] = useState(null);
+          const [gameStarted, setGameStarted] = useState(false);
+          const [score, setScore] = useState(0);
+          const [lives, setLives] = useState(3);
+          const [currentQuestion, setCurrentQuestion] = useState(null);
+          const [feedback, setFeedback] = useState(null);
+          const [gameOver, setGameOver] = useState(false);
+          const [questionCount, setQuestionCount] = useState(0);
+
+          const generatePattern = (difficulty) => {
+            const patternTypes = [
+              'colors_AB', 'colors_ABC', 'colors_AABB', 'colors_ABCD',
+              'numbers_add', 'numbers_multiply', 'numbers_subtract', 'numbers_fibonacci',
+              'shapes_size', 'shapes_rotate', 'shapes_alternate', 'shapes_count',
+              'emojis_pattern', 'mixed_complex'
+            ];
+            
+            // Filtrar según dificultad
+            let availableTypes = [];
+            if (difficulty === 'facil') {
+              availableTypes = ['colors_AB', 'colors_ABC', 'numbers_add', 'shapes_size', 'emojis_pattern'];
+            } else if (difficulty === 'medio') {
+              availableTypes = ['colors_ABC', 'colors_AABB', 'numbers_add', 'numbers_subtract', 'numbers_multiply', 'shapes_rotate', 'shapes_alternate', 'emojis_pattern'];
+            } else {
+              availableTypes = patternTypes;
+            }
+            
+            const type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+            return generateSpecificPattern(type, difficulty);
+          };
+
+          const generateSpecificPattern = (type, difficulty) => {
+            switch(type) {
+              case 'colors_AB':
+                return generateColorPatternAB();
+              case 'colors_ABC':
+                return generateColorPatternABC();
+              case 'colors_AABB':
+                return generateColorPatternAABB();
+              case 'colors_ABCD':
+                return generateColorPatternABCD();
+              case 'numbers_add':
+                return generateNumberPatternAdd(difficulty);
+              case 'numbers_multiply':
+                return generateNumberPatternMultiply();
+              case 'numbers_subtract':
+                return generateNumberPatternSubtract(difficulty);
+              case 'numbers_fibonacci':
+                return generateNumberPatternFibonacci();
+              case 'shapes_size':
+                return generateShapePatternSize();
+              case 'shapes_rotate':
+                return generateShapePatternRotate();
+              case 'shapes_alternate':
+                return generateShapePatternAlternate();
+              case 'shapes_count':
+                return generateShapePatternCount();
+              case 'emojis_pattern':
+                return generateEmojiPattern(difficulty);
+              case 'mixed_complex':
+                return generateMixedPattern();
+              default:
+                return generateColorPatternAB();
+            }
+          };
+
+          const generateColorPatternAB = () => {
+            const allColors = ['🔴', '🔵', '🟢', '🟡', '🟣', '🟠', '🟤', '⚫', '⚪'];
+            const colors = shuffle(allColors).slice(0, 2);
+            const pattern = [colors[0], colors[1], colors[0], colors[1], colors[0]];
+            const correct = colors[1];
+            const options = shuffle([colors[0], colors[1], ...shuffle(allColors.filter(c => !colors.includes(c))).slice(0, 2)]);
+            return { type: 'visual', pattern, correct, options, description: 'Patrón AB' };
+          };
+
+          const generateColorPatternABC = () => {
+            const allColors = ['🔴', '🔵', '🟢', '🟡', '🟣', '🟠', '🟤'];
+            const colors = shuffle(allColors).slice(0, 3);
+            const pattern = [colors[0], colors[1], colors[2], colors[0], colors[1]];
+            const correct = colors[2];
+            const options = shuffle([...colors, ...shuffle(allColors.filter(c => !colors.includes(c))).slice(0, 1)]);
+            return { type: 'visual', pattern, correct, options, description: 'Patrón ABC' };
+          };
+
+          const generateColorPatternAABB = () => {
+            const allColors = ['🔴', '🔵', '🟢', '🟡', '🟣', '🟠'];
+            const colors = shuffle(allColors).slice(0, 2);
+            const pattern = [colors[0], colors[0], colors[1], colors[1], colors[0], colors[0]];
+            const correct = colors[1];
+            const options = shuffle([colors[0], colors[1], ...shuffle(allColors.filter(c => !colors.includes(c))).slice(0, 2)]);
+            return { type: 'visual', pattern, correct, options, description: 'Patrón AABB' };
+          };
+
+          const generateColorPatternABCD = () => {
+            const allColors = ['🔴', '🔵', '🟢', '🟡', '🟣', '🟠'];
+            const colors = shuffle(allColors).slice(0, 4);
+            const pattern = [colors[0], colors[1], colors[2], colors[3], colors[0], colors[1], colors[2]];
+            const correct = colors[3];
+            const options = shuffle(colors);
+            return { type: 'visual', pattern, correct, options, description: 'Patrón ABCD' };
+          };
+
+          const generateNumberPatternAdd = (difficulty) => {
+            const start = Math.floor(Math.random() * 10) + 1;
+            const step = difficulty === 'facil' ? Math.floor(Math.random() * 3) + 1 : Math.floor(Math.random() * 5) + 2;
+            const pattern = [start, start + step, start + step * 2, start + step * 3, start + step * 4];
+            const correct = start + step * 5;
+            const options = shuffle([correct, correct + step, correct - step, correct + 1]);
+            return { type: 'numeric', pattern, correct, options, question: `${pattern.join(', ')}, __`, description: `+${step} cada vez` };
+          };
+
+          const generateNumberPatternMultiply = () => {
+            const start = 2;
+            const factor = 2;
+            const pattern = [start, start * factor, start * factor * factor, start * factor * factor * factor];
+            const correct = start * Math.pow(factor, 4);
+            const options = shuffle([correct, correct / 2, correct * 2, correct + 4]);
+            return { type: 'numeric', pattern, correct, options, question: `${pattern.join(', ')}, __`, description: '×2 cada vez' };
+          };
+
+          const generateNumberPatternSubtract = (difficulty) => {
+            const start = difficulty === 'facil' ? Math.floor(Math.random() * 20) + 20 : Math.floor(Math.random() * 30) + 30;
+            const step = Math.floor(Math.random() * 4) + 2;
+            const pattern = [start, start - step, start - step * 2, start - step * 3];
+            const correct = start - step * 4;
+            const options = shuffle([correct, correct + step, correct - step, correct + 2]);
+            return { type: 'numeric', pattern, correct, options, question: `${pattern.join(', ')}, __`, description: `-${step} cada vez` };
+          };
+
+          const generateNumberPatternFibonacci = () => {
+            const a = Math.floor(Math.random() * 3) + 1;
+            const b = Math.floor(Math.random() * 3) + 2;
+            const c = a + b;
+            const d = b + c;
+            const e = c + d;
+            const pattern = [a, b, c, d];
+            const correct = e;
+            const options = shuffle([correct, correct + 1, correct - 2, d + a]);
+            return { type: 'numeric', pattern, correct, options, question: `${pattern.join(', ')}, __`, description: 'Suma de los 2 anteriores' };
+          };
+
+          const generateShapePatternSize = () => {
+            const shapes = ['⭐', '❤️', '🌙', '☀️', '🔷', '⬛'];
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            const sizes = ['text-2xl', 'text-4xl', 'text-6xl'];
+            const pattern = [
+              { shape, size: sizes[0], display: 'pequeño' },
+              { shape, size: sizes[1], display: 'mediano' },
+              { shape, size: sizes[2], display: 'grande' },
+              { shape, size: sizes[0], display: 'pequeño' }
+            ];
+            const correct = JSON.stringify({ shape, size: sizes[1] });
+            const options = [
+              { shape, size: sizes[1] },
+              { shape, size: sizes[0] },
+              { shape, size: sizes[2] },
+              { shape: shapes[(shapes.indexOf(shape) + 1) % shapes.length], size: sizes[1] }
+            ];
+            return { type: 'shapes', pattern, correct, options, description: 'Tamaños: pequeño, mediano, grande' };
+          };
+
+          const generateShapePatternRotate = () => {
+            const rotations = [0, 45, 90, 135];
+            const shape = '🔺';
+            const pattern = rotations.slice(0, 3).map((r, i) => ({ 
+              shape, 
+              rotation: r, 
+              display: `${r}°`
+            }));
+            const correct = JSON.stringify({ shape, rotation: rotations[3] });
+            const options = rotations.map(r => ({ shape, rotation: r }));
+            return { type: 'shapes', pattern, correct, options: shuffle(options), description: 'Rotación: +45° cada vez' };
+          };
+
+          const generateShapePatternAlternate = () => {
+            const shapes = ['⭐', '🌙'];
+            const pattern = [
+              { shape: shapes[0] },
+              { shape: shapes[1] },
+              { shape: shapes[0] },
+              { shape: shapes[1] },
+              { shape: shapes[0] }
+            ];
+            const correct = JSON.stringify({ shape: shapes[1] });
+            const allShapes = ['⭐', '🌙', '☀️', '❤️'];
+            const options = shuffle(allShapes.map(s => ({ shape: s })));
+            return { type: 'shapes', pattern, correct, options, description: 'Figuras alternadas' };
+          };
+
+          const generateShapePatternCount = () => {
+            const shape = '●';
+            const pattern = [
+              { count: 1, display: '●' },
+              { count: 2, display: '●●' },
+              { count: 3, display: '●●●' },
+              { count: 4, display: '●●●●' }
+            ];
+            const correct = 5;
+            const options = shuffle([
+              { count: 5, display: '●●●●●' },
+              { count: 3, display: '●●●' },
+              { count: 6, display: '●●●●●●' },
+              { count: 1, display: '●' }
+            ]);
+            return { type: 'count', pattern, correct, options, description: '+1 cada vez' };
+          };
+
+          const generateEmojiPattern = (difficulty) => {
+            const emojiSets = [
+              ['😊', '😢', '😊', '😢'],
+              ['🐶', '🐱', '🐶', '🐱'],
+              ['🍎', '🍊', '🍎', '🍊'],
+              ['🌞', '🌙', '⭐', '🌞', '🌙'],
+              ['🏀', '⚽', '🏈', '🏀', '⚽']
+            ];
+            const set = emojiSets[Math.floor(Math.random() * emojiSets.length)];
+            const patternLength = difficulty === 'facil' ? 4 : 5;
+            const pattern = set.slice(0, patternLength);
+            const correct = set[patternLength % set.length];
+            const allEmojis = [...new Set(emojiSets.flat())];
+            const options = shuffle([correct, ...shuffle(allEmojis.filter(e => e !== correct)).slice(0, 3)]);
+            return { type: 'visual', pattern, correct, options, description: 'Secuencia de emojis' };
+          };
+
+          const generateMixedPattern = () => {
+            const patterns = [
+              { items: ['🔴', '🔵', '🔵', '🔴', '🔵', '🔵'], correct: '🔴', desc: 'ABB' },
+              { items: [1, 2, 4, 7, 11], correct: 16, desc: '+1, +2, +3, +4, +5' },
+              { items: ['A', 'B', 'A', 'C', 'A', 'D', 'A'], correct: 'E', desc: 'A intercalado' }
+            ];
+            const p = patterns[Math.floor(Math.random() * patterns.length)];
+            const options = typeof p.correct === 'number' 
+              ? shuffle([p.correct, p.correct + 1, p.correct - 1, p.correct + 2])
+              : shuffle([p.correct, '🔴', '🟢', '🟡'].filter((v, i, a) => a.indexOf(v) === i));
+            
+            return {
+              type: typeof p.correct === 'number' ? 'numeric' : 'visual',
+              pattern: p.items,
+              correct: p.correct,
+              options,
+              question: typeof p.correct === 'number' ? `${p.items.join(', ')}, __` : null,
+              description: p.desc
+            };
+          };
+
+          const shuffle = (array) => {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+          };
+
+          const startGame = (selectedLevel) => {
+            setLevel(selectedLevel);
+            setGameStarted(true);
+            setScore(0);
+            setLives(3);
+            setGameOver(false);
+            setQuestionCount(0);
+            const pattern = generatePattern(selectedLevel);
+            setCurrentQuestion(pattern);
+            setFeedback(null);
+          };
+
+          const checkAnswer = (answer) => {
+            if (feedback) return;
+
+            const answerStr = typeof answer === 'object' ? JSON.stringify(answer) : String(answer);
+            const correctStr = String(currentQuestion.correct);
+
+            if (answerStr === correctStr) {
+              setScore(s => s + 20);
+              setFeedback({ type: 'correct', message: '¡Correcto! 🎉' });
+              
+              setTimeout(() => {
+                const pattern = generatePattern(level);
+                setCurrentQuestion(pattern);
+                setFeedback(null);
+                setQuestionCount(q => q + 1);
+              }, 1000);
+            } else {
+              setLives(l => l - 1);
+              setFeedback({ type: 'incorrect', message: '¡Intenta de nuevo!' });
+              
+              if (lives <= 1) {
+                setGameOver(true);
+              } else {
+                setTimeout(() => {
+                  setFeedback(null);
+                }, 1500);
+              }
+            }
+          };
+
+          if (!gameStarted) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-orange-400 to-orange-600 p-4">
+                <div className="max-w-4xl mx-auto text-white">
+                  <a href="logica-menu.html" className="mb-4 inline-block bg-white text-orange-600 px-4 py-2 rounded-lg font-bold">
+                    ← Volver
+                  </a>
+                  
+                  <h2 className="text-5xl font-bold mb-4 text-center">🧩 Seguir Patrones</h2>
+                  <p className="text-2xl text-center mb-8">¿Qué viene después?</p>
+                  
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <button onClick={() => startGame('facil')} className="bg-green-500 hover:bg-green-600 rounded-xl p-8">
+                      <h3 className="text-3xl font-bold mb-2">😊 Fácil</h3>
+                      <p className="text-sm mb-3">Patrones simples AB</p>
+                      <div className="text-4xl">🔵🔴🔵🔴</div>
+                    </button>
+                    
+                    <button onClick={() => startGame('medio')} className="bg-yellow-500 hover:bg-yellow-600 rounded-xl p-8">
+                      <h3 className="text-3xl font-bold mb-2">🤔 Medio</h3>
+                      <p className="text-sm mb-3">Patrones ABC y números</p>
+                      <div className="text-3xl">2, 4, 6, __</div>
+                    </button>
+                    
+                    <button onClick={() => startGame('dificil')} className="bg-red-500 hover:bg-red-600 rounded-xl p-8">
+                      <h3 className="text-3xl font-bold mb-2">🔥 Difícil</h3>
+                      <p className="text-sm mb-3">Patrones complejos</p>
+                      <div className="text-2xl">1, 1, 2, 3, 5, __</div>
+                    </button>
+                  </div>
+
+                  <div className="mt-8 bg-white bg-opacity-20 rounded-xl p-6">
+                    <h3 className="text-2xl font-bold mb-3">🎯 Tipos de patrones:</h3>
+                    <ul className="space-y-2 text-lg">
+                      <li>🎨 Colores (AB, ABC, AABB, ABCD)</li>
+                      <li>🔢 Números (suma, resta, multiplicación, Fibonacci)</li>
+                      <li>📐 Formas (tamaños, rotaciones, cantidad)</li>
+                      <li>😀 Emojis y secuencias mixtas</li>
+                      <li>❤️ Tienes 3 vidas - ¡usa la lógica!</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (gameOver) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-orange-400 to-orange-600 p-4 flex items-center justify-center">
+                <div className="max-w-2xl mx-auto text-white text-center">
+                  <h2 className="text-6xl font-bold mb-6">¡Juego Terminado! 🎮</h2>
+                  <div className="bg-white bg-opacity-20 rounded-2xl p-8 mb-6">
+                    <div className="text-5xl font-bold mb-2">Puntuación: {score}</div>
+                    <div className="text-3xl">Patrones resueltos: {questionCount}</div>
+                  </div>
+                  <div className="flex gap-4 justify-center flex-wrap">
+                    <button onClick={() => startGame(level)} className="bg-green-500 hover:bg-green-600 px-8 py-4 rounded-xl text-xl font-bold">
+                      Jugar de Nuevo
+                    </button>
+                    <a href="logica-menu.html" className="bg-blue-500 hover:bg-blue-600 px-8 py-4 rounded-xl text-xl font-bold no-underline inline-block">
+                      Menú Lógica
+                    </a>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="min-h-screen bg-gradient-to-b from-orange-400 to-orange-600 p-4">
+              <div className="max-w-5xl mx-auto">
+                <div className="flex justify-between items-center mb-6 text-white flex-wrap gap-4">
+                  <a href="logica-menu.html" className="bg-white text-orange-600 px-4 py-2 rounded-lg font-bold">
+                    ← Menú
+                  </a>
+                  <div className="text-3xl font-bold">Puntos: {score}</div>
+                  <div className="text-2xl">Resueltos: {questionCount}</div>
+                  <div className="text-3xl">{'❤️'.repeat(lives)}</div>
+                </div>
+
+                <div className={`bg-white rounded-3xl p-8 shadow-2xl mb-6 ${
+                  feedback?.type === 'correct' ? 'bg-green-100' :
+                  feedback?.type === 'incorrect' ? 'bg-red-100' : ''
+                }`}>
+                  <h3 className="text-3xl font-bold text-gray-700 mb-2 text-center">
+                    ¿Qué viene después?
+                  </h3>
+                  <p className="text-center text-gray-600 mb-6 text-lg">{currentQuestion?.description}</p>
+
+                  {(currentQuestion?.type === 'visual' || currentQuestion?.type === 'count') && (
+                    <div className="flex justify-center items-center gap-4 mb-8 flex-wrap">
+                      {currentQuestion.pattern.map((item, idx) => (
+                        <span key={idx} className="text-6xl">
+                          {typeof item === 'string' ? item : item.display || item.shape}
+                        </span>
+                      ))}
+                      <span className="text-6xl text-gray-400">❓</span>
+                    </div>
+                  )}
+
+                  {currentQuestion?.type === 'numeric' && (
+                    <div className="text-center text-5xl font-bold text-orange-600 mb-8 font-mono">
+                      {currentQuestion.question}
+                    </div>
+                  )}
+
+                  {currentQuestion?.type === 'shapes' && (
+                    <div className="flex justify-center items-center gap-6 mb-8 flex-wrap">
+                      {currentQuestion.pattern.map((item, idx) => (
+                        <div key={idx} className={item.size || 'text-5xl'}>
+                          <span style={{ transform: `rotate(${item.rotation || 0}deg)`, display: 'inline-block' }}>
+                            {item.shape}
+                          </span>
+                        </div>
+                      ))}
+                      <span className="text-6xl text-gray-400">❓</span>
+                    </div>
+                  )}
+
+                  {feedback && (
+                    <div className={`text-2xl font-bold text-center mb-4 ${
+                      feedback.type === 'correct' ? 'text-green-700' : 'text-red-700'
+                    }`}>
+                      {feedback.message}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+                    {currentQuestion?.options.map((option, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => checkAnswer(option)}
+                        disabled={!!feedback}
+                        className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white rounded-2xl p-6 transform transition hover:scale-105"
+                      >
+                        {currentQuestion.type === 'numeric' && (
+                          <div className="text-4xl font-bold">{option}</div>
+                        )}
+                        {(currentQuestion.type === 'visual' || currentQuestion.type === 'count') && (
+                          <div className="text-6xl">
+                            {typeof option === 'string' ? option : option.display || option.shape}
+                          </div>
+                        )}
+                        {currentQuestion.type === 'shapes' && (
+                          <div className={option.size || 'text-5xl'}>
+                            <span style={{ transform: `rotate(${option.rotation || 0}deg)`, display: 'inline-block' }}>
+                              {option.shape}
+                            </span>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SeguirPatrones />);
+    </script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completa el Número</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        const CompletaNumero = () => {
+          const [level, setLevel] = useState(null);
+          const [gameStarted, setGameStarted] = useState(false);
+          const [score, setScore] = useState(0);
+          const [lives, setLives] = useState(3);
+          const [streak, setStreak] = useState(0);
+          const [bestStreak, setBestStreak] = useState(0);
+          const [timeLeft, setTimeLeft] = useState(10);
+          const [baseTime, setBaseTime] = useState(10);
+          const [question, setQuestion] = useState(null);
+          const [userAnswer, setUserAnswer] = useState('');
+          const [feedback, setFeedback] = useState(null);
+          const [gameOver, setGameOver] = useState(false);
+          const inputRef = useRef(null);
+
+          const levels = {
+            facil: { range: 10, operations: ['suma', 'resta'], label: 'Fácil (hasta 10)' },
+            medio: { range: 20, operations: ['suma', 'resta'], label: 'Medio (hasta 20)' },
+            dificil: { range: 50, operations: ['suma', 'resta', 'multiplicar'], label: 'Difícil (hasta 50 y ×)' }
+          };
+
+          const generateQuestion = (levelConfig) => {
+            const operations = levelConfig.operations;
+            const op = operations[Math.floor(Math.random() * operations.length)];
+            const position = Math.floor(Math.random() * 3); // 0: primer número, 1: segundo número, 2: resultado
+            
+            let num1, num2, result, missing, displayText;
+
+            if (op === 'suma') {
+              num1 = Math.floor(Math.random() * levelConfig.range) + 1;
+              num2 = Math.floor(Math.random() * levelConfig.range) + 1;
+              result = num1 + num2;
+              
+              if (position === 0) {
+                missing = num1;
+                displayText = `__ + ${num2} = ${result}`;
+              } else if (position === 1) {
+                missing = num2;
+                displayText = `${num1} + __ = ${result}`;
+              } else {
+                missing = result;
+                displayText = `${num1} + ${num2} = __`;
+              }
+            } else if (op === 'resta') {
+              num1 = Math.floor(Math.random() * levelConfig.range) + 1;
+              num2 = Math.floor(Math.random() * num1) + 1;
+              result = num1 - num2;
+              
+              if (position === 0) {
+                missing = num1;
+                displayText = `__ - ${num2} = ${result}`;
+              } else if (position === 1) {
+                missing = num2;
+                displayText = `${num1} - __ = ${result}`;
+              } else {
+                missing = result;
+                displayText = `${num1} - ${num2} = __`;
+              }
+            } else {
+              num1 = Math.floor(Math.random() * 10) + 1;
+              num2 = Math.floor(Math.random() * 10) + 1;
+              result = num1 * num2;
+              
+              if (position === 0) {
+                missing = num1;
+                displayText = `__ × ${num2} = ${result}`;
+              } else if (position === 1) {
+                missing = num2;
+                displayText = `${num1} × __ = ${result}`;
+              } else {
+                missing = result;
+                displayText = `${num1} × ${num2} = __`;
+              }
+            }
+
+            return { displayText, answer: missing };
+          };
+
+          const startGame = (selectedLevel) => {
+            setLevel(selectedLevel);
+            setGameStarted(true);
+            setScore(0);
+            setLives(3);
+            setStreak(0);
+            setGameOver(false);
+            setBaseTime(10);
+            const newQuestion = generateQuestion(levels[selectedLevel]);
+            setQuestion(newQuestion);
+            setTimeLeft(10);
+            setUserAnswer('');
+            setFeedback(null);
+          };
+
+          const checkAnswer = () => {
+            const answer = parseInt(userAnswer);
+            if (isNaN(answer)) return;
+
+            if (answer === question.answer) {
+              // Correcto
+              const newStreak = streak + 1;
+              setStreak(newStreak);
+              if (newStreak > bestStreak) setBestStreak(newStreak);
+              setScore(s => s + 10 + (newStreak * 2));
+              setFeedback('correct');
+              
+              // Reducir tiempo base según racha
+              const newBaseTime = Math.max(3, 10 - Math.floor(newStreak / 3));
+              setBaseTime(newBaseTime);
+              
+              setTimeout(() => {
+                const newQuestion = generateQuestion(levels[level]);
+                setQuestion(newQuestion);
+                setTimeLeft(newBaseTime);
+                setUserAnswer('');
+                setFeedback(null);
+                if (inputRef.current) inputRef.current.focus();
+              }, 800);
+            } else {
+              // Incorrecto
+              setStreak(0);
+              setLives(l => l - 1);
+              setFeedback('incorrect');
+              
+              if (lives <= 1) {
+                setGameOver(true);
+              } else {
+                setTimeout(() => {
+                  const newQuestion = generateQuestion(levels[level]);
+                  setQuestion(newQuestion);
+                  setTimeLeft(baseTime);
+                  setUserAnswer('');
+                  setFeedback(null);
+                  setBaseTime(10);
+                  if (inputRef.current) inputRef.current.focus();
+                }, 800);
+              }
+            }
+          };
+
+          const handleSubmit = (e) => {
+            e.preventDefault();
+            if (userAnswer && !feedback) {
+              checkAnswer();
+            }
+          };
+
+          useEffect(() => {
+            if (!gameStarted || gameOver || feedback) return;
+
+            const timer = setInterval(() => {
+              setTimeLeft(t => {
+                if (t <= 1) {
+                  // Tiempo agotado
+                  setStreak(0);
+                  setLives(l => l - 1);
+                  setFeedback('timeout');
+                  setBaseTime(10);
+                  
+                  if (lives <= 1) {
+                    setGameOver(true);
+                  } else {
+                    setTimeout(() => {
+                      const newQuestion = generateQuestion(levels[level]);
+                      setQuestion(newQuestion);
+                      setTimeLeft(baseTime);
+                      setUserAnswer('');
+                      setFeedback(null);
+                      if (inputRef.current) inputRef.current.focus();
+                    }, 1000);
+                  }
+                  return 0;
+                }
+                return t - 1;
+              });
+            }, 1000);
+
+            return () => clearInterval(timer);
+          }, [gameStarted, gameOver, feedback, lives, level, baseTime]);
+
+          if (!gameStarted) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-blue-400 to-blue-600 p-4">
+                <div className="max-w-4xl mx-auto text-white">
+                  <a href="matematicas-menu.html" className="mb-4 inline-block bg-white text-blue-600 px-4 py-2 rounded-lg font-bold">
+                    ← Volver a Matemáticas
+                  </a>
+                  
+                  <h2 className="text-5xl font-bold mb-4 text-center">Completa el Número ❓</h2>
+                  <p className="text-2xl text-center mb-8">¡Encuentra el número que falta!</p>
+                  
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {Object.keys(levels).map(key => (
+                      <button
+                        key={key}
+                        onClick={() => startGame(key)}
+                        className={`rounded-xl p-8 transform transition hover:scale-105 ${
+                          key === 'facil' ? 'bg-green-500 hover:bg-green-600' :
+                          key === 'medio' ? 'bg-yellow-500 hover:bg-yellow-600' :
+                          'bg-red-500 hover:bg-red-600'
+                        }`}
+                      >
+                        <h3 className="text-3xl font-bold mb-2">
+                          {key === 'facil' ? '😊 Fácil' : key === 'medio' ? '🤔 Medio' : '🔥 Difícil'}
+                        </h3>
+                        <p className="text-sm">{levels[key].label}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="bg-white bg-opacity-20 rounded-xl p-6 mt-8">
+                    <h3 className="text-2xl font-bold mb-3">📋 Cómo jugar:</h3>
+                    <ul className="space-y-2 text-lg">
+                      <li>⏱️ Tienes tiempo limitado para cada pregunta</li>
+                      <li>🔥 Crea rachas de aciertos para más puntos</li>
+                      <li>⚡ Cada racha reduce el tiempo (¡más difícil!)</li>
+                      <li>❤️ Tienes 3 vidas - ¡no las pierdas!</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (gameOver) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-blue-400 to-blue-600 p-4 flex items-center justify-center">
+                <div className="max-w-2xl mx-auto text-white text-center bg-white bg-opacity-20 rounded-3xl p-8">
+                  <h2 className="text-6xl font-bold mb-4">¡Juego Terminado! 🎮</h2>
+                  <div className="text-4xl mb-6">🏆</div>
+                  <div className="space-y-3 mb-6 text-2xl">
+                    <p>Puntuación: <span className="font-bold text-yellow-300">{score}</span></p>
+                    <p>Mejor Racha: <span className="font-bold text-orange-300">{bestStreak} 🔥</span></p>
+                  </div>
+                  <div className="flex gap-4 justify-center flex-wrap">
+                    <button onClick={() => startGame(level)} className="bg-green-500 hover:bg-green-600 px-8 py-4 rounded-xl text-xl font-bold">
+                      Jugar de Nuevo
+                    </button>
+                    <button onClick={() => setGameStarted(false)} className="bg-blue-500 hover:bg-blue-600 px-8 py-4 rounded-xl text-xl font-bold">
+                      Cambiar Nivel
+                    </button>
+                    <a href="matematicas-menu.html" className="bg-purple-500 hover:bg-purple-600 px-8 py-4 rounded-xl text-xl font-bold no-underline inline-block">
+                      Menú Matemáticas
+                    </a>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="min-h-screen bg-gradient-to-b from-blue-400 to-blue-600 p-4">
+              <div className="max-w-4xl mx-auto">
+                {/* Header con stats */}
+                <div className="bg-white rounded-2xl p-4 mb-4 shadow-xl">
+                  <div className="flex justify-between items-center flex-wrap gap-4">
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Puntos</div>
+                      <div className="text-3xl font-bold text-blue-600">{score}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Vidas</div>
+                      <div className="text-3xl">{'❤️'.repeat(lives)}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Racha</div>
+                      <div className="text-3xl font-bold text-orange-500">{streak} 🔥</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Tiempo</div>
+                      <div className={`text-3xl font-bold ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : 'text-green-600'}`}>
+                        {timeLeft}s
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pregunta */}
+                <div className={`bg-white rounded-3xl p-12 shadow-2xl transition-all duration-300 ${
+                  feedback === 'correct' ? 'bg-green-100' : 
+                  feedback === 'incorrect' || feedback === 'timeout' ? 'bg-red-100' : ''
+                }`}>
+                  <div className="text-center">
+                    {feedback === 'correct' && (
+                      <div className="text-6xl mb-4 animate-bounce">✅</div>
+                    )}
+                    {(feedback === 'incorrect' || feedback === 'timeout') && (
+                      <div className="text-6xl mb-4 animate-bounce">❌</div>
+                    )}
+                    
+                    <h3 className="text-3xl font-bold text-gray-700 mb-8">¿Qué número falta?</h3>
+                    <div className="text-7xl font-bold text-blue-600 mb-8 font-mono">
+                      {question?.displayText}
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+                      <input
+                        ref={inputRef}
+                        type="number"
+                        value={userAnswer}
+                        onChange={(e) => setUserAnswer(e.target.value)}
+                        disabled={!!feedback}
+                        autoFocus
+                        className="w-full text-6xl text-center p-6 border-4 border-blue-400 rounded-2xl focus:outline-none focus:border-blue-600 font-bold"
+                        placeholder="?"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!userAnswer || !!feedback}
+                        className="w-full mt-6 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white text-3xl font-bold py-6 rounded-2xl transition"
+                      >
+                        Comprobar ✓
+                      </button>
+                    </form>
+
+                    {feedback === 'correct' && (
+                      <div className="mt-6 text-2xl text-green-700 font-bold">
+                        ¡Correcto! +{10 + (streak * 2)} puntos
+                      </div>
+                    )}
+                    {feedback === 'incorrect' && (
+                      <div className="mt-6 text-2xl text-red-700 font-bold">
+                        Incorrecto. Era {question.answer}
+                      </div>
+                    )}
+                    {feedback === 'timeout' && (
+                      <div className="mt-6 text-2xl text-red-700 font-bold">
+                        ¡Tiempo agotado! Era {question.answer}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="text-center mt-4">
+                  <a href="matematicas-menu.html" className="text-white text-xl underline hover:text-blue-200">
+                    ← Volver al menú
+                  </a>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<CompletaNumero />);
+    </script>
+</body>
+</html>

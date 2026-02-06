@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayor o Menor</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        const MayorMenor = () => {
+          const [level, setLevel] = useState(null);
+          const [gameStarted, setGameStarted] = useState(false);
+          const [score, setScore] = useState(0);
+          const [lives, setLives] = useState(3);
+          const [streak, setStreak] = useState(0);
+          const [bestStreak, setBestStreak] = useState(0);
+          const [timeLeft, setTimeLeft] = useState(8);
+          const [baseTime, setBaseTime] = useState(8);
+          const [question, setQuestion] = useState(null);
+          const [feedback, setFeedback] = useState(null);
+          const [gameOver, setGameOver] = useState(false);
+
+          const levels = {
+            facil: { range: 20, useOperations: false, label: 'Números hasta 20' },
+            medio: { range: 50, useOperations: true, simple: true, label: 'Operaciones simples' },
+            dificil: { range: 100, useOperations: true, simple: false, label: 'Operaciones complejas' }
+          };
+
+          const generateQuestion = (levelConfig) => {
+            const questionTypes = ['mayor', 'menor'];
+            const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+            
+            let leftValue, rightValue, leftDisplay, rightDisplay;
+
+            if (!levelConfig.useOperations) {
+              // Solo números
+              leftValue = Math.floor(Math.random() * levelConfig.range) + 1;
+              rightValue = Math.floor(Math.random() * levelConfig.range) + 1;
+              leftDisplay = leftValue.toString();
+              rightDisplay = rightValue.toString();
+            } else {
+              // Con operaciones
+              const ops = ['+', '-'];
+              if (!levelConfig.simple) ops.push('×');
+              
+              // Lado izquierdo
+              if (Math.random() > 0.5) {
+                leftValue = Math.floor(Math.random() * (levelConfig.range / 2)) + 1;
+                leftDisplay = leftValue.toString();
+              } else {
+                const op = ops[Math.floor(Math.random() * ops.length)];
+                let a, b;
+                if (op === '+') {
+                  a = Math.floor(Math.random() * 20) + 1;
+                  b = Math.floor(Math.random() * 20) + 1;
+                  leftValue = a + b;
+                  leftDisplay = `${a} + ${b}`;
+                } else if (op === '-') {
+                  a = Math.floor(Math.random() * 30) + 10;
+                  b = Math.floor(Math.random() * a);
+                  leftValue = a - b;
+                  leftDisplay = `${a} - ${b}`;
+                } else {
+                  a = Math.floor(Math.random() * 10) + 1;
+                  b = Math.floor(Math.random() * 10) + 1;
+                  leftValue = a * b;
+                  leftDisplay = `${a} × ${b}`;
+                }
+              }
+              
+              // Lado derecho
+              if (Math.random() > 0.5) {
+                rightValue = Math.floor(Math.random() * (levelConfig.range / 2)) + 1;
+                rightDisplay = rightValue.toString();
+              } else {
+                const op = ops[Math.floor(Math.random() * ops.length)];
+                let a, b;
+                if (op === '+') {
+                  a = Math.floor(Math.random() * 20) + 1;
+                  b = Math.floor(Math.random() * 20) + 1;
+                  rightValue = a + b;
+                  rightDisplay = `${a} + ${b}`;
+                } else if (op === '-') {
+                  a = Math.floor(Math.random() * 30) + 10;
+                  b = Math.floor(Math.random() * a);
+                  rightValue = a - b;
+                  rightDisplay = `${a} - ${b}`;
+                } else {
+                  a = Math.floor(Math.random() * 10) + 1;
+                  b = Math.floor(Math.random() * 10) + 1;
+                  rightValue = a * b;
+                  rightDisplay = `${a} × ${b}`;
+                }
+              }
+            }
+
+            let correctAnswer;
+            if (type === 'mayor') {
+              correctAnswer = leftValue > rightValue ? 'left' : 'right';
+            } else {
+              correctAnswer = leftValue < rightValue ? 'left' : 'right';
+            }
+
+            return {
+              type,
+              leftDisplay,
+              rightDisplay,
+              leftValue,
+              rightValue,
+              correctAnswer
+            };
+          };
+
+          const startGame = (selectedLevel) => {
+            setLevel(selectedLevel);
+            setGameStarted(true);
+            setScore(0);
+            setLives(3);
+            setStreak(0);
+            setGameOver(false);
+            setBaseTime(8);
+            const newQuestion = generateQuestion(levels[selectedLevel]);
+            setQuestion(newQuestion);
+            setTimeLeft(8);
+            setFeedback(null);
+          };
+
+          const checkAnswer = (answer) => {
+            if (feedback) return;
+
+            if (answer === question.correctAnswer) {
+              const newStreak = streak + 1;
+              setStreak(newStreak);
+              if (newStreak > bestStreak) setBestStreak(newStreak);
+              setScore(s => s + 10 + (newStreak * 3));
+              setFeedback('correct');
+              
+              const newBaseTime = Math.max(2, 8 - Math.floor(newStreak / 5));
+              setBaseTime(newBaseTime);
+              
+              setTimeout(() => {
+                const newQuestion = generateQuestion(levels[level]);
+                setQuestion(newQuestion);
+                setTimeLeft(newBaseTime);
+                setFeedback(null);
+              }, 600);
+            } else {
+              setStreak(0);
+              setLives(l => l - 1);
+              setFeedback('incorrect');
+              
+              if (lives <= 1) {
+                setGameOver(true);
+              } else {
+                setTimeout(() => {
+                  const newQuestion = generateQuestion(levels[level]);
+                  setQuestion(newQuestion);
+                  setTimeLeft(8);
+                  setBaseTime(8);
+                  setFeedback(null);
+                }, 800);
+              }
+            }
+          };
+
+          useEffect(() => {
+            if (!gameStarted || gameOver || feedback) return;
+
+            const timer = setInterval(() => {
+              setTimeLeft(t => {
+                if (t <= 1) {
+                  setStreak(0);
+                  setLives(l => l - 1);
+                  setFeedback('timeout');
+                  setBaseTime(8);
+                  
+                  if (lives <= 1) {
+                    setGameOver(true);
+                  } else {
+                    setTimeout(() => {
+                      const newQuestion = generateQuestion(levels[level]);
+                      setQuestion(newQuestion);
+                      setTimeLeft(8);
+                      setFeedback(null);
+                    }, 1000);
+                  }
+                  return 0;
+                }
+                return t - 1;
+              });
+            }, 1000);
+
+            return () => clearInterval(timer);
+          }, [gameStarted, gameOver, feedback, lives, level]);
+
+          if (!gameStarted) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-purple-400 to-purple-600 p-4">
+                <div className="max-w-4xl mx-auto text-white">
+                  <a href="matematicas-menu.html" className="mb-4 inline-block bg-white text-purple-600 px-4 py-2 rounded-lg font-bold">
+                    ← Volver a Matemáticas
+                  </a>
+                  
+                  <h2 className="text-5xl font-bold mb-4 text-center">Mayor o Menor ⚖️</h2>
+                  <p className="text-2xl text-center mb-8">¡Compara y elige rápido!</p>
+                  
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {Object.keys(levels).map(key => (
+                      <button
+                        key={key}
+                        onClick={() => startGame(key)}
+                        className={`rounded-xl p-8 transform transition hover:scale-105 ${
+                          key === 'facil' ? 'bg-green-500 hover:bg-green-600' :
+                          key === 'medio' ? 'bg-yellow-500 hover:bg-yellow-600' :
+                          'bg-red-500 hover:bg-red-600'
+                        }`}
+                      >
+                        <h3 className="text-3xl font-bold mb-2">
+                          {key === 'facil' ? '😊 Fácil' : key === 'medio' ? '🤔 Medio' : '🔥 Difícil'}
+                        </h3>
+                        <p className="text-sm">{levels[key].label}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="bg-white bg-opacity-20 rounded-xl p-6 mt-8">
+                    <h3 className="text-2xl font-bold mb-3">📋 Cómo jugar:</h3>
+                    <ul className="space-y-2 text-lg">
+                      <li>⚡ Elige el número MAYOR o MENOR según se pida</li>
+                      <li>⏱️ Tiempo limitado - ¡decide rápido!</li>
+                      <li>🔥 Más rachas = menos tiempo (velocidad creciente)</li>
+                      <li>❤️ 3 vidas - ¡no te equivoques!</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (gameOver) {
+            return (
+              <div className="min-h-screen bg-gradient-to-b from-purple-400 to-purple-600 p-4 flex items-center justify-center">
+                <div className="max-w-2xl mx-auto text-white text-center bg-white bg-opacity-20 rounded-3xl p-8">
+                  <h2 className="text-6xl font-bold mb-4">¡Juego Terminado! 🎮</h2>
+                  <div className="text-4xl mb-6">🏆</div>
+                  <div className="space-y-3 mb-6 text-2xl">
+                    <p>Puntuación: <span className="font-bold text-yellow-300">{score}</span></p>
+                    <p>Mejor Racha: <span className="font-bold text-orange-300">{bestStreak} 🔥</span></p>
+                  </div>
+                  <div className="flex gap-4 justify-center flex-wrap">
+                    <button onClick={() => startGame(level)} className="bg-green-500 hover:bg-green-600 px-8 py-4 rounded-xl text-xl font-bold">
+                      Jugar de Nuevo
+                    </button>
+                    <button onClick={() => setGameStarted(false)} className="bg-blue-500 hover:bg-blue-600 px-8 py-4 rounded-xl text-xl font-bold">
+                      Cambiar Nivel
+                    </button>
+                    <a href="matematicas-menu.html" className="bg-purple-500 hover:bg-purple-600 px-8 py-4 rounded-xl text-xl font-bold no-underline inline-block">
+                      Menú Matemáticas
+                    </a>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="min-h-screen bg-gradient-to-b from-purple-400 to-purple-600 p-4">
+              <div className="max-w-5xl mx-auto">
+                <div className="bg-white rounded-2xl p-4 mb-4 shadow-xl">
+                  <div className="flex justify-between items-center flex-wrap gap-4">
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Puntos</div>
+                      <div className="text-3xl font-bold text-purple-600">{score}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Vidas</div>
+                      <div className="text-3xl">{'❤️'.repeat(lives)}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Racha</div>
+                      <div className="text-3xl font-bold text-orange-500">{streak} 🔥</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Tiempo</div>
+                      <div className={`text-3xl font-bold ${timeLeft <= 2 ? 'text-red-500 animate-pulse' : 'text-green-600'}`}>
+                        {timeLeft}s
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`bg-white rounded-3xl p-8 shadow-2xl transition-all duration-300 ${
+                  feedback === 'correct' ? 'bg-green-100' :
+                  feedback === 'incorrect' || feedback === 'timeout' ? 'bg-red-100' : ''
+                }`}>
+                  <div className="text-center mb-6">
+                    {feedback === 'correct' && <div className="text-6xl mb-4 animate-bounce">✅</div>}
+                    {(feedback === 'incorrect' || feedback === 'timeout') && <div className="text-6xl mb-4 animate-bounce">❌</div>}
+                    
+                    <h3 className="text-4xl font-bold text-gray-700 mb-4">
+                      {question?.type === 'mayor' ? '¿Cuál es MAYOR? ▲' : '¿Cuál es MENOR? ▼'}
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-8 max-w-3xl mx-auto">
+                    <button
+                      onClick={() => checkAnswer('left')}
+                      disabled={!!feedback}
+                      className={`bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-3xl p-12 transform transition hover:scale-105 ${
+                        feedback === 'correct' && question.correctAnswer === 'left' ? 'bg-green-500 ring-8 ring-green-300' :
+                        feedback === 'incorrect' && question.correctAnswer === 'left' ? 'bg-green-500' : ''
+                      }`}
+                    >
+                      <div className="text-6xl font-bold font-mono break-words">
+                        {question?.leftDisplay}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => checkAnswer('right')}
+                      disabled={!!feedback}
+                      className={`bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white rounded-3xl p-12 transform transition hover:scale-105 ${
+                        feedback === 'correct' && question.correctAnswer === 'right' ? 'bg-green-500 ring-8 ring-green-300' :
+                        feedback === 'incorrect' && question.correctAnswer === 'right' ? 'bg-green-500' : ''
+                      }`}
+                    >
+                      <div className="text-6xl font-bold font-mono break-words">
+                        {question?.rightDisplay}
+                      </div>
+                    </button>
+                  </div>
+
+                  {feedback === 'correct' && (
+                    <div className="mt-6 text-2xl text-green-700 font-bold text-center">
+                      ¡Correcto! +{10 + (streak * 3)} puntos
+                    </div>
+                  )}
+                  {feedback === 'incorrect' && (
+                    <div className="mt-6 text-xl text-red-700 font-bold text-center">
+                      ❌ Incorrecto: {question.leftValue} vs {question.rightValue}
+                    </div>
+                  )}
+                  {feedback === 'timeout' && (
+                    <div className="mt-6 text-2xl text-red-700 font-bold text-center">
+                      ⏰ ¡Tiempo agotado!
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-center mt-4">
+                  <a href="matematicas-menu.html" className="text-white text-xl underline hover:text-purple-200">
+                    ← Volver al menú
+                  </a>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MayorMenor />);
+    </script>
+</body>
+</html>
