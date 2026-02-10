@@ -194,7 +194,7 @@
       const redesGrandes = document.getElementById('redes-sociales-grandes');
       if (redesGrandes && typeof REDES_SOCIALES !== 'undefined') {
         const redesHTML = `
-          ${REDES_SOCIALES.instagram ? `
+   <!--       ${REDES_SOCIALES.instagram ? `
             <a href="${REDES_SOCIALES.instagram}" target="_blank" rel="noopener"
                class="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 rounded-2xl text-white hover:scale-110 transform transition shadow-lg">
               <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
@@ -222,7 +222,7 @@
               </svg>
               <span class="font-bold text-lg">YouTube</span>
             </a>
-          ` : ''}
+          ` : ''}  -->
           
           ${REDES_SOCIALES.amazon ? `
             <a href="${REDES_SOCIALES.amazon}" target="_blank" rel="noopener"
