@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Ver Puntuaciones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+    <div class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🎮 Panel de Administración</h1>
+            <p class="text-gray-600">Ver todas las puntuaciones de los juegos</p>
+        </div>
+
+        <!-- Selector de Juego -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <label class="block text-lg font-bold text-gray-800 mb-3">Selecciona un juego:</label>
+            <select id="gameSelector" class="w-full p-3 border-2 border-gray-300 rounded-lg text-lg" onchange="loadScores()">
+                <option value="">-- Selecciona un juego --</option>
+                <option value="propiedad-distributiva">🧮 Propiedad Distributiva</option>
+                <option value="invasores-matematicos">🚀 Invasores Matemáticos</option>
+                <option value="completa-numero">❓ Completa el Número</option>
+                <option value="mayor-menor">⚖️ Mayor o Menor</option>
+                <option value="sopa-letras">🔤 Sopa de Letras</option>
+                <option value="seguir-patrones">🧩 Seguir Patrones</option>
+                <option value="completa-letra">📝 Completa la Letra</option>
+                <option value="practica-escritura">⌨️ Práctica de Escritura</option>
+            </select>
+        </div>
+
+        <!-- Estadísticas -->
+        <div id="statsSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📊 Estadísticas</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-blue-50 p-4 rounded-lg text-center">
+                    <div class="text-3xl font-bold text-blue-600" id="totalGames">0</div>
+                    <div class="text-sm text-gray-600">Total Partidas</div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg text-center">
+                    <div class="text-3xl font-bold text-green-600" id="totalPlayers">0</div>
+                    <div class="text-sm text-gray-600">Jugadores Únicos</div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg text-center">
+                    <div class="text-3xl font-bold text-purple-600" id="maxScore">0</div>
+                    <div class="text-sm text-gray-600">Puntuación Máxima</div>
+                </div>
+                <div class="bg-orange-50 p-4 rounded-lg text-center">
+                    <div class="text-3xl font-bold text-orange-600" id="avgScore">0</div>
+                    <div class="text-sm text-gray-600">Promedio</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Puntuaciones -->
+        <div id="scoresSection" class="hidden bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">🏆 Todas las Puntuaciones</h2>
+                <button onclick="exportToCSV()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    📥 Exportar CSV
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">#</th>
+                            <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">Jugador</th>
+                            <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">Puntuación</th>
+                            <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">Nivel</th>
+                            <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoresTable">
+                        <!-- Se llenará dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="loadingMessage" class="text-center py-8 text-gray-500">
+                Selecciona un juego para ver las puntuaciones
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-6 text-gray-500">
+            <a href="index.html" class="hover:text-gray-700">← Volver al inicio</a>
+        </div>
+    </div>
+
+    <script>
+        let currentScores = [];
+        let db;
+
+        // Inicializar Firebase
+        window.addEventListener('load', async function() {
+            try {
+                const app = firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                console.log('✅ Firebase inicializado');
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('Error al conectar con Firebase');
+            }
+        });
+
+        // Cargar puntuaciones del juego seleccionado
+        async function loadScores() {
+            const gameName = document.getElementById('gameSelector').value;
+            
+            if (!gameName) {
+                document.getElementById('scoresSection').classList.add('hidden');
+                document.getElementById('statsSection').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('loadingMessage').textContent = 'Cargando...';
+            document.getElementById('scoresSection').classList.remove('hidden');
+            document.getElementById('statsSection').classList.remove('hidden');
+
+            try {
+                const snapshot = await db.collection(`scores_${gameName}`)
+                    .orderBy('score', 'desc')
+                    .get();
+
+                currentScores = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    currentScores.push({
+                        id: doc.id,
+                        name: data.name,
+                        score: data.score,
+                        level: data.level,
+                        date: data.date,
+                        timestamp: data.timestamp
+                    });
+                });
+
+                displayScores();
+                calculateStats();
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingMessage').textContent = 'Error al cargar puntuaciones';
+            }
+        }
+
+        // Mostrar puntuaciones en la tabla
+        function displayScores() {
+            const tbody = document.getElementById('scoresTable');
+            
+            if (currentScores.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">No hay puntuaciones todavía</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = currentScores.map((score, index) => {
+                const rank = index + 1;
+                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+                const rowClass = rank <= 3 ? 'bg-yellow-50' : '';
+                const date = new Date(score.date).toLocaleDateString('es-ES');
+                
+                return `
+                    <tr class="${rowClass} border-b hover:bg-gray-50">
+                        <td class="px-4 py-3 font-bold text-lg">${medal}</td>
+                        <td class="px-4 py-3 font-semibold">${score.name}</td>
+                        <td class="px-4 py-3 text-blue-600 font-bold">${score.score.toLocaleString()}</td>
+                        <td class="px-4 py-3">${score.level}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">${date}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('loadingMessage').style.display = 'none';
+        }
+
+        // Calcular estadísticas
+        function calculateStats() {
+            const totalGames = currentScores.length;
+            const uniquePlayers = new Set(currentScores.map(s => s.name)).size;
+            const maxScore = totalGames > 0 ? Math.max(...currentScores.map(s => s.score)) : 0;
+            const avgScore = totalGames > 0 ? Math.round(currentScores.reduce((sum, s) => sum + s.score, 0) / totalGames) : 0;
+
+            document.getElementById('totalGames').textContent = totalGames.toLocaleString();
+            document.getElementById('totalPlayers').textContent = uniquePlayers.toLocaleString();
+            document.getElementById('maxScore').textContent = maxScore.toLocaleString();
+            document.getElementById('avgScore').textContent = avgScore.toLocaleString();
+        }
+
+        // Exportar a CSV
+        function exportToCSV() {
+            if (currentScores.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+            }
+
+            const gameName = document.getElementById('gameSelector').value;
+            
+            // Crear CSV
+            let csv = 'Posición,Jugador,Puntuación,Nivel,Fecha\n';
+            currentScores.forEach((score, index) => {
+                const date = new Date(score.date).toLocaleDateString('es-ES');
+                csv += `${index + 1},"${score.name}",${score.score},"${score.level}","${date}"\n`;
+            });
+
+            // Descargar
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `puntuaciones_${gameName}_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
