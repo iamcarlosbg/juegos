@@ -40,6 +40,7 @@
                 inset 0 0 0 6px #000;
         }
     </style>
+    <script src="config.js"></script>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600">
     
@@ -436,13 +437,34 @@
         });
 
         // Sistema de puntuaciones (localStorage)
-        function saveScore() {
+        async function saveScore() {
             const playerName = document.getElementById('playerName').value.trim().toUpperCase();
             
             if (!playerName) {
                 alert('Por favor ingresa tu nombre');
                 return;
             }
+            
+            const scoreData = {
+                name: playerName.substring(0, 15),
+                score: typeof finalScore !== 'undefined' ? finalScore : (typeof gameState !== 'undefined' ? gameState.score : 0),
+                level: typeof currentLevel !== 'undefined' ? currentLevel : 'Normal',
+                date: new Date().toISOString()
+            };
+            
+            // Guardar usando la función global de Firebase
+            const saved = await savePlayerScore(scoreData.name, scoreData.score, scoreData.level);
+            
+            if (saved !== false) {
+                await displayPlayerRank(scoreData.name, scoreData.score);
+            }
+        }
+
+        function showGameOver(score) {
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+            document.getElementById('playerName').focus();
+        }
             
             const score = {
                 name: playerName,
@@ -511,14 +533,7 @@
         }
     </script>
 
-<script>
-  const REDES_SOCIALES = {
-    instagram: "https://instagram.com/@iamcarlosbg",
-    facebook: "https://www.facebook.com/CuentosHermanosRomero/",
-    youtube: "https://youtube.com/@trioromero",
-    amazon: "https://www.amazon.es/dp/B0DRZ41G82?binding=paperback&qid=1769810121&sr=8-1&ref=dbs_dp_awt_sb_pc_tpbk&fbclid=IwRlRTSAPqCCVleHRuA2FlbQIxMABzcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEej4EFlLIjuKqPAJe0-WhODbLGRXWubmxq2EvwEz_IfWM5wkRjCw6PaLUyeMI_aem_T2WhhpSpVWm-tlm0JztS-A"
-  };
-</script>
+
 
 <footer class="bg-gray-900 text-white py-8 mt-auto">
   <div class="max-w-6xl mx-auto px-4">
@@ -550,24 +565,77 @@
     </div>
   </div>
 </footer>
-<script>
-  document.getElementById("year").textContent = new Date().getFullYear();
-  if (typeof REDES_SOCIALES !== "undefined") {
-    const links = {
-      "link-instagram": REDES_SOCIALES.instagram,
-      "link-facebook": REDES_SOCIALES.facebook,
-      "link-youtube": REDES_SOCIALES.youtube,
-      "link-amazon": REDES_SOCIALES.amazon
-    };
-    Object.keys(links).forEach(id => {
-      const element = document.getElementById(id);
-      if (element && links[id]) {
-        element.href = links[id];
-      } else if (element) {
-        element.style.display = "none";
-      }
+
+
+    <script>
+    // ===== FUNCIONES DE RANKING =====
+    let currentFinalScore = 0;
+    let currentLevel = 'Normal';
+
+    async function saveGameScore() {
+        const playerName = document.getElementById('playerName')?.value?.trim().toUpperCase();
+        
+        if (!playerName) {
+            alert('Por favor ingresa tu nombre');
+            return;
+        }
+        
+        // Intentar obtener la puntuación de diferentes fuentes
+        const score = currentFinalScore || 
+                     (typeof gameState !== 'undefined' ? gameState.score : 0) ||
+                     (typeof score !== 'undefined' ? score : 0) ||
+                     0;
+        
+        // Intentar obtener el nivel de diferentes fuentes
+        const level = currentLevel ||
+                     (typeof gameState !== 'undefined' && gameState.level ? 
+                      (typeof levelConfig !== 'undefined' ? levelConfig[gameState.level]?.name : gameState.level) : 'Normal');
+        
+        console.log('💾 Guardando puntuación:', { playerName, score, level, game: GAME_NAME });
+        
+        // Guardar usando Firebase (función global definida en el script de inicialización)
+        try {
+            const saved = await savePlayerScore(playerName, score, level);
+            
+            if (saved !== false) {
+                console.log('✅ Puntuación guardada correctamente');
+                await displayPlayerRank(playerName, score);
+                
+                // Deshabilitar botón
+                const saveButton = document.querySelector('button[onclick="saveGameScore()"]');
+                if (saveButton) saveButton.disabled = true;
+                document.getElementById('playerName').disabled = true;
+            } else {
+                console.warn('⚠️ No se pudo guardar en Firebase, guardado en localStorage');
+            }
+        } catch (error) {
+            console.error('❌ Error al guardar:', error);
+            alert('Error al guardar la puntuación. Inténtalo de nuevo.');
+        }
+    }
+
+    function showGameOver(score, level = 'Normal') {
+        currentFinalScore = score;
+        currentLevel = level;
+        
+        console.log('🎮 Game Over:', { score, level });
+        
+        document.getElementById('finalScore').textContent = score.toLocaleString();
+        document.getElementById('gameOverScreen').classList.remove('hidden');
+        
+        // Auto-focus en el input
+        setTimeout(() => {
+            document.getElementById('playerName')?.focus();
+        }, 100);
+    }
+
+    // Permitir guardar con Enter
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !document.getElementById('gameOverScreen').classList.contains('hidden')) {
+            saveGameScore();
+        }
     });
-  }
-</script>
+    </script>
+
 </body>
 </html>

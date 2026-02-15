@@ -223,14 +223,7 @@ async function displayPlayerRank(playerName, playerScore) {
     }
 }
 </script>
-<script>
-  const REDES_SOCIALES = {
-    instagram: "https://instagram.com/academiadivertida",
-    facebook: "https://facebook.com/academiadivertida",
-    youtube: "https://youtube.com/@academiadivertida",
-    amazon: "https://amazon.com/author/academiadivertida"
-  };
-</script>
+
 
 <footer class="bg-gray-900 text-white py-8 mt-auto">
   <div class="max-w-6xl mx-auto px-4">
@@ -262,24 +255,6 @@ async function displayPlayerRank(playerName, playerScore) {
     </div>
   </div>
 </footer>
-<script>
-  document.getElementById("year").textContent = new Date().getFullYear();
-  if (typeof REDES_SOCIALES !== "undefined") {
-    const links = {
-      "link-instagram": REDES_SOCIALES.instagram,
-      "link-facebook": REDES_SOCIALES.facebook,
-      "link-youtube": REDES_SOCIALES.youtube,
-      "link-amazon": REDES_SOCIALES.amazon
-    };
-    Object.keys(links).forEach(id => {
-      const element = document.getElementById(id);
-      if (element && links[id]) {
-        element.href = links[id];
-      } else if (element) {
-        element.style.display = "none";
-      }
-    });
-  }
-</script>
+
 </body>
 </html>

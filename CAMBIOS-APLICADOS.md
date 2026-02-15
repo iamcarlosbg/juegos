@@ -109,19 +109,29 @@ window.addEventListener('load', async function() {
 
 ---
 
-## 📱 Redes Sociales - Cambios en Footer
+## 📱 Redes Sociales - Sistema Centralizado en TODOS los Archivos
 
 ### ANTES:
 ```html
-<!-- Todos los iconos visibles -->
-<a id="link-instagram" href="">...</a>
-<a id="link-facebook" href="">...</a>
-<a id="link-youtube" href="">...</a>
-<a id="link-amazon" href="">...</a>
+<!-- Cada archivo tenía su propio script -->
+<script>
+  const REDES_SOCIALES = { ... };
+</script>
+<script>
+  // Código de inicialización inline
+  document.getElementById("year").textContent = ...
+</script>
 ```
 
 ### DESPUÉS:
 ```html
+<!-- Todos usan config.js centralizado -->
+<head>
+  ...
+  <script src="config.js"></script>
+</head>
+
+<!-- Footer solo tiene los iconos -->
 <!-- Instagram, Facebook, YouTube comentados -->
 <!--  <a id="link-instagram" href="">...</a>
       <a id="link-facebook" href="">...</a>
@@ -130,16 +140,40 @@ window.addEventListener('load', async function() {
 <a id="link-amazon" href="">...</a>
 ```
 
-### Sistema de Control:
-Archivo `config.js` permite activar/desactivar con:
+### Sistema de Control Centralizado:
+**Un solo archivo `config.js` controla TODAS las páginas:**
 ```javascript
-socialMedia: {
-    instagram: { enabled: false },
-    facebook: { enabled: false },
-    youtube: { enabled: false },
-    amazon: { enabled: true }  // ← Solo este visible
-}
+const SITE_CONFIG = {
+  socialMedia: {
+    instagram: { enabled: false },  // Oculto en TODOS los archivos
+    facebook: { enabled: false },   // Oculto en TODOS los archivos
+    youtube: { enabled: false },    // Oculto en TODOS los archivos
+    amazon: { enabled: true }       // ✅ Visible en TODOS los archivos
+  }
+};
 ```
+
+### Archivos Afectados (14 archivos):
+✅ completa-letra.html
+✅ completa-numero.html
+✅ index.html
+✅ invasores-matematicos.html
+✅ jerarquia-operaciones.html
+✅ lengua-menu.html
+✅ logica-menu.html
+✅ matematicas-menu.html
+✅ mayor-menor.html
+✅ mecanografia-menu.html
+✅ practica-escritura.html
+✅ seguir-patrones.html
+✅ sobre-nosotros.html
+✅ sopa-letras.html
+
+**Ventajas:**
+- ✅ Un solo lugar para cambiar configuración
+- ✅ Cambio se aplica a TODAS las páginas automáticamente
+- ✅ No más código duplicado
+- ✅ Más fácil de mantener
 
 ---
 

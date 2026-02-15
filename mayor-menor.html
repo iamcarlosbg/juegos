@@ -379,6 +379,57 @@
 
 
 
+
+    <!-- Pantalla de Game Over -->
+    <div id="gameOverScreen" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
+        <div class="max-w-2xl w-full bg-white rounded-3xl p-8 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">🎮</div>
+                <h1 class="text-5xl font-bold text-red-600 mb-4">GAME OVER</h1>
+                <div class="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-6 mb-6">
+                    <div class="text-4xl font-bold text-gray-800 mb-2">🎯 Puntuación Final</div>
+                    <div class="text-6xl font-bold text-blue-600" id="finalScore">0</div>
+                </div>
+            </div>
+
+            <!-- Formulario de nombre -->
+            <div class="bg-yellow-50 border-4 border-yellow-400 rounded-xl p-6 mb-6">
+                <h2 class="text-2xl font-bold text-yellow-800 mb-4">🏆 ¡Guarda tu récord!</h2>
+                <input 
+                    type="text" 
+                    id="playerName" 
+                    maxlength="15"
+                    class="w-full text-2xl font-bold text-center border-4 border-yellow-500 rounded-xl p-3 mb-4 uppercase"
+                    placeholder="TU NOMBRE"
+                >
+                <button 
+                    onclick="saveGameScore()" 
+                    class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold text-xl py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition"
+                >
+                    💾 GUARDAR PUNTUACIÓN
+                </button>
+            </div>
+
+            <!-- Ranking -->
+            <div id="rankingSection" class="hidden">
+                <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 mb-6">
+                    <h2 class="text-3xl font-bold text-purple-800 mb-4">📊 Tu Posición</h2>
+                    <div id="playerRankInfo" class="text-2xl font-bold text-gray-800 mb-4"></div>
+                    <div id="topScoresEnd" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 justify-center mt-6">
+                <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 rounded-xl text-xl">
+                    🔄 Jugar de Nuevo
+                </button>
+                <a href="index.html" class="bg-gray-500 hover:bg-gray-600 text-white font-bold px-8 py-4 rounded-xl text-xl inline-block">
+                    🏠 Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+
 <script>
 // ===== SISTEMA DE RANKING CON FIREBASE =====
 let useFirebase = false;
@@ -488,14 +539,7 @@ async function displayPlayerRank(playerName, playerScore) {
     }
 }
 </script>
-<script>
-  const REDES_SOCIALES = {
-    instagram: "https://instagram.com/academiadivertida",
-    facebook: "https://facebook.com/academiadivertida",
-    youtube: "https://youtube.com/@academiadivertida",
-    amazon: "https://amazon.com/author/academiadivertida"
-  };
-</script>
+
 
 <footer class="bg-gray-900 text-white py-8 mt-auto">
   <div class="max-w-6xl mx-auto px-4">
@@ -527,24 +571,77 @@ async function displayPlayerRank(playerName, playerScore) {
     </div>
   </div>
 </footer>
-<script>
-  document.getElementById("year").textContent = new Date().getFullYear();
-  if (typeof REDES_SOCIALES !== "undefined") {
-    const links = {
-      "link-instagram": REDES_SOCIALES.instagram,
-      "link-facebook": REDES_SOCIALES.facebook,
-      "link-youtube": REDES_SOCIALES.youtube,
-      "link-amazon": REDES_SOCIALES.amazon
-    };
-    Object.keys(links).forEach(id => {
-      const element = document.getElementById(id);
-      if (element && links[id]) {
-        element.href = links[id];
-      } else if (element) {
-        element.style.display = "none";
-      }
+
+
+    <script>
+    // ===== FUNCIONES DE RANKING =====
+    let currentFinalScore = 0;
+    let currentLevel = 'Normal';
+
+    async function saveGameScore() {
+        const playerName = document.getElementById('playerName')?.value?.trim().toUpperCase();
+        
+        if (!playerName) {
+            alert('Por favor ingresa tu nombre');
+            return;
+        }
+        
+        // Intentar obtener la puntuación de diferentes fuentes
+        const score = currentFinalScore || 
+                     (typeof gameState !== 'undefined' ? gameState.score : 0) ||
+                     (typeof score !== 'undefined' ? score : 0) ||
+                     0;
+        
+        // Intentar obtener el nivel de diferentes fuentes
+        const level = currentLevel ||
+                     (typeof gameState !== 'undefined' && gameState.level ? 
+                      (typeof levelConfig !== 'undefined' ? levelConfig[gameState.level]?.name : gameState.level) : 'Normal');
+        
+        console.log('💾 Guardando puntuación:', { playerName, score, level, game: GAME_NAME });
+        
+        // Guardar usando Firebase (función global definida en el script de inicialización)
+        try {
+            const saved = await savePlayerScore(playerName, score, level);
+            
+            if (saved !== false) {
+                console.log('✅ Puntuación guardada correctamente');
+                await displayPlayerRank(playerName, score);
+                
+                // Deshabilitar botón
+                const saveButton = document.querySelector('button[onclick="saveGameScore()"]');
+                if (saveButton) saveButton.disabled = true;
+                document.getElementById('playerName').disabled = true;
+            } else {
+                console.warn('⚠️ No se pudo guardar en Firebase, guardado en localStorage');
+            }
+        } catch (error) {
+            console.error('❌ Error al guardar:', error);
+            alert('Error al guardar la puntuación. Inténtalo de nuevo.');
+        }
+    }
+
+    function showGameOver(score, level = 'Normal') {
+        currentFinalScore = score;
+        currentLevel = level;
+        
+        console.log('🎮 Game Over:', { score, level });
+        
+        document.getElementById('finalScore').textContent = score.toLocaleString();
+        document.getElementById('gameOverScreen').classList.remove('hidden');
+        
+        // Auto-focus en el input
+        setTimeout(() => {
+            document.getElementById('playerName')?.focus();
+        }, 100);
+    }
+
+    // Permitir guardar con Enter
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !document.getElementById('gameOverScreen').classList.contains('hidden')) {
+            saveGameScore();
+        }
     });
-  }
-</script>
+    </script>
+
 </body>
 </html>

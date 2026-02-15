@@ -1,37 +1,53 @@
 // config.js - Configuración global del sitio
+// ============================================
+// IMPORTANTE: Este archivo controla TODAS las páginas
+// Cambios aquí se aplican automáticamente a todo el sitio
+// ============================================
+
 const SITE_CONFIG = {
-  // Redes Sociales - Cambiar a true/false para mostrar/ocultar
+  // ===== REDES SOCIALES =====
+  // Cambiar enabled: false/true para mostrar/ocultar
+  // Cambiar url: para actualizar el enlace en TODAS las páginas
   socialMedia: {
     instagram: {
-      enabled: false, // Cambiar a true para mostrar
-      url: "https://instagram.com/@iamcarlosbg"
+      enabled: false,  // ← Cambiar a true para mostrar en TODAS las páginas
+      url: "https://instagram.com/@iamcarlosbg"  // ← Tu URL aquí
     },
     facebook: {
-      enabled: false, // Cambiar a true para mostrar
-      url: "https://www.facebook.com/CuentosHermanosRomero/"
+      enabled: false,  // ← Cambiar a true para mostrar en TODAS las páginas
+      url: "https://www.facebook.com/CuentosHermanosRomero/"  // ← Tu URL aquí
     },
     youtube: {
-      enabled: false, // Cambiar a true para mostrar
-      url: "https://youtube.com/@trioromero"
+      enabled: false,  // ← Cambiar a true para mostrar en TODAS las páginas
+      url: "https://youtube.com/@trioromero"  // ← Tu URL aquí
     },
     amazon: {
-      enabled: true, // ✅ Activo por defecto
-      url: "https://www.amazon.es/dp/B0DRZ41G82?binding=paperback&qid=1769810121&sr=8-1&ref=dbs_dp_awt_sb_pc_tpbk&fbclid=IwRlRTSAPqCCVleHRuA2FlbQIxMABzcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEej4EFlLIjuKqPAJe0-WhODbLGRXWubmxq2EvwEz_IfWM5wkRjCw6PaLUyeMI_aem_T2WhhpSpVWm-tlm0JztS-A"
+      enabled: true,   // ✅ Activo - se muestra en TODAS las páginas
+      url: "https://www.amazon.es/dp/B0DRZ41G82"  // ← Tu URL aquí
     }
   },
   
-  // Features del sitio
+  // ===== CONFIGURACIÓN DEL SITIO =====
+  site: {
+    name: "Aprende y Juega",
+    year: new Date().getFullYear()
+  },
+  
+  // ===== FEATURES =====
   features: {
-    ranking: true, // Sistema de ranking global
-    firebase: true // Usar Firebase para rankings
+    ranking: true,    // Sistema de ranking global
+    firebase: true    // Usar Firebase para rankings
   }
 };
 
-// Inicializar redes sociales automáticamente
+// ===== INICIALIZACIÓN AUTOMÁTICA =====
+// Este código se ejecuta en TODAS las páginas
 document.addEventListener('DOMContentLoaded', function() {
   initSocialMedia();
+  updateYear();
 });
 
+// Configurar enlaces de redes sociales
 function initSocialMedia() {
   const socialLinks = {
     'link-instagram': SITE_CONFIG.socialMedia.instagram,
@@ -44,12 +60,25 @@ function initSocialMedia() {
     const element = document.getElementById(id);
     if (element) {
       const config = socialLinks[id];
-      if (config.enabled && config.url) {
+      if (config && config.enabled && config.url) {
         element.href = config.url;
-        element.style.display = ''; // Mostrar
+        element.style.display = '';
+        element.style.opacity = '1';
+        element.style.pointerEvents = 'auto';
       } else {
-        element.style.display = 'none'; // Ocultar
+        element.style.display = 'none';
       }
     }
   });
 }
+
+// Actualizar año en footer automáticamente
+function updateYear() {
+  const yearElements = document.querySelectorAll('#year, .current-year');
+  yearElements.forEach(el => {
+    el.textContent = SITE_CONFIG.site.year;
+  });
+}
+
+// Log de configuración (solo para debug)
+console.log('✅ config.js cargado - Configuración aplicada a todas las páginas');
