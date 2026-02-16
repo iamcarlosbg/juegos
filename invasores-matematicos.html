@@ -8,34 +8,6 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase y Configuración -->
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
-    <script src="config.js"></script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-F5E13E7QHY"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-F5E13E7QHY');
-  
-  // Funciones de tracking para eventos personalizados
-  function trackGameStart(gameName, level) {
-    gtag('event', 'game_start', {'game_name': gameName, 'game_level': level});
-  }
-  function trackScoreSaved(gameName, score, level) {
-    gtag('event', 'score_saved', {'game_name': gameName, 'score': score, 'level': level});
-  }
-  function trackGameOver(gameName, score, level) {
-    gtag('event', 'game_over', {'game_name': gameName, 'final_score': score, 'level': level});
-  }
-  function trackLevelSelect(gameName, level) {
-    gtag('event', 'level_select', {'game_name': gameName, 'level': level});
-  }
-</script>
-
 </head>
 <body>
     <div id="root"></div>
@@ -182,7 +154,6 @@
             setLives(3);
             setGameOver(false);
             const newQuestion = generateQuestion(levelConfig);
-        setTimeout(() => { document.getElementById('answer')?.focus() || document.getElementById('userAnswer')?.focus(); }, 50);
             setQuestion(newQuestion);
             spawnEnemies(newQuestion.answer);
           };
@@ -244,13 +215,11 @@
                     setLives(l => l - 1);
                     if (lives <= 1) {
                       setGameOver(true);
-                setTimeout(() => window.showGameOver(score, levels[level] || "Normal"), 500);
                       return [];
                     }
                   }
                   
                   const newQuestion = generateQuestion(levels[level]);
-        setTimeout(() => { document.getElementById('answer')?.focus() || document.getElementById('userAnswer')?.focus(); }, 50);
                   setQuestion(newQuestion);
                   spawnEnemies(newQuestion.answer);
                   return [];
@@ -310,7 +279,6 @@
                 // Wait a bit before spawning new question
                 setTimeout(() => {
                   const newQuestion = generateQuestion(levels[level]);
-        setTimeout(() => { document.getElementById('answer')?.focus() || document.getElementById('userAnswer')?.focus(); }, 50);
                   setQuestion(newQuestion);
                   spawnEnemies(newQuestion.answer);
                   setIsMoving(false);
@@ -344,16 +312,7 @@
                     </button>
                   </div>
                   
-                  
-        <!-- Descripción del juego -->
-        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8">
-          <h3 class="text-2xl font-bold text-blue-900 mb-3 flex items-center">
-            <span class="text-3xl mr-2">ℹ️</span>
-            Sobre este juego
-          </h3>
-          <p id="gameDescription" class="text-gray-700 text-lg leading-relaxed"></p>
-        </div>
-<h2 className="text-4xl font-bold mb-8 text-center">Invasores Matemáticos 🚀</h2>
+                  <h2 className="text-4xl font-bold mb-8 text-center">Invasores Matemáticos 🚀</h2>
                   <p className="text-xl text-center mb-8">¿Qué quieres practicar?</p>
                   
                   <div className="grid md:grid-cols-2 gap-6">
@@ -667,184 +626,27 @@
     </script>
 
 
-
-
-    <!-- Pantalla de Game Over -->
-    <div id="gameOverScreen" class="hidden fixed overflow-y-auto inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
-        <div class="max-w-2xl w-full max-h-screen overflow-y-auto my-4 bg-white rounded-3xl p-8 shadow-2xl">
-            <div class="text-center mb-6">
-                <div class="text-6xl mb-4">🎮</div>
-                <h1 class="text-5xl font-bold text-red-600 mb-4">GAME OVER</h1>
-                <div class="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-6 mb-6">
-                    <div class="text-4xl font-bold text-gray-800 mb-2">🎯 Puntuación Final</div>
-                    <div class="text-6xl font-bold text-blue-600" id="finalScore">0</div>
-                </div>
-            </div>
-
-            <!-- Formulario de nombre -->
-            <div class="bg-yellow-50 border-4 border-yellow-400 rounded-xl p-6 mb-6">
-                <h2 class="text-2xl font-bold text-yellow-800 mb-4">🏆 ¡Guarda tu récord!</h2>
-                <input 
-                    type="text" 
-                    id="playerName" 
-                    maxlength="15"
-                    class="w-full text-2xl font-bold text-center border-4 border-yellow-500 rounded-xl p-3 mb-4 uppercase"
-                    placeholder="TU NOMBRE"
-                >
-                <button 
-                    onclick="saveGameScore()" 
-                    class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold text-xl py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition"
-                >
-                    💾 GUARDAR PUNTUACIÓN
-                </button>
-            </div>
-
-            <!-- Ranking -->
-            <div id="rankingSection" class="hidden">
-                <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 mb-6">
-                    <h2 class="text-3xl font-bold text-purple-800 mb-4">📊 Tu Posición</h2>
-                    <div id="playerRankInfo" class="text-2xl font-bold text-gray-800 mb-4"></div>
-                    <div id="topScoresEnd" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                </div>
-            </div>
-
-            <div class="flex gap-4 justify-center flex-wrap">
-                <button onclick="document.getElementById('gameOverScreen').classList.add('hidden'); location.reload();" class="bg-gray-500 hover:bg-gray-600 text-white font-bold px-6 py-3 rounded-xl text-lg">
-                    🗙 Cerrar
-                </button>
-                <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 rounded-xl text-xl">
-                    🔄 Jugar de Nuevo
-                </button>
-                <a href="index.html" class="bg-gray-500 hover:bg-gray-600 text-white font-bold px-8 py-4 rounded-xl text-xl inline-block">
-                    🏠 Inicio
-                </a>
-            </div>
-        </div>
-    </div>
-
 <script>
-// ===== SISTEMA DE RANKING CON FIREBASE =====
-// useFirebase ahora es global desde firebase-config.js
-const GAME_NAME = 'invasores-matematicos';
-
-window.addEventListener('load', async function() {
-    if (typeof initFirebase === 'function') {
-        useFirebase = await initFirebase(GAME_NAME);
-        await loadInitialScores();
-    }
-});
-
-async function loadInitialScores() {
-    const startScores = document.getElementById('topScoresStart');
-    if (startScores) {
-        await displayTopScores('topScoresStart');
-    }
-}
-
-async function displayTopScores(containerId, highlightName = null, highlightScore = null) {
-    let scores = [];
-    
-    if (useFirebase && typeof getTopScoresFromFirebase === 'function') {
-        scores = await getTopScoresFromFirebase(100);
-    } else {
-        scores = JSON.parse(localStorage.getItem(`scores_${window.GAME_NAME}`) || '[]');
-    }
-    
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    if (scores.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center py-4">No hay récords aún. ¡Sé el primero!</p>';
-        return;
-    }
-    
-    const top10 = scores.slice(0, 10);
-    container.innerHTML = top10.map((score, index) => {
-        const isHighlight = score.name === highlightName && score.score === highlightScore;
-        const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-        const date = score.date ? new Date(score.date).toLocaleDateString('es-ES') : 'Hoy';
-        
-        return `
-            <div class="flex justify-between items-center p-3 rounded-lg ${isHighlight ? 'bg-yellow-200 border-4 border-yellow-500' : 'bg-white'} shadow mb-2">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl font-bold w-12">${rankEmoji}</span>
-                    <div>
-                        <div class="font-bold text-lg ${isHighlight ? 'text-yellow-800' : 'text-gray-800'}">${score.name}</div>
-                        <div class="text-sm text-gray-600">${score.level || 'Normal'} • ${date}</div>
-                    </div>
-                </div>
-                <div class="text-2xl font-bold ${isHighlight ? 'text-yellow-800' : 'text-blue-600'}">${score.score}</div>
-            </div>
-        `;
-    }).join('');
-}
-
-async function savePlayerScore(playerName, finalScore, levelName = 'Normal') {
-    if (!playerName) {
-        alert('Por favor ingresa tu nombre');
-        return false;
-    }
-    
-    const scoreData = {
-        name: playerName.substring(0, 15).toUpperCase(),
-        score: parseInt(finalScore),
-        level: levelName,
-        date: new Date().toISOString()
-    };
-    
-    if (useFirebase && typeof saveScoreToFirebase === 'function') {
-        await saveScoreToFirebase(scoreData.name, scoreData.score, scoreData.level, GAME_NAME);
-    } else {
-        let scores = JSON.parse(localStorage.getItem(`scores_${window.GAME_NAME}`) || '[]');
-        scores.push(scoreData);
-        scores.sort((a, b) => b.score - a.score);
-        scores = scores.slice(0, 100);
-        localStorage.setItem(`scores_${window.GAME_NAME}`, JSON.stringify(scores));
-    }
-    
-    return true;
-}
-
-async function displayPlayerRank(playerName, playerScore) {
-    let scores = [];
-    if (useFirebase && typeof getTopScoresFromFirebase === 'function') {
-        scores = await getTopScoresFromFirebase(100);
-    } else {
-        scores = JSON.parse(localStorage.getItem(`scores_${window.GAME_NAME}`) || '[]');
-    }
-    
-    const playerRank = scores.findIndex(s => s.name === playerName && s.score === playerScore) + 1;
-    
-    const rankInfo = document.getElementById('playerRankInfo');
-    if (rankInfo) {
-        rankInfo.innerHTML = `
-            <div class="text-4xl mb-2">🎖️</div>
-            <div>Posición: <span class="text-purple-600">#${playerRank}</span> de ${scores.length}</div>
-        `;
-    }
-    
-    await displayTopScores('topScoresEnd', playerName, playerScore);
-    
-    const rankingSection = document.getElementById('rankingSection');
-    if (rankingSection) {
-        rankingSection.classList.remove('hidden');
-    }
-}
+  const REDES_SOCIALES = {
+    instagram: "https://instagram.com/academiadivertida",
+    facebook: "https://facebook.com/academiadivertida",
+    youtube: "https://youtube.com/@academiadivertida",
+    amazon: "https://amazon.com/author/academiadivertida"
+  };
 </script>
-
 
 <footer class="bg-gray-900 text-white py-8 mt-auto">
   <div class="max-w-6xl mx-auto px-4">
     <div class="flex justify-center gap-6 mb-6">
-      <!--  <a id="link-instagram" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Instagram">
+      <a id="link-instagram" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Instagram">
         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-      </a> -->
+      </a>
       <a id="link-facebook" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Facebook">
         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-      </a> -->
-      <!-- <a id="link-youtube" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="YouTube">
+      </a>
+      <a id="link-youtube" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="YouTube">
         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-      </a> -->
+      </a>
       <a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros">
         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg>
       </a>
@@ -856,8 +658,6 @@ async function displayPlayerRank(playerName, playerScore) {
       <span>|</span>
       <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a>
       <span>|</span>
-        <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
-        <span>|</span>
       <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
     </div>
     <div class="text-center text-sm text-gray-500">
@@ -865,177 +665,24 @@ async function displayPlayerRank(playerName, playerScore) {
     </div>
   </div>
 </footer>
-
-
-    <script>
-    // ===== FUNCIONES DE RANKING =====
-    let currentFinalScore = 0;
-    let currentLevel = 'Normal';
-
-    async function saveGameScore() {
-        const playerName = document.getElementById('playerName')?.value?.trim().toUpperCase();
-        
-        if (!playerName) {
-            alert('Por favor ingresa tu nombre');
-            return;
-        }
-        
-        // Intentar obtener la puntuación de diferentes fuentes
-        const score = currentFinalScore || 
-                     (typeof gameState !== 'undefined' ? gameState.score : 0) ||
-                     (typeof score !== 'undefined' ? score : 0) ||
-                     0;
-        
-        // Intentar obtener el nivel de diferentes fuentes
-        const level = currentLevel ||
-                     (typeof gameState !== 'undefined' && gameState.level ? 
-                      (typeof levelConfig !== 'undefined' ? levelConfig[gameState.level]?.name : gameState.level) : 'Normal');
-        
-        console.log('💾 Guardando puntuación:', { playerName, score, level, game: GAME_NAME });
-        
-        // Guardar usando Firebase (función global definida en el script de inicialización)
-        try {
-            const saved = await savePlayerScore(playerName, score, level);
-            
-            if (saved !== false) {
-                console.log('✅ Puntuación guardada correctamente');
-                await displayPlayerRank(playerName, score);
-                
-                // Deshabilitar botón
-                const saveButton = document.querySelector('button[onclick="saveGameScore()"]');
-                if (saveButton) saveButton.disabled = true;
-                document.getElementById('playerName').disabled = true;
-            } else {
-                console.warn('⚠️ No se pudo guardar en Firebase, guardado en localStorage');
-            }
-        } catch (error) {
-            console.error('❌ Error al guardar:', error);
-            alert('Error al guardar la puntuación. Inténtalo de nuevo.');
-        }
-    }
-
-    function showGameOver(score, level = 'Normal') {
-        currentFinalScore = score;
-        currentLevel = level;
-        
-        console.log('🎮 Game Over:', { score, level });
-        
-        document.getElementById('finalScore').textContent = score.toLocaleString();
-        document.getElementById('gameOverScreen').classList.remove('hidden');
-        
-        // Auto-focus en el input
-        setTimeout(() => {
-            document.getElementById('playerName')?.focus();
-        }, 100);
-    }
-
-    // Permitir guardar con Enter
-    document.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && !document.getElementById('gameOverScreen').classList.contains('hidden')) {
-            saveGameScore();
-        }
-    });
-    
 <script>
-// ===== CARGAR CONFIGURACIÓN Y RANKINGS =====
-(function() {
-  const GAME_NAME_CONFIG = 'invasores-matematicos';
-  const gameConfig = typeof getGameConfig === 'function' ? getGameConfig(GAME_NAME_CONFIG) : {};
-  
-  // Cargar descripción
-  if (gameConfig.description) {
-    const descEl = document.getElementById('gameDescription');
-    if (descEl) descEl.textContent = gameConfig.description;
-  }
-  
-  // Cargar cómo jugar
-  if (gameConfig.howToPlay) {
-    const howToEl = document.getElementById('howToPlayContent');
-    if (howToEl) {
-      howToEl.innerHTML = gameConfig.howToPlay.map((step, i) => `
-        <div class="flex items-start">
-          <span class="bg-green-600 text-white rounded-full w-7 h-7 flex items-center justify-center flex-shrink-0 mr-3 font-bold text-sm">${i + 1}</span>
-          <span class="text-gray-700">${step}</span>
-        </div>
-      `).join('');
-    }
-  }
-  
-  // Función para mostrar ranking por nivel
-  window.showLevelRankingStart = async function(level) {
-    const container = document.getElementById('rankingsDisplayStart');
-    if (!container) return;
-    
-    container.innerHTML = '<p class="text-gray-500 text-center py-4">Cargando...</p>';
-    
-    let allScores = [];
-    const gameName = window.GAME_NAME || 'invasores-matematicos';
-    
-    try {
-      if (typeof useFirebase !== 'undefined' && useFirebase && typeof getTopScoresFromFirebase === 'function') {
-        allScores = await getTopScoresFromFirebase(100);
-      } else {
-        allScores = JSON.parse(localStorage.getItem(`scores_${gameName}`) || '[]');
-      }
-    } catch(e) {
-      console.error('Error loading scores:', e);
-    }
-    
-    const levelScores = allScores
-      .filter(s => s.level === level)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
-    
-    // Actualizar tabs
-    document.querySelectorAll('.level-tab').forEach(tab => {
-      if (tab.dataset.level === level) {
-        tab.classList.remove('opacity-70');
-        tab.classList.add('ring-4', 'ring-orange-500', 'scale-105');
-      } else {
-        tab.classList.add('opacity-70');
-        tab.classList.remove('ring-4', 'ring-orange-500', 'scale-105');
+  document.getElementById("year").textContent = new Date().getFullYear();
+  if (typeof REDES_SOCIALES !== "undefined") {
+    const links = {
+      "link-instagram": REDES_SOCIALES.instagram,
+      "link-facebook": REDES_SOCIALES.facebook,
+      "link-youtube": REDES_SOCIALES.youtube,
+      "link-amazon": REDES_SOCIALES.amazon
+    };
+    Object.keys(links).forEach(id => {
+      const element = document.getElementById(id);
+      if (element && links[id]) {
+        element.href = links[id];
+      } else if (element) {
+        element.style.display = "none";
       }
     });
-    
-    if (levelScores.length === 0) {
-      container.innerHTML = `
-        <div class="text-center py-8">
-          <div class="text-5xl mb-3">🎯</div>
-          <p class="text-gray-600 font-semibold">No hay récords en este nivel</p>
-          <p class="text-gray-500 text-sm">¡Sé el primero en jugar!</p>
-        </div>
-      `;
-      return;
-    }
-    
-    container.innerHTML = levelScores.map((score, index) => {
-      const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-      const date = score.date ? new Date(score.date).toLocaleDateString('es-ES') : 'Hoy';
-      const bgColor = index === 0 ? 'bg-yellow-50 border-l-4 border-yellow-400' : 
-                      index === 1 ? 'bg-gray-50 border-l-4 border-gray-400' : 
-                      index === 2 ? 'bg-orange-50 border-l-4 border-orange-400' : 'bg-white';
-      
-      return `
-        <div class="flex justify-between items-center p-4 ${bgColor} rounded-xl shadow-sm hover:shadow-md transition">
-          <div class="flex items-center gap-4">
-            <span class="text-2xl font-bold w-12">${rankEmoji}</span>
-            <div>
-              <div class="font-bold text-lg text-gray-800">${score.name}</div>
-              <div class="text-sm text-gray-600">${date}</div>
-            </div>
-          </div>
-          <div class="text-2xl md:text-3xl font-bold text-blue-600">${score.score}</div>
-        </div>
-      `;
-    }).join('');
-  };
-  
-  // Cargar ranking inicial
-  setTimeout(() => showLevelRankingStart('Fácil'), 300);
-})();
+  }
 </script>
-
-</script>
-
 </body>
 </html>
