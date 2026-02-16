@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jerarquía de Operaciones - Aprende y Juega</title>
-    <meta name="description" content="Aprende la jerarquía de operaciones matemáticas jugando">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="config.js"></script>
     
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F5E13E7QHY"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -25,9 +23,7 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
         }
-        .float-animation {
-            animation: float 3s ease-in-out infinite;
-        }
+        .float-animation { animation: float 3s ease-in-out infinite; }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500">
@@ -37,14 +33,12 @@
         <div class="max-w-3xl w-full">
             <div class="bg-white rounded-3xl p-8 shadow-2xl">
                 
-                <!-- Botón Volver -->
                 <div class="mb-6">
                     <a href="matematicas-menu.html" class="inline-flex items-center text-purple-600 hover:text-purple-800 font-semibold transition">
                         ← Volver a Matemáticas
                     </a>
                 </div>
 
-                <!-- Título -->
                 <div class="text-center mb-8">
                     <div class="text-6xl mb-4 float-animation">🧮</div>
                     <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
@@ -55,7 +49,7 @@
                     </p>
                 </div>
 
-                <!-- SECCIÓN 1: Botones de Nivel -->
+                <!-- SECCIÓN 1: Botones -->
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
                         Elige tu nivel de dificultad
@@ -93,7 +87,7 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 2: Top 10 Rankings -->
+                <!-- SECCIÓN 2: Rankings -->
                 <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 mb-8">
                     <h3 class="text-2xl font-bold text-orange-900 mb-6 text-center flex items-center justify-center">
                         <span class="text-3xl mr-2">🏆</span>
@@ -101,15 +95,9 @@
                     </h3>
                     
                     <div class="flex justify-center gap-2 mb-6 flex-wrap">
-                        <button onclick="showRanking('Fácil')" class="ranking-tab px-6 py-3 rounded-xl bg-green-100 text-green-800 font-bold hover:bg-green-200 transition" data-level="Fácil">
-                            Fácil
-                        </button>
-                        <button onclick="showRanking('Medio')" class="ranking-tab px-6 py-3 rounded-xl bg-yellow-100 text-yellow-800 font-bold hover:bg-yellow-200 transition" data-level="Medio">
-                            Medio
-                        </button>
-                        <button onclick="showRanking('Difícil')" class="ranking-tab px-6 py-3 rounded-xl bg-red-100 text-red-800 font-bold hover:bg-red-200 transition" data-level="Difícil">
-                            Difícil
-                        </button>
+                        <button onclick="showRanking('Fácil')" class="ranking-tab px-6 py-3 rounded-xl bg-green-100 text-green-800 font-bold hover:bg-green-200 transition" data-level="Fácil">Fácil</button>
+                        <button onclick="showRanking('Medio')" class="ranking-tab px-6 py-3 rounded-xl bg-yellow-100 text-yellow-800 font-bold hover:bg-yellow-200 transition" data-level="Medio">Medio</button>
+                        <button onclick="showRanking('Difícil')" class="ranking-tab px-6 py-3 rounded-xl bg-red-100 text-red-800 font-bold hover:bg-red-200 transition" data-level="Difícil">Difícil</button>
                     </div>
 
                     <div id="rankingContainer" class="space-y-2 max-h-96 overflow-y-auto">
@@ -117,17 +105,15 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 3: Descripción + Cómo Jugar (TODO EN UNO) -->
+                <!-- SECCIÓN 3: Descripción + Cómo jugar -->
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
                     <h3 class="text-2xl font-bold text-blue-900 mb-4 flex items-center">
                         <span class="text-3xl mr-2">📚</span>
                         Sobre este juego
                     </h3>
                     
-                    <!-- Descripción -->
                     <p id="gameDescription" class="text-gray-700 text-lg mb-6 leading-relaxed"></p>
                     
-                    <!-- Cómo jugar -->
                     <div class="bg-white bg-opacity-50 rounded-xl p-4">
                         <h4 class="font-bold text-gray-800 mb-3 text-lg">¿Cómo jugar?</h4>
                         <div id="howToPlayContent" class="space-y-2"></div>
@@ -144,17 +130,11 @@
             <div class="bg-white rounded-xl shadow-lg p-4 mb-4">
                 <div class="flex justify-between items-center flex-wrap gap-4">
                     <div class="flex items-center gap-4">
-                        <div class="text-2xl font-bold text-gray-800">
-                            🎯 <span id="score">0</span> pts
-                        </div>
-                        <div class="text-2xl font-bold text-gray-800">
-                            ❤️ <span id="lives">3</span>
-                        </div>
+                        <div class="text-2xl font-bold text-gray-800">🎯 <span id="score">0</span> pts</div>
+                        <div class="text-2xl font-bold text-gray-800">❤️ <span id="lives">3</span></div>
                     </div>
                     <div class="text-xl font-bold text-purple-600" id="currentLevel"></div>
-                    <div class="text-2xl font-bold">
-                        ⏱️ <span id="timeLeft" class="text-green-600">30</span>s
-                    </div>
+                    <div class="text-2xl font-bold">⏱️ <span id="timeLeft" class="text-green-600">30</span>s</div>
                 </div>
             </div>
 
@@ -177,9 +157,7 @@
             </div>
 
             <div class="bg-gray-800 rounded-xl p-4 text-white">
-                <div class="text-lg font-bold text-center">
-                    Progreso de tiempo
-                </div>
+                <div class="text-lg font-bold text-center">Progreso de tiempo</div>
                 <div class="w-full bg-gray-600 rounded-full h-4 mt-2">
                     <div id="progressBar" class="bg-green-500 h-full rounded-full transition-all duration-1000"></div>
                 </div>
@@ -187,7 +165,7 @@
         </div>
     </div>
 
-    <!-- Pantalla Game Over -->
+    <!-- Game Over -->
     <div id="gameOverScreen" class="hidden fixed overflow-y-auto inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl p-8 max-w-md w-full max-h-screen overflow-y-auto my-4">
             <div class="text-center">
@@ -227,31 +205,7 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 mt-8">
-        <div class="max-w-6xl mx-auto px-4">
-            <div class="flex justify-center gap-6 mb-6">
-                <a id="link-amazon" href="" target="_blank" class="hover:scale-110 transform transition">
-                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/></svg>
-                </a>
-            </div>
-            <div class="text-center text-sm text-gray-400 mb-4">
-                <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
-                <span>|</span>
-                <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a>
-                <span>|</span>
-                <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
-                <span>|</span>
-                <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
-            </div>
-            <div class="text-center text-sm text-gray-500">
-                © <span id="year">2026</span> Aprende y Juega 🎓
-            </div>
-        </div>
-    </footer>
-
     <script>
-    // ===== CONFIGURACIÓN =====
     const GAME_NAME = 'jerarquia-operaciones';
     
     const levelConfig = {
@@ -271,7 +225,6 @@
 
     let useFirebase = false;
 
-    // ===== INICIALIZACIÓN =====
     window.addEventListener('load', async function() {
         if (typeof initFirebase === 'function') {
             useFirebase = await initFirebase(GAME_NAME);
@@ -280,16 +233,13 @@
         showRanking('Fácil');
     });
 
-    // ===== CARGAR CONTENIDO DESDE CONFIG.JS =====
     function loadGameContent() {
         const gameConfig = typeof getGameConfig === 'function' ? getGameConfig(GAME_NAME) : {};
         
-        // Descripción
         if (gameConfig.description) {
             document.getElementById('gameDescription').textContent = gameConfig.description;
         }
         
-        // Cómo jugar
         if (gameConfig.howToPlay) {
             document.getElementById('howToPlayContent').innerHTML = gameConfig.howToPlay.map((step, i) => `
                 <div class="flex items-start">
@@ -300,7 +250,6 @@
         }
     }
 
-    // ===== RANKINGS =====
     async function showRanking(level) {
         const container = document.getElementById('rankingContainer');
         container.innerHTML = '<p class="text-gray-500 text-center py-4">Cargando...</p>';
@@ -318,13 +267,12 @@
         
         const levelScores = scores.filter(s => s.level === level).sort((a, b) => b.score - a.score).slice(0, 10);
         
-        // Actualizar tabs
         document.querySelectorAll('.ranking-tab').forEach(tab => {
             if (tab.dataset.level === level) {
-                tab.classList.add('ring-4', 'ring-orange-500', 'scale-105', 'opacity-100');
+                tab.classList.add('ring-4', 'ring-orange-500', 'scale-105');
                 tab.classList.remove('opacity-70');
             } else {
-                tab.classList.remove('ring-4', 'ring-orange-500', 'scale-105', 'opacity-100');
+                tab.classList.remove('ring-4', 'ring-orange-500', 'scale-105');
                 tab.classList.add('opacity-70');
             }
         });
@@ -358,7 +306,6 @@
         }).join('');
     }
 
-    // ===== JUEGO =====
     function startGame(level) {
         gameState.level = level;
         gameState.score = 0;
@@ -501,6 +448,7 @@
             document.querySelector('button[onclick="saveScore()"]').disabled = true;
         } catch(e) {
             console.error('Error saving:', e);
+            document.getElementById('rankDisplay').innerHTML = '<p class="text-red-600 font-bold">❌ Error al guardar</p>';
         }
     }
     </script>
