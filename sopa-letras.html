@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sopa de Letras - Encuentra las Palabras</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    
     <style>
         .cell {
             touch-action: none;
@@ -128,7 +136,7 @@
                     </div>
                 </div>
 
-                <!-- Panel lateral (NUEVO ORDEN) -->
+                <!-- Panel lateral -->
                 <div class="space-y-4 sm:space-y-6">
                     <!-- 1. Botón de pista -->
                     <button onclick="showHint()" class="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold py-4 px-6 rounded-xl hover:from-yellow-500 hover:to-orange-500 transition-all shadow-lg text-sm sm:text-base">
@@ -226,9 +234,32 @@
                 </div>
             </div>
 
+            <!-- Formulario para guardar puntuación -->
+            <div id="save-score-form" class="mb-6">
+                <p class="text-sm text-gray-600 mb-3">Guarda tu puntuación en el ranking:</p>
+                <input 
+                    type="text" 
+                    id="player-name" 
+                    placeholder="Tu nombre" 
+                    maxlength="15"
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none mb-3"
+                />
+                <button 
+                    onclick="saveScore()" 
+                    id="save-btn"
+                    class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold py-3 px-8 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg"
+                >
+                    💾 Guardar Puntuación
+                </button>
+                <p id="save-message" class="text-sm mt-2"></p>
+            </div>
+
             <div class="space-y-3">
                 <button onclick="newGame()" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-3 px-8 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg">
                     🔄 Nuevo Juego
+                </button>
+                <button onclick="showLeaderboard()" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 px-8 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg">
+                    🏆 Ver Ranking
                 </button>
                 <button onclick="backToMenu()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-8 rounded-xl transition-all">
                     🏠 Volver al Menú
@@ -237,7 +268,44 @@
         </div>
     </div>
 
+    <!-- Modal de ranking -->
+    <div id="leaderboard-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full mx-4 transform scale-0 transition-transform duration-500" id="leaderboard-content">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600">
+                    🏆 Ranking Global
+                </h2>
+                <button onclick="closeLeaderboard()" class="text-gray-600 hover:text-gray-800">
+                    ✕
+                </button>
+            </div>
+            
+            <!-- Filtros -->
+            <div class="flex gap-2 mb-4 flex-wrap">
+                <button onclick="filterLeaderboard('all')" class="filter-btn active px-4 py-2 rounded-lg bg-purple-100 text-purple-800 font-semibold text-sm">
+                    Todos
+                </button>
+                <button onclick="filterLeaderboard('facil')" class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-semibold text-sm">
+                    😊 Fácil
+                </button>
+                <button onclick="filterLeaderboard('medio')" class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-semibold text-sm">
+                    🤔 Medio
+                </button>
+                <button onclick="filterLeaderboard('dificil')" class="filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-semibold text-sm">
+                    🔥 Difícil
+                </button>
+            </div>
+
+            <div id="leaderboard-list" class="space-y-2 max-h-96 overflow-y-auto">
+                <p class="text-center text-gray-500 py-8">Cargando ranking...</p>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // ==================== VARIABLES DEL JUEGO ====================
+        const GAME_NAME = 'sopa-letras';
+        
         let wordsData = null;
         let selectedCategory = null;
         let selectedDifficulty = null;
@@ -251,11 +319,11 @@
         let selectedCells = [];
         let startCell = null;
         
-        // Sistema de puntuación
         let score = 1000;
         let startTime = null;
         let timerInterval = null;
         let hintsUsed = 0;
+        let currentFilter = 'all';
 
         const categoryIcons = {
             'animales': '🐾',
@@ -285,7 +353,148 @@
             'dificil': '🔥 Difícil'
         };
 
-        // Cargar datos
+        // ==================== INICIALIZACIÓN ====================
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Inicializar Firebase para este juego
+            await initFirebase(GAME_NAME);
+            loadWordsData();
+        });
+
+        // ==================== FUNCIONES DE FIREBASE ====================
+        async function saveScore() {
+            const playerName = document.getElementById('player-name').value.trim();
+            
+            if (!playerName) {
+                document.getElementById('save-message').textContent = '⚠️ Por favor ingresa tu nombre';
+                document.getElementById('save-message').className = 'text-sm mt-2 text-red-600';
+                return;
+            }
+
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Guardando...';
+
+            // Crear objeto con datos extendidos para sopa de letras
+            const level = `${selectedDifficulty}-${selectedCategory}`;
+            
+            try {
+                // Usar la función del firebase-config.js
+                await savePlayerScore(playerName, score, level);
+                
+                document.getElementById('save-message').textContent = '✅ ¡Puntuación guardada!';
+                document.getElementById('save-message').className = 'text-sm mt-2 text-green-600';
+                document.getElementById('save-score-form').style.display = 'none';
+                
+                // Recargar el leaderboard si está abierto
+                if (!document.getElementById('leaderboard-modal').classList.contains('hidden')) {
+                    loadLeaderboard(currentFilter);
+                }
+            } catch (error) {
+                console.error("Error guardando puntuación:", error);
+                document.getElementById('save-message').textContent = '❌ Error al guardar';
+                document.getElementById('save-message').className = 'text-sm mt-2 text-red-600';
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Guardar Puntuación';
+            }
+        }
+
+        function showLeaderboard() {
+            const modal = document.getElementById('leaderboard-modal');
+            const content = document.getElementById('leaderboard-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.add('scale-100');
+            }, 10);
+            
+            loadLeaderboard('all');
+        }
+
+        function closeLeaderboard() {
+            const modal = document.getElementById('leaderboard-modal');
+            const content = document.getElementById('leaderboard-content');
+            content.classList.remove('scale-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function filterLeaderboard(difficulty) {
+            currentFilter = difficulty;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = 'filter-btn px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-semibold text-sm';
+            });
+            event.target.className = 'filter-btn px-4 py-2 rounded-lg bg-purple-100 text-purple-800 font-semibold text-sm';
+            
+            loadLeaderboard(difficulty);
+        }
+
+        async function loadLeaderboard(difficulty) {
+            document.getElementById('leaderboard-list').innerHTML = 
+                '<p class="text-center text-gray-500 py-8">Cargando ranking...</p>';
+
+            try {
+                // Usar la función del firebase-config.js
+                const allScores = await getTopScoresFromFirebase(100);
+                
+                // Filtrar por dificultad si no es "all"
+                let scores = allScores;
+                if (difficulty !== 'all') {
+                    scores = allScores.filter(s => s.level && s.level.startsWith(difficulty));
+                }
+
+                if (scores.length === 0) {
+                    document.getElementById('leaderboard-list').innerHTML = 
+                        '<p class="text-center text-gray-500 py-8">No hay puntuaciones aún</p>';
+                    return;
+                }
+
+                // Tomar top 20
+                const topScores = scores.slice(0, 20);
+
+                const html = topScores.map((data, index) => {
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                    
+                    // Extraer categoría y dificultad del level
+                    let diffIcon = '📊';
+                    let catIcon = '📚';
+                    if (data.level) {
+                        const parts = data.level.split('-');
+                        if (parts[0] === 'facil') diffIcon = '😊';
+                        else if (parts[0] === 'medio') diffIcon = '🤔';
+                        else if (parts[0] === 'dificil') diffIcon = '🔥';
+                        
+                        if (parts[1] && categoryIcons[parts[1]]) {
+                            catIcon = categoryIcons[parts[1]];
+                        }
+                    }
+                    
+                    return `
+                        <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl font-bold">${medal}</span>
+                                <div>
+                                    <p class="font-bold text-gray-800">${data.name}</p>
+                                    <p class="text-xs text-gray-600">${diffIcon} ${catIcon} ${data.date}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-purple-600">${data.score}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('leaderboard-list').innerHTML = html;
+            } catch (error) {
+                console.error("Error cargando ranking:", error);
+                document.getElementById('leaderboard-list').innerHTML = 
+                    '<p class="text-center text-red-500 py-8">Error al cargar el ranking</p>';
+            }
+        }
+
+        // ==================== FUNCIONES DEL JUEGO ====================
         async function loadWordsData() {
             try {
                 const response = await fetch('palabras-sopa.json');
@@ -338,7 +547,6 @@
             let allWords = [...wordsData.temas[selectedCategory][selectedDifficulty]];
             allWords = shuffleArray(allWords);
             
-            // Configuración según dificultad
             if (selectedDifficulty === 'facil') {
                 GRID_SIZE = 10;
                 WORDS = allWords.slice(0, Math.min(6, allWords.length));
@@ -398,7 +606,6 @@
             const seconds = elapsed % 60;
             document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             
-            // Penalización por tiempo: -1 punto cada 2 segundos
             if (elapsed % 2 === 0) {
                 score = Math.max(0, score - 1);
                 updateScore();
@@ -631,7 +838,6 @@
                 if ((selectedWord === word || reversedWord === word) && !foundWords.has(word)) {
                     foundWords.add(word);
                     
-                    // Bonificación por encontrar palabra
                     score += 100;
                     updateScore();
                     
@@ -682,7 +888,6 @@
             const remainingWords = WORDS.filter(w => !foundWords.has(w));
             if (remainingWords.length === 0) return;
             
-            // Penalización por usar pista
             score = Math.max(0, score - 50);
             hintsUsed++;
             updateScore();
@@ -709,11 +914,17 @@
         function showVictory() {
             stopTimer();
             
-            // Actualizar modal con estadísticas finales
             document.getElementById('final-score').textContent = score;
             document.getElementById('final-time').textContent = document.getElementById('timer').textContent;
             document.getElementById('final-words').textContent = foundWords.size;
             document.getElementById('final-hints').textContent = hintsUsed;
+            
+            // Resetear formulario
+            document.getElementById('player-name').value = '';
+            document.getElementById('save-message').textContent = '';
+            document.getElementById('save-score-form').style.display = 'block';
+            document.getElementById('save-btn').disabled = false;
+            document.getElementById('save-btn').textContent = '💾 Guardar Puntuación';
             
             const modal = document.getElementById('victory-modal');
             const content = document.getElementById('modal-content');
@@ -737,7 +948,6 @@
             foundWords.clear();
             hintsUsed = 0;
             
-            // Reiniciar puntuación según dificultad
             if (selectedDifficulty === 'facil') {
                 score = 1000;
             } else if (selectedDifficulty === 'medio') {
@@ -766,8 +976,6 @@
                 isSelecting = false;
             }
         });
-
-        loadWordsData();
     </script>
 </body>
 </html>
