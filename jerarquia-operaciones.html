@@ -220,11 +220,11 @@
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-8 mt-8">
         <div class="max-w-6xl mx-auto px-4">
-            <div class="flex justify-center gap-6 mb-6">
-                <a id="link-amazon" href="" target="_blank" class="hover:scale-110 transform transition">
-                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/></svg>
-                </a>
+            <!-- Redes sociales - Cargadas desde config.js -->
+            <div id="socialMediaLinks" class="flex justify-center gap-6 mb-6">
+                <!-- Se cargan dinámicamente desde config.js -->
             </div>
+            
             <div class="text-center text-sm text-gray-400 mb-4">
                 <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
                 <span>|</span>
@@ -267,6 +267,7 @@
             useFirebase = await initFirebase(GAME_NAME);
         }
         loadGameContent();
+        loadSocialMedia();
         showRanking('Fácil');
     });
 
@@ -281,6 +282,27 @@
             descSection.style.display = 'block';
         } else {
             descSection.style.display = 'none';
+        }
+    }
+    
+    // ===== CARGAR REDES SOCIALES DESDE CONFIG.JS =====
+    function loadSocialMedia() {
+        // Cargar desde config.js si está disponible
+        if (typeof initSocialMedia === 'function') {
+            initSocialMedia();
+            return;
+        }
+        
+        // Fallback: mostrar enlace por defecto
+        const container = document.getElementById('socialMediaLinks');
+        if (container) {
+            container.innerHTML = `
+                <a href="https://aprendeyjuega.com" target="_blank" class="text-white hover:text-blue-400 transition transform hover:scale-110">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </a>
+            `;
         }
     }
 
