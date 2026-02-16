@@ -202,8 +202,8 @@
     </div>
 
     <!-- Pantalla de Game Over -->
-    <div id="gameOverScreen" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
-        <div class="max-w-2xl w-full bg-white rounded-3xl p-8 shadow-2xl">
+    <div id="gameOverScreen" class="hidden fixed overflow-y-auto inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
+        <div class="max-w-2xl w-full max-h-screen overflow-y-auto my-4 bg-white rounded-3xl p-8 shadow-2xl">
             <div class="text-center mb-6">
                 <div class="text-6xl mb-4">🎮</div>
                 <h1 class="text-5xl font-bold text-red-600 mb-4">GAME OVER</h1>
@@ -240,7 +240,10 @@
                 </div>
             </div>
 
-            <div class="flex gap-4 justify-center mt-6">
+            <div class="flex gap-4 justify-center flex-wrap">
+                <button onclick="document.getElementById('gameOverScreen').classList.add('hidden'); location.reload();" class="bg-gray-500 hover:bg-gray-600 text-white font-bold px-6 py-3 rounded-xl text-lg">
+                    🗙 Cerrar
+                </button>
                 <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 rounded-xl text-xl">
                     🔄 Jugar de Nuevo
                 </button>
@@ -382,6 +385,8 @@
         
         document.getElementById('startScreen').classList.add('hidden');
         document.getElementById('gameScreen').classList.remove('hidden');
+        setTimeout(() => document.getElementById('answer').focus(), 100);
+        setTimeout(() => { document.getElementById('answer')?.focus() || document.getElementById('userAnswer')?.focus(); }, 100);
         document.getElementById('currentLevel').textContent = levelConfig[level].name;
         
         updateDisplay();
@@ -411,6 +416,7 @@
         
         document.getElementById('operation').textContent = operation.display + ' = ?';
         document.getElementById('answer').value = '';
+        document.getElementById('answer').focus();
         document.getElementById('answer').focus();
         document.getElementById('feedback').textContent = '';
         
