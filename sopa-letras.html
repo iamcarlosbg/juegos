@@ -383,6 +383,16 @@
                     <p className="text-xl">¡Encontraste todas las palabras!</p>
                     <div className="flex gap-4 justify-center mt-4 flex-wrap">
                       <button
+                        onClick={() => {
+                          if (typeof window.showGameOver === 'function') {
+                            window.showGameOver(score, difficulty || "Normal");
+                          }
+                        }}
+                        className="bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-bold"
+                      >
+                        💾 Guardar Puntuación
+                      </button>
+                      <button
                         onClick={playAgain}
                         className="bg-white text-green-600 px-6 py-2 rounded-lg font-bold"
                       >
@@ -676,6 +686,8 @@ async function displayPlayerRank(playerName, playerScore) {
       <span>|</span>
       <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a>
       <span>|</span>
+        <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
+        <span>|</span>
       <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
     </div>
     <div class="text-center text-sm text-gray-500">

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puntuaciones - Aprende y Juega</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="config.js"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500">
+    
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-3xl p-6 shadow-2xl mb-8">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h1 class="text-4xl font-bold text-gray-800">🏆 Puntuaciones</h1>
+                <a href="index.html" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-3 rounded-xl transition">
+                    ← Volver al Inicio
+                </a>
+            </div>
+        </div>
+
+        <!-- Selector de Juego -->
+        <div class="bg-white rounded-3xl p-6 shadow-2xl mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Selecciona un juego:</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="gameSelector">
+                <!-- Los juegos se cargarán aquí -->
+            </div>
+        </div>
+
+        <!-- Rankings por Nivel -->
+        <div id="rankingsContainer" class="hidden">
+            <!-- Los rankings se cargarán aquí -->
+        </div>
+
+        <!-- Mensaje inicial -->
+        <div id="initialMessage" class="bg-white rounded-3xl p-8 shadow-2xl text-center">
+            <div class="text-6xl mb-4">🎮</div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                Selecciona un juego para ver las puntuaciones
+            </h2>
+            <p class="text-gray-600">
+                Podrás ver el Top 10 de cada nivel de dificultad
+            </p>
+        </div>
+    </div>
+
+    <script>
+    // ===== CONFIGURACIÓN DE JUEGOS =====
+    const GAMES = [
+        {
+            id: 'jerarquia-operaciones',
+            name: 'Jerarquía de Operaciones',
+            icon: '🧮',
+            color: 'from-purple-400 to-pink-500',
+            levels: ['Fácil', 'Medio', 'Difícil']
+        },
+        {
+            id: 'invasores-matematicos',
+            name: 'Invasores Matemáticos',
+            icon: '🚀',
+            color: 'from-blue-400 to-purple-500',
+            levels: ['Fácil', 'Medio', 'Difícil']
+        },
+        {
+            id: 'completa-numero',
+            name: 'Completa el Número',
+            icon: '❓',
+            color: 'from-green-400 to-blue-500',
+            levels: ['Normal']
+        },
+        {
+            id: 'mayor-menor',
+            name: 'Mayor o Menor',
+            icon: '⚖️',
+            color: 'from-yellow-400 to-orange-500',
+            levels: ['Números hasta 20', 'Operaciones simples', 'Operaciones complejas']
+        },
+        {
+            id: 'sopa-letras',
+            name: 'Sopa de Letras',
+            icon: '🔤',
+            color: 'from-green-400 to-teal-500',
+            levels: ['Normal']
+        },
+        {
+            id: 'seguir-patrones',
+            name: 'Seguir Patrones',
+            icon: '🧩',
+            color: 'from-pink-400 to-red-500',
+            levels: ['Normal']
+        },
+        {
+            id: 'completa-letra',
+            name: 'Completa la Letra',
+            icon: '📝',
+            color: 'from-indigo-400 to-purple-500',
+            levels: ['Normal']
+        },
+        {
+            id: 'practica-escritura',
+            name: 'Práctica de Escritura',
+            icon: '⌨️',
+            color: 'from-teal-400 to-cyan-500',
+            levels: ['Normal']
+        }
+    ];
+
+    let useFirebase = false;
+    let currentGame = null;
+
+    // ===== INICIALIZACIÓN =====
+    window.addEventListener('load', async function() {
+        if (typeof initFirebase === 'function') {
+            useFirebase = await initFirebase('rankings');
+        }
+        renderGameSelector();
+    });
+
+    // ===== RENDERIZAR SELECTOR DE JUEGOS =====
+    function renderGameSelector() {
+        const container = document.getElementById('gameSelector');
+        
+        container.innerHTML = GAMES.map(game => `
+            <button 
+                onclick="loadGameRankings('${game.id}')"
+                class="bg-gradient-to-r ${game.color} text-white font-bold p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition"
+            >
+                <div class="text-5xl mb-2">${game.icon}</div>
+                <div class="text-lg">${game.name}</div>
+            </button>
+        `).join('');
+    }
+
+    // ===== CARGAR RANKINGS DE UN JUEGO =====
+    async function loadGameRankings(gameId) {
+        currentGame = GAMES.find(g => g.id === gameId);
+        if (!currentGame) return;
+
+        // Ocultar mensaje inicial
+        document.getElementById('initialMessage').classList.add('hidden');
+        
+        // Mostrar container de rankings
+        const container = document.getElementById('rankingsContainer');
+        container.classList.remove('hidden');
+        
+        // Mostrar loading
+        container.innerHTML = `
+            <div class="bg-white rounded-3xl p-8 shadow-2xl text-center">
+                <div class="text-6xl mb-4">⏳</div>
+                <h2 class="text-2xl font-bold text-gray-800">Cargando puntuaciones...</h2>
+            </div>
+        `;
+
+        // Cargar todas las puntuaciones del juego
+        let allScores = [];
+        if (useFirebase && typeof getTopScoresFromFirebase === 'function') {
+            allScores = await getTopScoresFromFirebase(1000);
+        } else {
+            allScores = JSON.parse(localStorage.getItem(`scores_${gameId}`) || '[]');
+        }
+
+        // Renderizar rankings por nivel
+        renderRankingsByLevel(allScores);
+    }
+
+    // ===== RENDERIZAR RANKINGS POR NIVEL =====
+    function renderRankingsByLevel(allScores) {
+        const container = document.getElementById('rankingsContainer');
+        
+        container.innerHTML = `
+            <div class="bg-white rounded-3xl p-6 shadow-2xl mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">
+                        ${currentGame.icon} ${currentGame.name}
+                    </h2>
+                    <div class="text-gray-600">
+                        Total: ${allScores.length} partidas
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-${currentGame.levels.length} gap-6">
+                    ${currentGame.levels.map(level => {
+                        const levelScores = allScores
+                            .filter(s => s.level === level)
+                            .sort((a, b) => b.score - a.score)
+                            .slice(0, 10);
+                        
+                        return `
+                            <div class="bg-gradient-to-br ${currentGame.color} rounded-2xl p-6 text-white">
+                                <h3 class="text-2xl font-bold mb-4 text-center">${level}</h3>
+                                <div class="space-y-2">
+                                    ${levelScores.length > 0 ? levelScores.map((score, index) => {
+                                        const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                                        return `
+                                            <div class="bg-white bg-opacity-20 backdrop-blur rounded-lg p-3 flex justify-between items-center">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xl font-bold w-8">${rankEmoji}</span>
+                                                    <div class="text-sm font-semibold">${score.name}</div>
+                                                </div>
+                                                <div class="text-xl font-bold">${score.score}</div>
+                                            </div>
+                                        `;
+                                    }).join('') : `
+                                        <div class="text-center py-8 text-white text-opacity-80">
+                                            <div class="text-4xl mb-2">🎯</div>
+                                            <p>No hay puntuaciones aún</p>
+                                            <p class="text-sm">¡Sé el primero!</p>
+                                        </div>
+                                    `}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+    </script>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8 mt-8">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-center gap-6 mb-6">
+                <a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg>
+                </a>
+            </div>
+            <div class="text-center text-sm text-gray-400 mb-4">
+                <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
+                <span>|</span>
+                <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a>
+                <span>|</span>
+                <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
+                <span>|</span>
+                <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
+            </div>
+            <div class="text-center text-sm text-gray-500">
+                © <span id="year"></span> Aprende y Juega - Academia Divertida 🎓
+            </div>
+        </div>
+    </footer>
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
