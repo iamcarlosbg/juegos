@@ -42,9 +42,9 @@ const SITE_CONFIG = {
   // ===== CONFIGURACIÓN DE JUEGOS =====
   games: {
     // Configuración global para todos los juegos
-    showDescription: true,      // Mostrar descripción del juego
-    showHowToPlay: true,        // Mostrar "Cómo jugar"
-    showTopScores: true,        // Mostrar Top 10 por nivel
+    showDescription: false,      // Mostrar descripción del juego
+    showHowToPlay: false,        // Mostrar "Cómo jugar"
+    showTopScores: false,        // Mostrar Top 10 por nivel
     
     // Configuración específica por juego (sobreescribe la global)
     'jerarquia-operaciones': {
