@@ -143,6 +143,13 @@
             useFirebase = await initFirebase('rankings');
         }
         renderGameSelector();
+        
+        // Cargar el primer juego automáticamente
+        setTimeout(() => {
+            if (GAMES.length > 0) {
+                loadGameRankings(GAMES[0].id);
+            }
+        }, 100);
     });
 
     // ===== RENDERIZAR SELECTOR DE JUEGOS =====
