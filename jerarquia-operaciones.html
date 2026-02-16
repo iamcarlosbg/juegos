@@ -115,7 +115,6 @@
                 <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-6 mb-8">
                   <h3 class="text-2xl font-bold text-green-900 mb-4 flex items-center">
                     <span class="text-3xl mr-2">📚</span>
-                    ¿Cómo jugar?
                   </h3>
                   <div id="howToPlayContent" class="space-y-3"></div>
                 </div>
@@ -126,7 +125,6 @@
                     <span class="text-3xl mr-2">ℹ️</span>
                     Sobre este juego
                   </h3>
-                  <p id="gameDescription" class="text-gray-700 text-lg leading-relaxed"></p>
                 </div>
 
                 <!-- Top 10 por nivel -->
@@ -148,17 +146,11 @@
                     </button>
                   </div>
 
-                  <div id="rankingsDisplayStart" class="space-y-2 max-h-96 overflow-y-auto">
-                    <p class="text-gray-500 text-center py-4">Cargando rankings...</p>
-                  </div>
                 </div>
 
 
         
 
-          <div id="rankingsDisplayStart" class="space-y-2 max-h-96 overflow-y-auto">
-            <p class="text-gray-500 text-center py-4">Cargando rankings...</p>
-          </div>
         </div>
 
 
@@ -166,7 +158,6 @@
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-6">
                     <h3 class="font-bold text-lg text-blue-900 mb-3 flex items-center">
                         <span class="text-2xl mr-2">📚</span>
-                        ¿Cómo jugar?
                     </h3>
                     <div class="space-y-2 text-gray-700 text-sm">
                         <p>🎯 Resuelve operaciones siguiendo el orden: <strong>primero ×, después +</strong></p>
@@ -181,7 +172,6 @@
                 <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6">
                     <h3 class="font-bold text-2xl text-orange-900 mb-4 text-center flex items-center justify-center">
                         <span class="text-3xl mr-2">🏆</span>
-                        Top 10 Jugadores
                     </h3>
                     <div id="topScoresStart" class="space-y-2 max-h-80 overflow-y-auto">
                         <p class="text-gray-500 text-center py-4">Cargando récords...</p>
@@ -253,11 +243,9 @@
             </div>
         </div>
 
-                <!-- Cómo jugar -->
                 <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-6 mb-8">
                   <h3 class="text-2xl font-bold text-green-900 mb-4 flex items-center">
                     <span class="text-3xl mr-2">📚</span>
-                    ¿Cómo jugar?
                   </h3>
                   <div id="howToPlayContent" class="space-y-3"></div>
                 </div>
@@ -266,16 +254,13 @@
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8">
                   <h3 class="text-2xl font-bold text-blue-900 mb-3 flex items-center">
                     <span class="text-3xl mr-2">ℹ️</span>
-                    Sobre este juego
                   </h3>
-                  <p id="gameDescription" class="text-gray-700 text-lg leading-relaxed"></p>
                 </div>
 
                 <!-- Top 10 por nivel -->
                 <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 mb-8">
                   <h3 class="text-2xl font-bold text-orange-900 mb-6 text-center flex items-center justify-center">
                     <span class="text-3xl mr-2">🏆</span>
-                    Top 10 Jugadores
                   </h3>
                   
                   <div class="flex justify-center gap-2 mb-6 flex-wrap">
@@ -290,9 +275,6 @@
                     </button>
                   </div>
 
-                  <div id="rankingsDisplayStart" class="space-y-2 max-h-96 overflow-y-auto">
-                    <p class="text-gray-500 text-center py-4">Cargando rankings...</p>
-                  </div>
                 </div>
 
     </div>
@@ -786,7 +768,11 @@
   };
   
   // Cargar ranking inicial
-  setTimeout(() => showLevelRankingStart('Fácil'), 300);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(() => showLevelRankingStart('Fácil'), 500));
+  } else {
+    setTimeout(() => showLevelRankingStart('Fácil'), 500);
+  }
 })();
 </script>
 
