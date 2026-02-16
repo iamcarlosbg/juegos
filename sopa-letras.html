@@ -67,7 +67,7 @@
                             <span class="text-3xl sm:text-4xl">😊</span>
                             <div>
                                 <p class="text-lg sm:text-xl font-bold">Fácil</p>
-                                <p class="text-xs sm:text-sm text-green-700">Grid 12x12 • 8 palabras</p>
+                                <p class="text-xs sm:text-sm text-green-700">Grid 10x10 • 6 palabras</p>
                             </div>
                         </div>
                         <span class="text-2xl">→</span>
@@ -80,7 +80,7 @@
                             <span class="text-3xl sm:text-4xl">🤔</span>
                             <div>
                                 <p class="text-lg sm:text-xl font-bold">Medio</p>
-                                <p class="text-xs sm:text-sm text-yellow-700">Grid 15x15 • 10 palabras</p>
+                                <p class="text-xs sm:text-sm text-yellow-700">Grid 12x12 • 8 palabras</p>
                             </div>
                         </div>
                         <span class="text-2xl">→</span>
@@ -93,7 +93,7 @@
                             <span class="text-3xl sm:text-4xl">🔥</span>
                             <div>
                                 <p class="text-lg sm:text-xl font-bold">Difícil</p>
-                                <p class="text-xs sm:text-sm text-red-700">Grid 18x18 • 12 palabras</p>
+                                <p class="text-xs sm:text-sm text-red-700">Grid 14x14 • 10 palabras</p>
                             </div>
                         </div>
                         <span class="text-2xl">→</span>
@@ -128,41 +128,66 @@
                     </div>
                 </div>
 
-                <!-- Panel lateral -->
+                <!-- Panel lateral (NUEVO ORDEN) -->
                 <div class="space-y-4 sm:space-y-6">
-                    <!-- Estadísticas -->
+                    <!-- 1. Botón de pista -->
+                    <button onclick="showHint()" class="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold py-4 px-6 rounded-xl hover:from-yellow-500 hover:to-orange-500 transition-all shadow-lg text-sm sm:text-base">
+                        💡 Pista (-50 pts)
+                    </button>
+
+                    <!-- 2. Lista de palabras -->
+                    <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">📝 Palabras a buscar</h3>
+                        <div id="words-list" class="space-y-2 max-h-64 sm:max-h-80 overflow-y-auto"></div>
+                    </div>
+
+                    <!-- 3. Estadísticas y puntuación -->
                     <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6">
                         <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">📊 Estadísticas</h3>
                         <div class="space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600 text-sm sm:text-base">Encontradas:</span>
-                                <span id="found-count" class="text-xl sm:text-2xl font-bold text-green-600">0</span>
+                            <!-- Puntuación destacada -->
+                            <div class="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-3 mb-2">
+                                <div class="text-center">
+                                    <p class="text-xs text-gray-600 mb-1">Puntuación</p>
+                                    <p id="score" class="text-3xl font-bold text-purple-600">1000</p>
+                                </div>
                             </div>
+
+                            <!-- Tiempo -->
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-600 text-sm sm:text-base">Restantes:</span>
-                                <span id="remaining-count" class="text-xl sm:text-2xl font-bold text-blue-600">0</span>
+                                <span class="text-gray-600 text-sm sm:text-base">⏱️ Tiempo:</span>
+                                <span id="timer" class="text-lg sm:text-xl font-bold text-blue-600">0:00</span>
                             </div>
+
+                            <!-- Encontradas -->
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 text-sm sm:text-base">✅ Encontradas:</span>
+                                <span id="found-count" class="text-lg sm:text-xl font-bold text-green-600">0</span>
+                            </div>
+
+                            <!-- Restantes -->
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 text-sm sm:text-base">🔍 Restantes:</span>
+                                <span id="remaining-count" class="text-lg sm:text-xl font-bold text-orange-600">0</span>
+                            </div>
+
+                            <!-- Pistas usadas -->
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 text-sm sm:text-base">💡 Pistas:</span>
+                                <span id="hints-used" class="text-lg sm:text-xl font-bold text-yellow-600">0</span>
+                            </div>
+
+                            <!-- Barra de progreso -->
                             <div class="w-full bg-gray-200 rounded-full h-3 sm:h-4 overflow-hidden">
                                 <div id="progress-bar" class="bg-gradient-to-r from-green-400 to-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Lista de palabras -->
-                    <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6">
-                        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">📝 Palabras</h3>
-                        <div id="words-list" class="space-y-2 max-h-64 sm:max-h-96 overflow-y-auto"></div>
-                    </div>
-
-                    <!-- Botones -->
-                    <div class="space-y-3">
-                        <button onclick="newGame()" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg text-sm sm:text-base">
-                            🔄 Nuevo Juego
-                        </button>
-                        <button onclick="showHint()" class="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold py-3 px-6 rounded-xl hover:from-yellow-500 hover:to-orange-500 transition-all shadow-lg text-sm sm:text-base">
-                            💡 Pista
-                        </button>
-                    </div>
+                    <!-- Botón nuevo juego -->
+                    <button onclick="newGame()" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg text-sm sm:text-base">
+                        🔄 Nuevo Juego
+                    </button>
                 </div>
             </div>
         </div>
@@ -175,9 +200,32 @@
             <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-4">
                 ¡Felicitaciones!
             </h2>
-            <p class="text-gray-600 text-base sm:text-lg mb-6">
+            <p class="text-gray-600 text-base sm:text-lg mb-4">
                 ¡Has encontrado todas las palabras!
             </p>
+            
+            <!-- Resumen de puntuación -->
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 mb-6">
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-600">Puntuación Final</p>
+                        <p id="final-score" class="text-2xl font-bold text-purple-600">1000</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Tiempo</p>
+                        <p id="final-time" class="text-2xl font-bold text-blue-600">0:00</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Palabras</p>
+                        <p id="final-words" class="text-xl font-bold text-green-600">0</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Pistas usadas</p>
+                        <p id="final-hints" class="text-xl font-bold text-yellow-600">0</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="space-y-3">
                 <button onclick="newGame()" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-3 px-8 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg">
                     🔄 Nuevo Juego
@@ -193,7 +241,7 @@
         let wordsData = null;
         let selectedCategory = null;
         let selectedDifficulty = null;
-        let GRID_SIZE = 15;
+        let GRID_SIZE = 10;
         let WORDS = [];
         
         let grid = [];
@@ -202,6 +250,12 @@
         let isSelecting = false;
         let selectedCells = [];
         let startCell = null;
+        
+        // Sistema de puntuación
+        let score = 1000;
+        let startTime = null;
+        let timerInterval = null;
+        let hintsUsed = 0;
 
         const categoryIcons = {
             'animales': '🐾',
@@ -263,11 +317,9 @@
         function selectCategory(category) {
             selectedCategory = category;
             
-            // Actualizar pantalla de dificultad
             document.getElementById('selected-category-icon').textContent = categoryIcons[category];
             document.getElementById('selected-category-name').textContent = categoryNames[category];
             
-            // Cambiar a pantalla de dificultad
             document.getElementById('category-screen').classList.add('hidden');
             document.getElementById('difficulty-screen').classList.remove('hidden');
         }
@@ -283,18 +335,23 @@
         }
 
         function startGame() {
-            // Obtener todas las palabras de la categoría y dificultad
             let allWords = [...wordsData.temas[selectedCategory][selectedDifficulty]];
-            
-            // MEZCLAR las palabras de forma aleatoria
             allWords = shuffleArray(allWords);
             
-            // Seleccionar número de palabras según dificultad
-            const numWords = selectedDifficulty === 'facil' ? 8 : selectedDifficulty === 'medio' ? 10 : 12;
-            WORDS = allWords.slice(0, Math.min(numWords, allWords.length));
-            
-            // Ajustar tamaño de grid según dificultad
-            GRID_SIZE = selectedDifficulty === 'facil' ? 12 : selectedDifficulty === 'medio' ? 15 : 18;
+            // Configuración según dificultad
+            if (selectedDifficulty === 'facil') {
+                GRID_SIZE = 10;
+                WORDS = allWords.slice(0, Math.min(6, allWords.length));
+                score = 1000;
+            } else if (selectedDifficulty === 'medio') {
+                GRID_SIZE = 12;
+                WORDS = allWords.slice(0, Math.min(8, allWords.length));
+                score = 1500;
+            } else {
+                GRID_SIZE = 14;
+                WORDS = allWords.slice(0, Math.min(10, allWords.length));
+                score = 2000;
+            }
             
             document.getElementById('category-icon').textContent = categoryIcons[selectedCategory];
             document.getElementById('current-category').textContent = categoryNames[selectedCategory];
@@ -307,6 +364,7 @@
         }
 
         function backToMenu() {
+            stopTimer();
             document.getElementById('game-panel').classList.add('hidden');
             document.getElementById('category-screen').classList.remove('hidden');
             foundWords.clear();
@@ -322,14 +380,41 @@
             return newArray;
         }
 
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Penalización por tiempo: -1 punto cada 2 segundos
+            if (elapsed % 2 === 0) {
+                score = Math.max(0, score - 1);
+                updateScore();
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
         function createGrid() {
             grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(''));
             wordPositions = [];
             
-            // MEZCLAR palabras antes de colocarlas para más aleatoriedad
             const shuffledWords = shuffleArray(WORDS);
             
-            // Colocar palabras
             shuffledWords.forEach(word => {
                 let placed = false;
                 let attempts = 0;
@@ -347,7 +432,6 @@
                 }
             });
             
-            // Rellenar espacios vacíos con letras aleatorias
             const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             for (let i = 0; i < GRID_SIZE; i++) {
                 for (let j = 0; j < GRID_SIZE; j++) {
@@ -360,14 +444,8 @@
 
         function canPlaceWord(word, row, col, direction) {
             const directions = [
-                [0, 1],   // horizontal derecha
-                [1, 0],   // vertical abajo
-                [1, 1],   // diagonal abajo-derecha
-                [-1, 1],  // diagonal arriba-derecha
-                [0, -1],  // horizontal izquierda
-                [-1, 0],  // vertical arriba
-                [-1, -1], // diagonal arriba-izquierda
-                [1, -1]   // diagonal abajo-izquierda
+                [0, 1], [1, 0], [1, 1], [-1, 1],
+                [0, -1], [-1, 0], [-1, -1], [1, -1]
             ];
             
             const [dx, dy] = directions[direction];
@@ -413,12 +491,11 @@
             gridElement.className = 'grid gap-0.5 sm:gap-1 select-none';
             gridElement.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
             
-            // Tamaño de celda adaptativo
-            const cellSize = GRID_SIZE <= 12 
-                ? 'w-7 h-7 sm:w-9 sm:h-9 text-sm sm:text-lg' 
-                : GRID_SIZE <= 15 
-                ? 'w-6 h-6 sm:w-8 sm:h-8 text-xs sm:text-base' 
-                : 'w-5 h-5 sm:w-7 sm:h-7 text-xs sm:text-sm';
+            const cellSize = GRID_SIZE <= 10 
+                ? 'w-8 h-8 sm:w-10 sm:h-10 text-sm sm:text-lg' 
+                : GRID_SIZE <= 12 
+                ? 'w-7 h-7 sm:w-9 sm:h-9 text-xs sm:text-base' 
+                : 'w-6 h-6 sm:w-8 sm:h-8 text-xs sm:text-sm';
             
             for (let i = 0; i < GRID_SIZE; i++) {
                 for (let j = 0; j < GRID_SIZE; j++) {
@@ -428,12 +505,10 @@
                     cell.dataset.row = i;
                     cell.dataset.col = j;
                     
-                    // Eventos de mouse
                     cell.addEventListener('mousedown', handleMouseDown);
                     cell.addEventListener('mouseenter', handleMouseEnter);
                     cell.addEventListener('mouseup', handleMouseUp);
                     
-                    // Eventos táctiles
                     cell.addEventListener('touchstart', handleTouchStart, { passive: false });
                     cell.addEventListener('touchmove', handleTouchMove, { passive: false });
                     cell.addEventListener('touchend', handleTouchEnd, { passive: false });
@@ -443,7 +518,6 @@
             }
         }
 
-        // Manejo de mouse
         function handleMouseDown(e) {
             e.preventDefault();
             isSelecting = true;
@@ -468,7 +542,6 @@
             clearSelection();
         }
 
-        // Manejo táctil
         function handleTouchStart(e) {
             e.preventDefault();
             const touch = e.touches[0];
@@ -557,6 +630,11 @@
             wordPositions.forEach(({ word, positions }) => {
                 if ((selectedWord === word || reversedWord === word) && !foundWords.has(word)) {
                     foundWords.add(word);
+                    
+                    // Bonificación por encontrar palabra
+                    score += 100;
+                    updateScore();
+                    
                     markWordFound(positions);
                     updateWordsList();
                     updateStats();
@@ -594,6 +672,7 @@
         function updateStats() {
             document.getElementById('found-count').textContent = foundWords.size;
             document.getElementById('remaining-count').textContent = WORDS.length - foundWords.size;
+            document.getElementById('hints-used').textContent = hintsUsed;
             
             const progress = (foundWords.size / WORDS.length) * 100;
             document.getElementById('progress-bar').style.width = progress + '%';
@@ -602,6 +681,12 @@
         function showHint() {
             const remainingWords = WORDS.filter(w => !foundWords.has(w));
             if (remainingWords.length === 0) return;
+            
+            // Penalización por usar pista
+            score = Math.max(0, score - 50);
+            hintsUsed++;
+            updateScore();
+            updateStats();
             
             const randomWord = remainingWords[Math.floor(Math.random() * remainingWords.length)];
             const wordInfo = wordPositions.find(w => w.word === randomWord);
@@ -622,6 +707,14 @@
         }
 
         function showVictory() {
+            stopTimer();
+            
+            // Actualizar modal con estadísticas finales
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-time').textContent = document.getElementById('timer').textContent;
+            document.getElementById('final-words').textContent = foundWords.size;
+            document.getElementById('final-hints').textContent = hintsUsed;
+            
             const modal = document.getElementById('victory-modal');
             const content = document.getElementById('modal-content');
             modal.classList.remove('hidden');
@@ -640,14 +733,28 @@
         }
 
         function newGame() {
+            stopTimer();
             foundWords.clear();
+            hintsUsed = 0;
+            
+            // Reiniciar puntuación según dificultad
+            if (selectedDifficulty === 'facil') {
+                score = 1000;
+            } else if (selectedDifficulty === 'medio') {
+                score = 1500;
+            } else {
+                score = 2000;
+            }
+            
             createGrid();
             renderGrid();
             updateWordsList();
             updateStats();
+            updateScore();
+            startTimer();
+            closeModal();
         }
 
-        // Prevenir selección de texto y comportamientos por defecto
         document.addEventListener('mouseup', () => {
             if (isSelecting) {
                 isSelecting = false;
@@ -660,7 +767,6 @@
             }
         });
 
-        // Inicializar
         loadWordsData();
     </script>
 </body>
