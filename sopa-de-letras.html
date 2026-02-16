@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sopa de Letras - Encuentra las Palabras</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Encabezado -->
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-2">
+                🔍 Sopa de Letras
+            </h1>
+            <p class="text-gray-600 text-lg">¡Encuentra todas las palabras ocultas!</p>
+        </div>
+
+        <!-- Descripción del juego -->
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8">
+            <h3 class="text-2xl font-bold text-blue-900 mb-3 flex items-center">
+                <span class="text-3xl mr-2">ℹ️</span>
+                ¿Cómo jugar?
+            </h3>
+            <ul class="space-y-2 text-gray-700">
+                <li class="flex items-start">
+                    <span class="text-green-500 mr-2">✓</span>
+                    <span>Haz clic en la primera letra de una palabra</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-500 mr-2">✓</span>
+                    <span>Arrastra hasta la última letra (horizontal, vertical o diagonal)</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-500 mr-2">✓</span>
+                    <span>Suelta el ratón para confirmar la selección</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-500 mr-2">✓</span>
+                    <span>¡Encuentra todas las palabras de la lista!</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Panel de juego -->
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- Sopa de letras -->
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-2xl shadow-2xl p-6">
+                    <div id="grid" class="inline-block mx-auto"></div>
+                </div>
+            </div>
+
+            <!-- Panel lateral -->
+            <div class="space-y-6">
+                <!-- Estadísticas -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">📊 Estadísticas</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Encontradas:</span>
+                            <span id="found-count" class="text-2xl font-bold text-green-600">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Restantes:</span>
+                            <span id="remaining-count" class="text-2xl font-bold text-blue-600">0</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                            <div id="progress-bar" class="bg-gradient-to-r from-green-400 to-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de palabras -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">📝 Palabras</h3>
+                    <div id="words-list" class="space-y-2"></div>
+                </div>
+
+                <!-- Botones -->
+                <div class="space-y-3">
+                    <button onclick="newGame()" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg">
+                        🎮 Nuevo Juego
+                    </button>
+                    <button onclick="showHint()" class="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold py-3 px-6 rounded-xl hover:from-yellow-500 hover:to-orange-500 transition-all shadow-lg">
+                        💡 Pista
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de victoria -->
+    <div id="victory-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-md mx-4 text-center transform scale-0 transition-transform duration-500" id="modal-content">
+            <div class="text-6xl mb-4">🎉</div>
+            <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-4">
+                ¡Felicitaciones!
+            </h2>
+            <p class="text-gray-600 text-lg mb-6">
+                ¡Has encontrado todas las palabras!
+            </p>
+            <button onclick="closeModal()" class="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-3 px-8 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg">
+                Continuar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const GRID_SIZE = 12;
+        const WORDS = ['JAVASCRIPT', 'PYTHON', 'HTML', 'CSS', 'REACT', 'NODE', 'ANGULAR', 'VUE'];
+        
+        let grid = [];
+        let foundWords = new Set();
+        let wordPositions = [];
+        let isSelecting = false;
+        let selectedCells = [];
+        let startCell = null;
+
+        function createGrid() {
+            grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(''));
+            wordPositions = [];
+            
+            // Colocar palabras
+            WORDS.forEach(word => {
+                let placed = false;
+                let attempts = 0;
+                
+                while (!placed && attempts < 100) {
+                    const direction = Math.floor(Math.random() * 8);
+                    const row = Math.floor(Math.random() * GRID_SIZE);
+                    const col = Math.floor(Math.random() * GRID_SIZE);
+                    
+                    if (canPlaceWord(word, row, col, direction)) {
+                        placeWord(word, row, col, direction);
+                        placed = true;
+                    }
+                    attempts++;
+                }
+            });
+            
+            // Rellenar espacios vacíos
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    if (grid[i][j] === '') {
+                        grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                    }
+                }
+            }
+        }
+
+        function canPlaceWord(word, row, col, direction) {
+            const directions = [
+                [0, 1],   // horizontal derecha
+                [1, 0],   // vertical abajo
+                [1, 1],   // diagonal abajo-derecha
+                [-1, 1],  // diagonal arriba-derecha
+                [0, -1],  // horizontal izquierda
+                [-1, 0],  // vertical arriba
+                [-1, -1], // diagonal arriba-izquierda
+                [1, -1]   // diagonal abajo-izquierda
+            ];
+            
+            const [dx, dy] = directions[direction];
+            
+            for (let i = 0; i < word.length; i++) {
+                const newRow = row + (dx * i);
+                const newCol = col + (dy * i);
+                
+                if (newRow < 0 || newRow >= GRID_SIZE || newCol < 0 || newCol >= GRID_SIZE) {
+                    return false;
+                }
+                
+                if (grid[newRow][newCol] !== '' && grid[newRow][newCol] !== word[i]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function placeWord(word, row, col, direction) {
+            const directions = [
+                [0, 1], [1, 0], [1, 1], [-1, 1],
+                [0, -1], [-1, 0], [-1, -1], [1, -1]
+            ];
+            
+            const [dx, dy] = directions[direction];
+            const positions = [];
+            
+            for (let i = 0; i < word.length; i++) {
+                const newRow = row + (dx * i);
+                const newCol = col + (dy * i);
+                grid[newRow][newCol] = word[i];
+                positions.push([newRow, newCol]);
+            }
+            
+            wordPositions.push({ word, positions });
+        }
+
+        function renderGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.innerHTML = '';
+            gridElement.className = 'grid gap-1 select-none';
+            gridElement.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
+            
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    const cell = document.createElement('div');
+                    cell.textContent = grid[i][j];
+                    cell.className = 'w-8 h-8 flex items-center justify-center font-bold text-lg bg-gray-100 rounded cursor-pointer hover:bg-blue-100 transition-colors';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    
+                    cell.addEventListener('mousedown', handleMouseDown);
+                    cell.addEventListener('mouseenter', handleMouseEnter);
+                    cell.addEventListener('mouseup', handleMouseUp);
+                    
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        function handleMouseDown(e) {
+            isSelecting = true;
+            startCell = { row: parseInt(e.target.dataset.row), col: parseInt(e.target.dataset.col) };
+            selectedCells = [startCell];
+            updateSelection();
+        }
+
+        function handleMouseEnter(e) {
+            if (!isSelecting) return;
+            
+            const currentCell = { row: parseInt(e.target.dataset.row), col: parseInt(e.target.dataset.col) };
+            selectedCells = getPathCells(startCell, currentCell);
+            updateSelection();
+        }
+
+        function handleMouseUp() {
+            if (!isSelecting) return;
+            
+            isSelecting = false;
+            checkSelection();
+            clearSelection();
+        }
+
+        function getPathCells(start, end) {
+            const cells = [];
+            const dx = Math.sign(end.row - start.row);
+            const dy = Math.sign(end.col - start.col);
+            
+            let current = { ...start };
+            cells.push({ ...current });
+            
+            while (current.row !== end.row || current.col !== end.col) {
+                current.row += dx;
+                current.col += dy;
+                
+                if (current.row < 0 || current.row >= GRID_SIZE || 
+                    current.col < 0 || current.col >= GRID_SIZE) {
+                    break;
+                }
+                
+                cells.push({ ...current });
+            }
+            
+            return cells;
+        }
+
+        function updateSelection() {
+            document.querySelectorAll('#grid > div').forEach(cell => {
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                const isSelected = selectedCells.some(c => c.row === row && c.col === col);
+                
+                if (isSelected) {
+                    cell.classList.add('bg-blue-300');
+                } else if (!cell.classList.contains('bg-green-400')) {
+                    cell.classList.remove('bg-blue-300');
+                }
+            });
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('#grid > div').forEach(cell => {
+                if (!cell.classList.contains('bg-green-400')) {
+                    cell.classList.remove('bg-blue-300');
+                }
+            });
+            selectedCells = [];
+            startCell = null;
+        }
+
+        function checkSelection() {
+            const selectedWord = selectedCells.map(c => grid[c.row][c.col]).join('');
+            const reversedWord = selectedWord.split('').reverse().join('');
+            
+            wordPositions.forEach(({ word, positions }) => {
+                if ((selectedWord === word || reversedWord === word) && !foundWords.has(word)) {
+                    foundWords.add(word);
+                    markWordFound(positions);
+                    updateWordsList();
+                    updateStats();
+                    
+                    if (foundWords.size === WORDS.length) {
+                        setTimeout(showVictory, 500);
+                    }
+                }
+            });
+        }
+
+        function markWordFound(positions) {
+            positions.forEach(([row, col]) => {
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                cell.classList.remove('bg-blue-300');
+                cell.classList.add('bg-green-400');
+            });
+        }
+
+        function updateWordsList() {
+            const listElement = document.getElementById('words-list');
+            listElement.innerHTML = WORDS.map(word => {
+                const found = foundWords.has(word);
+                return `
+                    <div class="flex items-center justify-between p-2 rounded-lg ${found ? 'bg-green-100' : 'bg-gray-100'}">
+                        <span class="${found ? 'line-through text-gray-500' : 'text-gray-800'}">${word}</span>
+                        ${found ? '<span class="text-green-600">✓</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('found-count').textContent = foundWords.size;
+            document.getElementById('remaining-count').textContent = WORDS.length - foundWords.size;
+            
+            const progress = (foundWords.size / WORDS.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function showHint() {
+            const remainingWords = WORDS.filter(w => !foundWords.has(w));
+            if (remainingWords.length === 0) return;
+            
+            const randomWord = remainingWords[Math.floor(Math.random() * remainingWords.length)];
+            const wordInfo = wordPositions.find(w => w.word === randomWord);
+            
+            if (wordInfo) {
+                const firstPos = wordInfo.positions[0];
+                const cell = document.querySelector(`[data-row="${firstPos[0]}"][data-col="${firstPos[1]}"]`);
+                
+                cell.classList.add('bg-yellow-300');
+                setTimeout(() => {
+                    if (!foundWords.has(randomWord)) {
+                        cell.classList.remove('bg-yellow-300');
+                    }
+                }, 2000);
+            }
+        }
+
+        function showVictory() {
+            const modal = document.getElementById('victory-modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('victory-modal');
+            const content = document.getElementById('modal-content');
+            content.classList.remove('scale-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function newGame() {
+            foundWords.clear();
+            createGrid();
+            renderGrid();
+            updateWordsList();
+            updateStats();
+        }
+
+        // Prevenir selección de texto
+        document.addEventListener('mouseup', () => {
+            if (isSelecting) {
+                isSelecting = false;
+            }
+        });
+
+        // Inicializar juego
+        newGame();
+    </script>
+</body>
+</html>
