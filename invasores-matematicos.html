@@ -220,6 +220,7 @@
                     setLives(l => l - 1);
                     if (lives <= 1) {
                       setGameOver(true);
+                setTimeout(() => window.showGameOver(score, levels[level] || "Normal"), 500);
                       return [];
                     }
                   }

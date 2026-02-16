@@ -141,6 +141,7 @@
               
               if (lives <= 1) {
                 setGameOver(true);
+          setTimeout(() => window.showGameOver(score || 0, "Normal"), 300);
               } else {
                 setTimeout(() => {
                   const newQuestion = generateQuestion(levels[level]);
