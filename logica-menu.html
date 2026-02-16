@@ -25,6 +25,29 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="config.js"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F5E13E7QHY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-F5E13E7QHY');
+  
+  // Funciones de tracking para eventos personalizados
+  function trackGameStart(gameName, level) {
+    gtag('event', 'game_start', {'game_name': gameName, 'game_level': level});
+  }
+  function trackScoreSaved(gameName, score, level) {
+    gtag('event', 'score_saved', {'game_name': gameName, 'score': score, 'level': level});
+  }
+  function trackGameOver(gameName, score, level) {
+    gtag('event', 'game_over', {'game_name': gameName, 'final_score': score, 'level': level});
+  }
+  function trackLevelSelect(gameName, level) {
+    gtag('event', 'level_select', {'game_name': gameName, 'level': level});
+  }
+</script>
+
 </head>
 <body class="min-h-screen bg-gradient-to-br from-orange-400 to-orange-600 p-4">
     <div class="max-w-6xl mx-auto">

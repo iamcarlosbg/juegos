@@ -22,6 +22,29 @@
             animation: float 3s ease-in-out infinite;
         }
     </style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F5E13E7QHY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-F5E13E7QHY');
+  
+  // Funciones de tracking para eventos personalizados
+  function trackGameStart(gameName, level) {
+    gtag('event', 'game_start', {'game_name': gameName, 'game_level': level});
+  }
+  function trackScoreSaved(gameName, score, level) {
+    gtag('event', 'score_saved', {'game_name': gameName, 'score': score, 'level': level});
+  }
+  function trackGameOver(gameName, score, level) {
+    gtag('event', 'game_over', {'game_name': gameName, 'final_score': score, 'level': level});
+  }
+  function trackLevelSelect(gameName, level) {
+    gtag('event', 'level_select', {'game_name': gameName, 'level': level});
+  }
+</script>
+
 </head>
 <body class="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500">
     
@@ -230,7 +253,7 @@
 
     <script>
     // ===== SISTEMA DE RANKING CON FIREBASE =====
-    let useFirebase = false;
+    // useFirebase ahora es global desde firebase-config.js
     const GAME_NAME = 'jerarquia-operaciones';
 
     window.addEventListener('load', async function() {
@@ -247,7 +270,7 @@
         if (useFirebase && typeof getTopScoresFromFirebase === 'function') {
             scores = await getTopScoresFromFirebase(100);
         } else {
-            scores = JSON.parse(localStorage.getItem(`scores_${GAME_NAME}`) || '[]');
+            scores = JSON.parse(localStorage.getItem(`scores_${window.GAME_NAME}`) || '[]');
         }
         
         const container = document.getElementById(containerId);
@@ -300,11 +323,11 @@
         if (useFirebase && typeof savePlayerScore === 'function') {
             await savePlayerScore(scoreData.name, scoreData.score, scoreData.level);
         } else {
-            let scores = JSON.parse(localStorage.getItem(`scores_${GAME_NAME}`) || '[]');
+            let scores = JSON.parse(localStorage.getItem(`scores_${window.GAME_NAME}`) || '[]');
             scores.push(scoreData);
             scores.sort((a, b) => b.score - a.score);
             scores = scores.slice(0, 100);
-            localStorage.setItem(`scores_${GAME_NAME}`, JSON.stringify(scores));
+            localStorage.setItem(`scores_${window.GAME_NAME}`, JSON.stringify(scores));
         }
         
         await displayPlayerRank(scoreData.name, scoreData.score);
@@ -317,7 +340,7 @@
         if (useFirebase && typeof getTopScoresFromFirebase === 'function') {
             scores = await getTopScoresFromFirebase(100);
         } else {
-            scores = JSON.parse(localStorage.getItem(`scores_${GAME_NAME}`) || '[]');
+            scores = JSON.parse(localStorage.getItem(`scores_${window.GAME_NAME}`) || '[]');
         }
         
         const playerRank = scores.findIndex(s => s.name === playerName && s.score === playerScore) + 1;

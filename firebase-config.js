@@ -17,10 +17,14 @@ const firebaseConfig = {
 // Inicializar Firebase (se hace automáticamente al cargar el script)
 let db;
 let scoresCollection;
+let useFirebase = false;  // Variable global para saber si Firebase está activo
 
 // Función para inicializar Firebase
 async function initFirebase(gameName) {
   try {
+    // Guardar el nombre del juego globalmente
+    window.GAME_NAME = gameName;
+    
     // Inicializar Firebase
     const app = firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
@@ -28,11 +32,13 @@ async function initFirebase(gameName) {
     // Cada juego tiene su propia colección
     scoresCollection = db.collection(`scores_${gameName}`);
     
-    console.log('✅ Firebase inicializado correctamente');
+    useFirebase = true;
+    console.log('✅ Firebase inicializado correctamente para:', gameName);
     return true;
   } catch (error) {
     console.error('❌ Error al inicializar Firebase:', error);
     console.log('⚠️ Usando modo offline (localStorage)');
+    useFirebase = false;
     return false;
   }
 }
@@ -56,6 +62,19 @@ async function saveScoreToFirebase(playerName, score, level, gameName) {
     // Fallback a localStorage
     saveScoreToLocalStorage(playerName, score, level, gameName);
     return false;
+  }
+}
+
+// Alias para compatibilidad - función que usan los juegos
+async function savePlayerScore(playerName, score, level) {
+  // Obtener el nombre del juego desde la variable global GAME_NAME
+  const gameName = window.GAME_NAME || 'unknown';
+  
+  if (useFirebase && db) {
+    return await saveScoreToFirebase(playerName, score, level, gameName);
+  } else {
+    saveScoreToLocalStorage(playerName, score, level, gameName);
+    return true;
   }
 }
 

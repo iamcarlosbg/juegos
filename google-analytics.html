@@ -1,0 +1,57 @@
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F5E13E7QHY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-F5E13E7QHY');
+  
+  // ===== EVENTOS PERSONALIZADOS =====
+  
+  // Rastrear inicio de juego
+  function trackGameStart(gameName, level) {
+    gtag('event', 'game_start', {
+      'game_name': gameName,
+      'game_level': level
+    });
+    console.log('📊 Analytics: Juego iniciado -', gameName, level);
+  }
+  
+  // Rastrear puntuación guardada
+  function trackScoreSaved(gameName, score, level) {
+    gtag('event', 'score_saved', {
+      'game_name': gameName,
+      'score': score,
+      'level': level
+    });
+    console.log('📊 Analytics: Puntuación guardada -', gameName, score, level);
+  }
+  
+  // Rastrear game over
+  function trackGameOver(gameName, score, level) {
+    gtag('event', 'game_over', {
+      'game_name': gameName,
+      'final_score': score,
+      'level': level
+    });
+    console.log('📊 Analytics: Game Over -', gameName, score);
+  }
+  
+  // Rastrear selección de nivel
+  function trackLevelSelect(gameName, level) {
+    gtag('event', 'level_select', {
+      'game_name': gameName,
+      'level': level
+    });
+    console.log('📊 Analytics: Nivel seleccionado -', gameName, level);
+  }
+  
+  // Rastrear vista de puntuaciones
+  function trackScoresView(gameName) {
+    gtag('event', 'view_scores', {
+      'game_name': gameName
+    });
+    console.log('📊 Analytics: Viendo puntuaciones -', gameName);
+  }
+</script>
