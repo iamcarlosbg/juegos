@@ -126,12 +126,18 @@
             setGameOver(false);
             setBaseTime(10);
             const newQuestion = generateQuestion(levels[selectedLevel]);
-        setTimeout(() => { document.getElementById('answer')?.focus() || document.getElementById('userAnswer')?.focus(); }, 50);
             setQuestion(newQuestion);
             setTimeLeft(10);
             setUserAnswer('');
             setFeedback(null);
           };
+
+          // Auto-focus cuando cambia la pregunta
+          useEffect(() => {
+            if (gameStarted && !gameOver && !feedback && inputRef.current) {
+              inputRef.current.focus();
+            }
+          }, [question, gameStarted, gameOver, feedback]);
 
           const checkAnswer = () => {
             const answer = parseInt(userAnswer);
@@ -151,12 +157,10 @@
               
               setTimeout(() => {
                 const newQuestion = generateQuestion(levels[level]);
-        setTimeout(() => { document.getElementById('answer')?.focus() || document.getElementById('userAnswer')?.focus(); }, 50);
                 setQuestion(newQuestion);
                 setTimeLeft(newBaseTime);
                 setUserAnswer('');
                 setFeedback(null);
-                if (inputRef.current) inputRef.current.focus();
               }, 800);
             } else {
               // Incorrecto
@@ -170,13 +174,11 @@
               } else {
                 setTimeout(() => {
                   const newQuestion = generateQuestion(levels[level]);
-        setTimeout(() => { document.getElementById('answer')?.focus() || document.getElementById('userAnswer')?.focus(); }, 50);
                   setQuestion(newQuestion);
                   setTimeLeft(baseTime);
                   setUserAnswer('');
                   setFeedback(null);
                   setBaseTime(10);
-                  if (inputRef.current) inputRef.current.focus();
                 }, 800);
               }
             }

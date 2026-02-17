@@ -131,7 +131,6 @@
             if (availableWords.length === 0) {
               setUsedWords([]);
               return generateQuestion(selectedLevel);
-        setTimeout(() => { document.getElementById('answer')?.focus() || document.getElementById('userAnswer')?.focus(); }, 50);
             }
 
             const wordData = availableWords[Math.floor(Math.random() * availableWords.length)];
@@ -152,7 +151,8 @@
               word,
               missingIndices,
               missingLetters,
-              totalMissing: missingLetters.length
+              totalMissing: missingLetters.length,
+              categoria: wordData.categoria || 'Palabra'
             };
           };
 
@@ -413,9 +413,14 @@
                   <div className="text-center">
                     <h3 className="text-3xl font-bold text-gray-700 mb-2">¿Qué letras faltan?</h3>
                     {question && (
-                      <p className="text-lg text-gray-600 mb-6">
-                        {foundLetters.length} / {question.totalMissing} letras encontradas
-                      </p>
+                      <>
+                        <div className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full mb-3">
+                          <span className="font-semibold">💡 Pista:</span> {question.categoria}
+                        </div>
+                        <p className="text-lg text-gray-600 mb-6">
+                          {foundLetters.length} / {question.totalMissing} letras encontradas
+                        </p>
+                      </>
                     )}
                     
                     <div className="text-7xl font-bold text-green-600 mb-6 font-mono tracking-widest">
