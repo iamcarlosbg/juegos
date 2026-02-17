@@ -174,54 +174,55 @@
 
           if (!gameStarted && !showThemeSelector) {
             return (
-              <div className="min-h-screen bg-gradient-to-b from-purple-400 to-pink-500 p-4">
-                <div className="max-w-4xl mx-auto text-white">
-                  <a
-                    href="index.html"
-                    className="mb-4 inline-block bg-white text-purple-600 px-4 py-2 rounded-lg font-bold no-underline"
-                  >
-                    🏠 Volver al Menú
-                  </a>
-                  
-                  
-        <!-- Descripción del juego -->
-        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8">
-          <h3 class="text-2xl font-bold text-blue-900 mb-3 flex items-center">
-            <span class="text-3xl mr-2">ℹ️</span>
-            Sobre este juego
-          </h3>
-          <p id="gameDescription" class="text-gray-700 text-lg leading-relaxed"></p>
-        </div>
-<h2 className="text-4xl font-bold mb-8 text-center">Práctica de Escritura ✍️</h2>
-                  <p className="text-xl text-center mb-8">Elige tu nivel:</p>
-                  
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <button
-                      onClick={() => selectDifficulty('facil')}
-                      className="bg-green-500 hover:bg-green-600 rounded-xl p-8"
-                    >
-                      <h3 className="text-3xl font-bold mb-2">😊 Fácil</h3>
-                      <p className="text-sm">Frases cortas</p>
-                      <p className="text-sm">Palabras simples</p>
-                    </button>
-                    
-                    <button
-                      onClick={() => selectDifficulty('medio')}
-                      className="bg-yellow-500 hover:bg-yellow-600 rounded-xl p-8"
-                    >
-                      <h3 className="text-3xl font-bold mb-2">🤔 Medio</h3>
-                      <p className="text-sm">Frases medianas</p>
-                      <p className="text-sm">Vocabulario intermedio</p>
-                    </button>
-                    
-                    <button
-                      onClick={() => selectDifficulty('dificil')}
-                      className="bg-red-500 hover:bg-red-600 rounded-xl p-8"
-                    >
-                      <h3 className="text-3xl font-bold mb-2">🔥 Difícil</h3>
-                      <p className="text-sm">Frases largas</p>
-                      <p className="text-sm">Palabras complejas</p>
-                    </button>
+              <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center p-4">
+                <div className="max-w-3xl w-full">
+                  <div className="bg-white rounded-3xl p-8 shadow-2xl">
+
+                    <div className="mb-6">
+                      <a href="mecanografia-menu.html" className="inline-flex items-center text-purple-600 hover:text-purple-800 font-semibold transition">← Volver a Mecanografía</a>
+                    </div>
+
+                    <div className="text-center mb-8">
+                      <div className="text-6xl mb-4">⌨️</div>
+                      <h1 className="text-4xl font-bold text-gray-800 mb-2">Práctica de Escritura</h1>
+                      <p className="text-lg text-gray-600">¡Mejora tu mecanografía!</p>
+                    </div>
+
+                    <div className="mb-8">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Selecciona tu nivel</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onClick={() => selectDifficulty('facil')} className="group relative overflow-hidden bg-gradient-to-br from-green-400 via-green-500 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 p-6">
+                          <div className="text-center"><div className="text-6xl mb-3 transform group-hover:scale-110 transition-transform duration-300">😊</div><div className="text-2xl font-black mb-2">FÁCIL</div><div className="text-sm font-semibold opacity-90">Frases cortas</div></div>
+                        </button>
+                        <button onClick={() => selectDifficulty('medio')} className="group relative overflow-hidden bg-gradient-to-br from-yellow-400 via-orange-500 to-orange-600 hover:from-yellow-500 hover:to-orange-700 text-white rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 p-6">
+                          <div className="text-center"><div className="text-6xl mb-3 transform group-hover:scale-110 transition-transform duration-300">🤔</div><div className="text-2xl font-black mb-2">MEDIO</div><div className="text-sm font-semibold opacity-90">Frases medianas</div></div>
+                        </button>
+                        <button onClick={() => selectDifficulty('dificil')} className="group relative overflow-hidden bg-gradient-to-br from-red-500 via-pink-600 to-purple-600 hover:from-red-600 hover:to-purple-700 text-white rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 p-6">
+                          <div className="text-center"><div className="text-6xl mb-3 transform group-hover:scale-110 transition-transform duration-300">🔥</div><div className="text-2xl font-black mb-2">DIFÍCIL</div><div className="text-sm font-semibold opacity-90">Frases largas</div></div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 mb-8 shadow-lg border border-orange-100">
+                      <h3 className="text-2xl font-bold text-orange-900 mb-6 text-center">🏆 Top 10 Jugadores</h3>
+                      <div className="flex justify-center gap-2 mb-6 flex-wrap">
+                        {['facil','medio','dificil'].map(lvl => (
+                          <button key={lvl} onClick={() => window.loadRk_practica_escritura(lvl)} id={`rtab-practica-escritura-${lvl}`}
+                            className={`px-6 py-3 rounded-xl font-bold transition-all duration-200 hover:scale-105 shadow-md ${lvl==='facil'?'bg-green-100 text-green-800':lvl==='medio'?'bg-yellow-100 text-yellow-800':'bg-red-100 text-red-800'}`}>
+                            {lvl==='facil'?'Fácil':lvl==='medio'?'Medio':'Difícil'}
+                          </button>
+                        ))}
+                      </div>
+                      <div id="rklist-practica-escritura" className="space-y-2 max-h-72 overflow-y-auto">
+                        <p className="text-gray-500 text-center py-4">Cargando...</p>
+                      </div>
+                    </div>
+
+                    <div id="dsec-practica-escritura" className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 shadow-lg border border-purple-100">
+                      <h3 className="text-2xl font-bold text-blue-900 mb-4">ℹ️ Sobre este juego</h3>
+                      <p id="gdesc-practica-escritura" className="text-gray-700 text-lg leading-relaxed"></p>
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -539,33 +540,17 @@ async function displayPlayerRank(playerName, playerScore) {
 
 <footer class="bg-gray-900 text-white py-8 mt-auto">
   <div class="max-w-6xl mx-auto px-4">
-    <div class="flex justify-center gap-6 mb-6">
-      <!--  <a id="link-instagram" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Instagram">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-      </a> -->
-      <a id="link-facebook" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Facebook">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-      </a> -->
-      <!-- <a id="link-youtube" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="YouTube">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-      </a> -->
-      <a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg>
-      </a>
-    </div>
     <div class="text-center text-sm text-gray-400 mb-4">
       <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
       <span>|</span>
       <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a>
       <span>|</span>
-      <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a>
+      <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
       <span>|</span>
-        <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
-        <span>|</span>
       <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
     </div>
     <div class="text-center text-sm text-gray-500">
-      © <span id="year"></span> Academia Divertida - Aprende Jugando 🎓
+      © 2026 Aprende y Juega 🎓
     </div>
   </div>
 </footer>
@@ -741,5 +726,41 @@ async function displayPlayerRank(playerName, playerScore) {
 
 </script>
 
+
+    <script>
+    window.loadRk_practica_escritura = async function(level) {
+        const c = document.getElementById('rklist-practica-escritura');
+        if (!c) return;
+        c.innerHTML = '<p class="text-gray-500 text-center py-4">Cargando...</p>';
+        let sc = [];
+        try { if (typeof getTopScoresFromFirebase==='function') sc=await getTopScoresFromFirebase(100); else sc=JSON.parse(localStorage.getItem('scores_practica-escritura')||'[]'); } catch(e) {}
+        const fil = sc.filter(s=>s.level===level).sort((a,b)=>b.score-a.score).slice(0,10);
+        ['facil','medio','dificil'].forEach(l=>{ const t=document.getElementById(`rtab-practica-escritura-${l}`); if(t) t.style.outline=l===level?'3px solid #f97316':'none'; });
+        if (!fil.length) { c.innerHTML='<div class="text-center py-8"><p class="text-5xl mb-2">🎯</p><p class="text-gray-500">¡Sé el primero!</p></div>'; return; }
+        c.innerHTML = fil.map((s,i)=>{ const e=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`; const bg=i<3?'bg-yellow-50 border-l-4 border-yellow-400':'bg-white'; const d=s.date?new Date(s.date).toLocaleDateString('es-ES'):'Hoy'; return `<div class="flex justify-between items-center p-3 ${bg} rounded-xl shadow-sm mb-1"><div class="flex items-center gap-2"><span class="text-xl w-8">${e}</span><div><div class="font-bold text-gray-800">${s.name}</div><div class="text-xs text-gray-500">${d}</div></div></div><div class="text-xl font-bold text-blue-600">${s.score}</div></div>`; }).join('');
+    };
+    window.saveRk_practica_escritura = async function(score, level) {
+        const ni=document.getElementById('pname-practica-escritura'); const msg=document.getElementById('smsg-practica-escritura');
+        const name=ni?ni.value.trim().toUpperCase()||'JUGADOR':'JUGADOR';
+        if(msg) msg.innerHTML='<span class="text-blue-600">💾 Guardando...</span>';
+        try {
+            const d={name:name.substring(0,15),score:parseInt(score),level:level,date:new Date().toISOString()};
+            if(typeof saveScoreToFirebase==='function') await saveScoreToFirebase(d.name,d.score,d.level,'practica-escritura');
+            else { let s=JSON.parse(localStorage.getItem('scores_practica-escritura')||'[]'); s.push(d); s.sort((a,b)=>b.score-a.score); localStorage.setItem('scores_practica-escritura',JSON.stringify(s.slice(0,100))); }
+            if(msg) msg.innerHTML='<span class="text-green-600 font-bold">✅ ¡Guardado!</span>';
+            if(ni) ni.disabled=true;
+            const ic=document.getElementById('irank-practica-escritura');
+            if(ic){ let s2=[]; try{if(typeof getTopScoresFromFirebase==='function')s2=await getTopScoresFromFirebase(100);else s2=JSON.parse(localStorage.getItem('scores_practica-escritura')||'[]');}catch(e){} ic.innerHTML=s2.filter(s=>s.level===level).sort((a,b)=>b.score-a.score).slice(0,5).map((s,i)=>{const e=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;const isMe=s.name===name&&s.score===score;return `<div class="flex justify-between p-2 rounded ${isMe?'bg-yellow-100 font-bold':''} text-sm"><span>${e} ${s.name}</span><span class="text-blue-600 font-bold">${s.score}</span></div>`;}).join(''); }
+        } catch(e){ if(msg) msg.innerHTML='<span class="text-red-600">❌ Error</span>'; }
+    };
+    document.addEventListener('DOMContentLoaded',function(){
+        setTimeout(()=>{
+            const cfg=typeof getGameConfig==='function'?getGameConfig('practica-escritura'):{};
+            const sec=document.getElementById('dsec-practica-escritura'); const desc=document.getElementById('gdesc-practica-escritura');
+            if(sec&&desc){ if(cfg.showDescription===false)sec.style.display='none'; else{desc.textContent=cfg.description||'Practica la escritura al teclado con palabras temáticas. ¡Mejora tu velocidad y precisión!';sec.style.display='block';} }
+            window.loadRk_practica_escritura('facil');
+        },600);
+    });
+    </script>
 </body>
 </html>
