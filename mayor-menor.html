@@ -36,6 +36,57 @@
   }
 </script>
 
+
+<script>
+// ===== FUNCIONES DE COMPARTIR EN REDES SOCIALES =====
+// Definidas ANTES de React para que estén disponibles
+window.compartirWhatsApp = function(nombreJuego, score, nivel, urlJuego) {
+  const mensaje = `🎮 ¡Acabo de conseguir ${score} puntos en ${nombreJuego}! 🏆\n\n¿Crees que puedes superarme? ¡Acepta el reto! 👇\n${urlJuego}`;
+  const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+};
+
+window.compartirFacebook = function(urlJuego) {
+  const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlJuego)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+};
+
+window.compartirTwitter = function(nombreJuego, score, urlJuego) {
+  const texto = `🎮 ${score} puntos en ${nombreJuego}! 🔥\n\n¿Puedes superar mi puntuación? ¡Demuéstralo! 💪`;
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(urlJuego)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+};
+
+window.compartirTelegram = function(nombreJuego, score, urlJuego) {
+  const mensaje = `🏆 ¡${score} puntos en ${nombreJuego}!\n\n¿Aceptas el desafío? ¡Juega ahora! 🎯`;
+  const url = `https://t.me/share/url?url=${encodeURIComponent(urlJuego)}&text=${encodeURIComponent(mensaje)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+};
+
+window.copiarEnlace = function(urlJuego, botonId) {
+  navigator.clipboard.writeText(urlJuego).then(() => {
+    const boton = document.getElementById(botonId);
+    if (!boton) return;
+    const textoOriginal = boton.innerHTML;
+    boton.innerHTML = '<span class="text-xl">✅</span> ¡Copiado!';
+    boton.classList.add('bg-green-500');
+    boton.classList.remove('bg-gray-500');
+    setTimeout(() => {
+      boton.innerHTML = textoOriginal;
+      boton.classList.remove('bg-green-500');
+      boton.classList.add('bg-gray-500');
+    }, 2000);
+  }).catch(() => alert('No se pudo copiar. Copia manualmente: ' + urlJuego));
+};
+
+window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
+  const mensaje = `🎯 TE RETO A SUPERAR MI PUNTUACIÓN 🎯\n\nAcabo de hacer ${score} puntos en ${nombreJuego} (nivel ${nivel})\n\n¿Crees que puedes hacerlo mejor?\n\n¡Juega aquí! 👇\n${urlJuego}\n\n¡Que gane el mejor! 🏆`;
+  navigator.clipboard.writeText(mensaje).then(() => {
+    alert('📋 ¡Mensaje copiado!\n\nAhora pégalo donde quieras: WhatsApp, Instagram, TikTok, Discord...\n\n¡Reta a tus amigos! 🎯');
+  }).catch(() => alert('No se pudo copiar automáticamente.\n\nCopia este mensaje:\n\n' + mensaje));
+};
+</script>
+
 </head>
 <body>
     <div id="root"></div>
@@ -981,50 +1032,7 @@ async function displayPlayerRank(playerName, playerScore) {
 
 
 // ===== FUNCIONES DE COMPARTIR EN REDES SOCIALES =====
-window.compartirWhatsApp = function(nombreJuego, score, nivel, urlJuego) {
-  const mensaje = `🎮 ¡Acabo de conseguir ${score} puntos en ${nombreJuego}! 🏆\n\n¿Crees que puedes superarme? ¡Acepta el reto! 👇\n${urlJuego}`;
-  const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-  window.open(url, '_blank', 'width=600,height=400');
-};
 
-window.compartirFacebook = function(urlJuego) {
-  const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlJuego)}`;
-  window.open(url, '_blank', 'width=600,height=400');
-};
-
-window.compartirTwitter = function(nombreJuego, score, urlJuego) {
-  const texto = `🎮 ${score} puntos en ${nombreJuego}! 🔥\n\n¿Puedes superar mi puntuación? ¡Demuéstralo! 💪`;
-  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(urlJuego)}`;
-  window.open(url, '_blank', 'width=600,height=400');
-};
-
-window.compartirTelegram = function(nombreJuego, score, urlJuego) {
-  const mensaje = `🏆 ¡${score} puntos en ${nombreJuego}!\n\n¿Aceptas el desafío? ¡Juega ahora! 🎯`;
-  const url = `https://t.me/share/url?url=${encodeURIComponent(urlJuego)}&text=${encodeURIComponent(mensaje)}`;
-  window.open(url, '_blank', 'width=600,height=400');
-};
-
-window.copiarEnlace = function(urlJuego, botonId) {
-  navigator.clipboard.writeText(urlJuego).then(() => {
-    const boton = document.getElementById(botonId);
-    const textoOriginal = boton.innerHTML;
-    boton.innerHTML = '<span class="text-xl">✅</span> ¡Copiado!';
-    boton.classList.add('bg-green-500');
-    boton.classList.remove('bg-gray-500');
-    setTimeout(() => {
-      boton.innerHTML = textoOriginal;
-      boton.classList.remove('bg-green-500');
-      boton.classList.add('bg-gray-500');
-    }, 2000);
-  }).catch(() => alert('No se pudo copiar. Copia manualmente: ' + urlJuego));
-};
-
-window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
-  const mensaje = `🎯 TE RETO A SUPERAR MI PUNTUACIÓN 🎯\n\nAcabo de hacer ${score} puntos en ${nombreJuego} (nivel ${nivel})\n\n¿Crees que puedes hacerlo mejor?\n\n¡Juega aquí! 👇\n${urlJuego}\n\n¡Que gane el mejor! 🏆`;
-  navigator.clipboard.writeText(mensaje).then(() => {
-    alert('📋 ¡Mensaje copiado!\n\nAhora pégalo donde quieras: WhatsApp, Instagram, TikTok, Discord...\n\n¡Reta a tus amigos! 🎯');
-  }).catch(() => alert('No se pudo copiar automáticamente.\n\nCopia este mensaje:\n\n' + mensaje));
-};
 
 </script>
 </body>
