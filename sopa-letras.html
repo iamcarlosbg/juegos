@@ -1027,8 +1027,6 @@
                 isSelecting = false;
             }
         });
-
-        // ===== FUNCIONES DE COMPARTIR EN REDES SOCIALES =====
         function compartirWhatsApp(nombreJuego, score, nivel, urlJuego) {
           const mensaje = `🎮 ¡Acabo de conseguir ${score} puntos en ${nombreJuego}! 🏆\n\n¿Crees que puedes superarme? ¡Acepta el reto! 👇\n${urlJuego}`;
           const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
@@ -1069,5 +1067,54 @@
           }).catch(() => alert('No se pudo copiar automáticamente.\n\nCopia este mensaje:\n\n' + mensaje));
         }
     </script>
+
+<footer class="bg-gray-900 text-white py-8 mt-auto">
+  <div class="max-w-6xl mx-auto px-4">
+    <div id="socialMediaLinks" class="flex justify-center gap-6 mb-6">
+      <!-- initSocialMedia() las cargará aquí desde config.js -->
+    </div>
+    <div class="text-center text-sm text-gray-400 mb-4">
+      <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
+      <span>|</span>
+      <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a>
+      <span>|</span>
+      <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a>
+      <span>|</span>
+      <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
+      <span>|</span>
+      <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
+    </div>
+    <div class="text-center text-sm text-gray-500">
+      © <span id="year"></span> Academia Divertida - Aprende Jugando 🎓
+    </div>
+  </div>
+</footer>
+
+<script>
+// Cargar redes sociales desde config.js
+if (typeof initSocialMedia === 'function') {
+    initSocialMedia();
+}
+// Actualizar año
+const yearSpan = document.getElementById('year');
+if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
+}
+
+// Función para formatear fechas correctamente
+function formatDate(dateString) {
+    if (!dateString) return 'Hoy';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Hoy';
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    } catch(e) {
+        return 'Hoy';
+    }
+}
+</script>
 </body>
 </html>

@@ -34,7 +34,6 @@
 </script>
 
 <script>
-// ===== FUNCIONES DE COMPARTIR EN REDES SOCIALES =====
 // Definidas ANTES de React para que estén disponibles
 window.compartirWhatsApp = function(nombreJuego, score, nivel, urlJuego) {
   const mensaje = `🎮 ¡Acabo de conseguir ${score} puntos en ${nombreJuego}! 🏆\n\n¿Crees que puedes superarme? ¡Acepta el reto! 👇\n${urlJuego}`;
@@ -508,38 +507,7 @@ window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
 
 
 
-<footer class="bg-gray-900 text-white py-8 mt-auto">
-  <div class="max-w-6xl mx-auto px-4">
-    <div class="flex justify-center gap-6 mb-6">
-      <a id="link-instagram" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Instagram">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-      </a>
-      <a id="link-facebook" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Facebook">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-      </a>
-      <a id="link-youtube" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="YouTube">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-      </a>
-      <a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg>
-      </a>
-    </div>
-    <div class="text-center text-sm text-gray-400 mb-4">
-      <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
-      <span>|</span>
-      <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a>
-      <span>|</span>
-      <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a>
-      <span>|</span>
-        <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
-        <span>|</span>
-      <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
-    </div>
-    <div class="text-center text-sm text-gray-500">
-      © <span id="year"></span> Academia Divertida - Aprende Jugando 🎓
-    </div>
-  </div>
-</footer>
+
 
 
 
@@ -713,35 +681,22 @@ window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
 })();
 </script>
 
-</script>
 
-<footer class="bg-gray-900 text-white py-8 mt-auto">
-  <div class="max-w-6xl mx-auto px-4">
-    <div class="text-center text-sm text-gray-400 mb-4">
-      <a href="index.html" class="hover:text-white transition mx-2">Inicio</a><span>|</span>
-      <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a><span>|</span>
-      <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a><span>|</span>
-      <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
-    </div>
-    <div class="text-center text-sm text-gray-500">© 2026 Aprende y Juega 🎓</div>
-  </div>
-</footer>
 
 <script>
+
+// ==================== INICIALIZACIÓN DE FIREBASE ====================
+window.addEventListener('DOMContentLoaded', async () => {
+    if (typeof initFirebase === 'function') {
+        await initFirebase('completa-numero');
+        console.log('✅ Firebase inicializado para completa-numero');
+    }
+});
+
 window.loadRk_completa_numero = async function(level) {
     const c = document.getElementById('rklist-completa-numero');
     if (!c) return;
     c.innerHTML = '<p class="text-gray-500 text-center py-4">Cargando...</p>';
-    
-    // ESPERAR a que Firebase esté inicializado
-    if (typeof initFirebase === 'function' && !window.firebaseInitialized) {
-        try {
-            await initFirebase('completa-numero');
-            window.firebaseInitialized = true;
-        } catch(e) {
-            console.log('Firebase no disponible, usando localStorage');
-        }
-    }
     
     let sc = [];
     try { if (typeof getTopScoresFromFirebase === 'function') sc = await getTopScoresFromFirebase(100); else sc = JSON.parse(localStorage.getItem('scores_completa-numero') || '[]'); } catch(e) {}
@@ -751,7 +706,7 @@ window.loadRk_completa_numero = async function(level) {
     c.innerHTML = fil.map((s,i) => {
         const e = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
         const bg = i<3?'bg-yellow-50 border-l-4 border-yellow-400':'bg-white';
-        const d = s.date ? new Date(s.date).toLocaleDateString('es-ES') : 'Hoy';
+        const d = s.date ? formatDate(s.date) : 'Hoy';
         return `<div class="flex justify-between items-center p-3 ${bg} rounded-xl shadow-sm mb-1"><div class="flex items-center gap-2"><span class="text-xl w-8">${e}</span><div><div class="font-bold text-gray-800">${s.name}</div><div class="text-xs text-gray-500">${d}</div></div></div><div class="text-xl font-bold text-blue-600">${s.score}</div></div>`;
     }).join('');
 };
@@ -780,15 +735,7 @@ window.saveRk_completa_numero = async function(score, level) {
     } catch(e) { if (msg) msg.innerHTML = '<span class="text-red-600">❌ Error</span>'; }
 };
 
-// ===== INICIALIZAR FIREBASE =====
-window.addEventListener('load', async function() {
-    if (typeof initFirebase === 'function') {
-        await initFirebase('completa-numero');
-        console.log('✅ Firebase inicializado para completa-numero');
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
+addEventListener('DOMContentLoaded', function() {
     setTimeout(async () => {
         // Esperar a que Firebase esté listo
         if (typeof initFirebase === 'function') {
@@ -807,5 +754,54 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+
+<footer class="bg-gray-900 text-white py-8 mt-auto">
+  <div class="max-w-6xl mx-auto px-4">
+    <div id="socialMediaLinks" class="flex justify-center gap-6 mb-6">
+      <!-- initSocialMedia() las cargará aquí desde config.js -->
+    </div>
+    <div class="text-center text-sm text-gray-400 mb-4">
+      <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
+      <span>|</span>
+      <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a>
+      <span>|</span>
+      <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a>
+      <span>|</span>
+      <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
+      <span>|</span>
+      <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
+    </div>
+    <div class="text-center text-sm text-gray-500">
+      © <span id="year"></span> Academia Divertida - Aprende Jugando 🎓
+    </div>
+  </div>
+</footer>
+
+<script>
+// Cargar redes sociales desde config.js
+if (typeof initSocialMedia === 'function') {
+    initSocialMedia();
+}
+// Actualizar año
+const yearSpan = document.getElementById('year');
+if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
+}
+
+// Función para formatear fechas correctamente
+function formatDate(dateString) {
+    if (!dateString) return 'Hoy';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Hoy';
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    } catch(e) {
+        return 'Hoy';
+    }
+}
+</script>
 </body>
 </html>

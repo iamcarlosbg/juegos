@@ -38,7 +38,6 @@
 
 
 <script>
-// ===== FUNCIONES DE COMPARTIR EN REDES SOCIALES =====
 // Definidas ANTES de React para que estén disponibles
 window.compartirWhatsApp = function(nombreJuego, score, nivel, urlJuego) {
   const mensaje = `🎮 ¡Acabo de conseguir ${score} puntos en ${nombreJuego}! 🏆\n\n¿Crees que puedes superarme? ¡Acepta el reto! 👇\n${urlJuego}`;
@@ -594,7 +593,7 @@ window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
         container.innerHTML = filtered.map((s,i) => {
             const emoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
             const bg = i<3?'bg-yellow-50 border-l-4 border-yellow-400':'bg-white';
-            const date = s.date ? new Date(s.date).toLocaleDateString('es-ES') : 'Hoy';
+            const date = s.date ? formatDate(s.date) : 'Hoy';
             return `<div class="flex justify-between items-center p-3 ${bg} rounded-xl shadow-sm mb-1">
                 <div class="flex items-center gap-2">
                     <span class="text-xl w-8">${emoji}</span>
@@ -842,22 +841,7 @@ async function displayPlayerRank(playerName, playerScore) {
 </script>
 
 
-<footer class="bg-gray-900 text-white py-8 mt-auto">
-  <div class="max-w-6xl mx-auto px-4">
-    <div class="text-center text-sm text-gray-400 mb-4">
-      <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
-      <span>|</span>
-      <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a>
-      <span>|</span>
-      <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
-      <span>|</span>
-      <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
-    </div>
-    <div class="text-center text-sm text-gray-500">
-      © 2026 Aprende y Juega 🎓
-    </div>
-  </div>
-</footer>
+
 
 
     <script>
@@ -1030,10 +1014,53 @@ async function displayPlayerRank(playerName, playerScore) {
 
 </script>
 
+<footer class="bg-gray-900 text-white py-8 mt-auto">
+  <div class="max-w-6xl mx-auto px-4">
+    <div id="socialMediaLinks" class="flex justify-center gap-6 mb-6">
+      <!-- initSocialMedia() las cargará aquí desde config.js -->
+    </div>
+    <div class="text-center text-sm text-gray-400 mb-4">
+      <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
+      <span>|</span>
+      <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a>
+      <span>|</span>
+      <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a>
+      <span>|</span>
+      <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
+      <span>|</span>
+      <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
+    </div>
+    <div class="text-center text-sm text-gray-500">
+      © <span id="year"></span> Academia Divertida - Aprende Jugando 🎓
+    </div>
+  </div>
+</footer>
 
-// ===== FUNCIONES DE COMPARTIR EN REDES SOCIALES =====
+<script>
+// Cargar redes sociales desde config.js
+if (typeof initSocialMedia === 'function') {
+    initSocialMedia();
+}
+// Actualizar año
+const yearSpan = document.getElementById('year');
+if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
+}
 
-
+// Función para formatear fechas correctamente
+function formatDate(dateString) {
+    if (!dateString) return 'Hoy';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Hoy';
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    } catch(e) {
+        return 'Hoy';
+    }
+}
 </script>
 </body>
 </html>
