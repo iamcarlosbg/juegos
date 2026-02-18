@@ -769,8 +769,21 @@ window.saveRk_completa_numero = async function(score, level) {
     } catch(e) { if (msg) msg.innerHTML = '<span class="text-red-600">❌ Error</span>'; }
 };
 
+// ===== INICIALIZAR FIREBASE =====
+window.addEventListener('load', async function() {
+    if (typeof initFirebase === 'function') {
+        await initFirebase('completa-numero');
+        console.log('✅ Firebase inicializado para completa-numero');
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
+    setTimeout(async () => {
+        // Esperar a que Firebase esté listo
+        if (typeof initFirebase === 'function') {
+            await initFirebase('completa-numero');
+        }
+        
         const cfg = typeof getGameConfig === 'function' ? getGameConfig('completa-numero') : {};
         const sec = document.getElementById('dsec-completa-numero');
         const desc = document.getElementById('gdesc-completa-numero');

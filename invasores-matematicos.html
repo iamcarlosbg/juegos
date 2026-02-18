@@ -771,8 +771,21 @@ window.saveRkInvasores = async function(score, level) {
     } catch(e) { if (msg) msg.innerHTML = '<span class="text-red-600">❌ Error</span>'; }
 };
 
+// ===== INICIALIZAR FIREBASE =====
+window.addEventListener('load', async function() {
+    if (typeof initFirebase === 'function') {
+        await initFirebase('invasores-matematicos');
+        console.log('✅ Firebase inicializado para invasores-matematicos');
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
+    setTimeout(async () => {
+        // Esperar a que Firebase esté listo
+        if (typeof initFirebase === 'function') {
+            await initFirebase('invasores-matematicos');
+        }
+        
         const cfg = typeof getGameConfig === 'function' ? getGameConfig('invasores-matematicos') : {};
         const sec = document.getElementById('dsec-invasores');
         const desc = document.getElementById('gdesc-invasores');
