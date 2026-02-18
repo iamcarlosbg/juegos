@@ -259,6 +259,45 @@
                 <p id="save-message" class="text-sm mt-2"></p>
             </div>
 
+            <!-- Sección de compartir -->
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-6 border-2 border-purple-200">
+                <h4 class="font-bold text-purple-900 mb-4 text-center flex items-center justify-center gap-2">
+                    <span class="text-2xl">🎉</span>
+                    <span>¡Comparte tu récord!</span>
+                    <span class="text-2xl">🎉</span>
+                </h4>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button onclick="compartirWhatsApp('Sopa de Letras', parseInt(document.getElementById('final-score').textContent), selectedDifficulty || 'normal', window.location.href)" 
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
+                        <span class="text-xl">📱</span> WhatsApp
+                    </button>
+                    <button onclick="compartirFacebook(window.location.href)" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
+                        <span class="text-xl">📘</span> Facebook
+                    </button>
+                    <button onclick="compartirTwitter('Sopa de Letras', parseInt(document.getElementById('final-score').textContent), window.location.href)" 
+                        class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
+                        <span class="text-xl">🐦</span> Twitter
+                    </button>
+                    <button onclick="compartirTelegram('Sopa de Letras', parseInt(document.getElementById('final-score').textContent), window.location.href)" 
+                        class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
+                        <span class="text-xl">✈️</span> Telegram
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="copiarEnlace(window.location.href, 'btn-copiar-sopa')" id="btn-copiar-sopa"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
+                        <span class="text-xl">📋</span> Copiar enlace
+                    </button>
+                    <button onclick="retarAmigo('Sopa de Letras', parseInt(document.getElementById('final-score').textContent), selectedDifficulty || 'normal', window.location.href)" 
+                        class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
+                        <span class="text-xl">🎯</span> Retar amigo
+                    </button>
+                </div>
+            </div>
+
             <div class="space-y-3">
                 <button onclick="newGame()" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-3 px-8 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg">
                     🔄 Nuevo Juego
@@ -988,6 +1027,47 @@
                 isSelecting = false;
             }
         });
+
+        // ===== FUNCIONES DE COMPARTIR EN REDES SOCIALES =====
+        function compartirWhatsApp(nombreJuego, score, nivel, urlJuego) {
+          const mensaje = `🎮 ¡Acabo de conseguir ${score} puntos en ${nombreJuego}! 🏆\n\n¿Crees que puedes superarme? ¡Acepta el reto! 👇\n${urlJuego}`;
+          const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+          window.open(url, '_blank', 'width=600,height=400');
+        }
+        function compartirFacebook(urlJuego) {
+          const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlJuego)}`;
+          window.open(url, '_blank', 'width=600,height=400');
+        }
+        function compartirTwitter(nombreJuego, score, urlJuego) {
+          const texto = `🎮 ${score} puntos en ${nombreJuego}! 🔥\n\n¿Puedes superar mi puntuación? ¡Demuéstralo! 💪`;
+          const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(urlJuego)}`;
+          window.open(url, '_blank', 'width=600,height=400');
+        }
+        function compartirTelegram(nombreJuego, score, urlJuego) {
+          const mensaje = `🏆 ¡${score} puntos en ${nombreJuego}!\n\n¿Aceptas el desafío? ¡Juega ahora! 🎯`;
+          const url = `https://t.me/share/url?url=${encodeURIComponent(urlJuego)}&text=${encodeURIComponent(mensaje)}`;
+          window.open(url, '_blank', 'width=600,height=400');
+        }
+        function copiarEnlace(urlJuego, botonId) {
+          navigator.clipboard.writeText(urlJuego).then(() => {
+            const boton = document.getElementById(botonId);
+            const textoOriginal = boton.innerHTML;
+            boton.innerHTML = '<span class="text-xl">✅</span> ¡Copiado!';
+            boton.classList.add('bg-green-500');
+            boton.classList.remove('bg-gray-500');
+            setTimeout(() => {
+              boton.innerHTML = textoOriginal;
+              boton.classList.remove('bg-green-500');
+              boton.classList.add('bg-gray-500');
+            }, 2000);
+          }).catch(() => alert('No se pudo copiar. Copia manualmente: ' + urlJuego));
+        }
+        function retarAmigo(nombreJuego, score, nivel, urlJuego) {
+          const mensaje = `🎯 TE RETO A SUPERAR MI PUNTUACIÓN 🎯\n\nAcabo de hacer ${score} puntos en ${nombreJuego} (nivel ${nivel})\n\n¿Crees que puedes hacerlo mejor?\n\n¡Juega aquí! 👇\n${urlJuego}\n\n¡Que gane el mejor! 🏆`;
+          navigator.clipboard.writeText(mensaje).then(() => {
+            alert('📋 ¡Mensaje copiado!\n\nAhora pégalo donde quieras: WhatsApp, Instagram, TikTok, Discord...\n\n¡Reta a tus amigos! 🎯');
+          }).catch(() => alert('No se pudo copiar automáticamente.\n\nCopia este mensaje:\n\n' + mensaje));
+        }
     </script>
 </body>
 </html>

@@ -39,6 +39,36 @@ const SITE_CONFIG = {
     firebase: true    // Usar Firebase para rankings
   },
   
+  // ===== COMPARTIR EN REDES SOCIALES =====
+  // Configurar qué botones aparecen cuando se termina un juego
+  shareButtons: {
+    enabled: true,  // Mostrar botones de compartir en Game Over
+    networks: {
+      whatsapp: {
+        enabled: true,
+        message: "🎮 ¡Acabo de conseguir {score} puntos en {game}! 🏆\n\n¿Crees que puedes superarme? ¡Acepta el reto! 👇\n{url}"
+      },
+      facebook: {
+        enabled: true
+      },
+      twitter: {
+        enabled: true,
+        message: "🎮 {score} puntos en {game}! 🔥\n\n¿Puedes superar mi puntuación? ¡Demuéstralo! 💪"
+      },
+      telegram: {
+        enabled: true,
+        message: "🏆 ¡{score} puntos en {game}!\n\n¿Aceptas el desafío? ¡Juega ahora! 🎯"
+      }
+    },
+    copyLink: {
+      enabled: true  // Botón "Copiar enlace"
+    },
+    challenge: {
+      enabled: true,  // Botón "Retar amigo"
+      message: "🎯 TE RETO A SUPERAR MI PUNTUACIÓN 🎯\n\nAcabo de hacer {score} puntos en {game} (nivel {level})\n\n¿Crees que puedes hacerlo mejor?\n\n¡Juega aquí! 👇\n{url}\n\n¡Que gane el mejor! 🏆"
+    }
+  },
+  
   // ===== CONFIGURACIÓN DE JUEGOS =====
   games: {
     // Configuración global para todos los juegos
