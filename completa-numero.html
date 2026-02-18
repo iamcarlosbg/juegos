@@ -685,28 +685,69 @@ window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
 
 <script>
 
-// ==================== INICIALIZACIÓN DE FIREBASE ====================
-window.addEventListener('DOMContentLoaded', async () => {
+<footer class="bg-gray-900 text-white py-8 mt-auto">
+// ===== SISTEMA DE RANKING CON FIREBASE =====
+const GAME_NAME = 'completa-numero';
+
+// useFirebase ya se declara en firebase-config.js
+
+// ===== INICIALIZACIÓN =====
+window.addEventListener('load', async function() {
     if (typeof initFirebase === 'function') {
-        await initFirebase('completa-numero');
-        console.log('✅ Firebase inicializado para completa-numero');
+        useFirebase = await initFirebase(GAME_NAME);
     }
+    loadGameContent();
+    window.loadRk_completa_numero('facil');
 });
 
+// ===== CARGAR CONTENIDO DESDE CONFIG.JS =====
+function loadGameContent() {
+    const gameConfig = typeof getGameConfig === 'function' ? getGameConfig(GAME_NAME) : {};
+    
+    const descSection = document.getElementById('dsec-completa-numero');
+    const descEl = document.getElementById('gdesc-completa-numero');
+    if (descSection && gameConfig.showDescription !== false && gameConfig.description) {
+        if (descEl) descEl.textContent = gameConfig.description;
+        descSection.style.display = 'block';
+    } else if (descSection) {
+        descSection.style.display = 'none';
+    }
+}
+
+// ===== FUNCIONES DE RANKING =====
 window.loadRk_completa_numero = async function(level) {
     const c = document.getElementById('rklist-completa-numero');
     if (!c) return;
     c.innerHTML = '<p class="text-gray-500 text-center py-4">Cargando...</p>';
     
     let sc = [];
-    try { if (typeof getTopScoresFromFirebase === 'function') sc = await getTopScoresFromFirebase(100); else sc = JSON.parse(localStorage.getItem('scores_completa-numero') || '[]'); } catch(e) {}
+    try {
+        if (useFirebase && typeof getTopScoresFromFirebase === 'function') {
+            sc = await getTopScoresFromFirebase(100);
+        } else {
+            sc = JSON.parse(localStorage.getItem(`scores_${GAME_NAME}`) || '[]');
+        }
+    } catch(e) {
+        console.error('Error cargando rankings:', e);
+    }
+    
     const fil = sc.filter(s => s.level === level).sort((a,b) => b.score - a.score).slice(0,10);
-    ['facil','medio','dificil'].forEach(l => { const t = document.getElementById(`rtab-completa-numero-${l}`); if (t) t.style.outline = l === level ? '3px solid #f97316' : 'none'; });
-    if (!fil.length) { c.innerHTML = '<div class="text-center py-8"><p class="text-5xl mb-2">🎯</p><p class="text-gray-500">¡Sé el primero!</p></div>'; return; }
+    
+    // Actualizar tabs
+    ['facil','medio','dificil'].forEach(l => {
+        const t = document.getElementById(`rtab-completa-numero-${l}`);
+        if (t) t.style.outline = l === level ? '3px solid #f97316' : 'none';
+    });
+    
+    if (!fil.length) {
+        c.innerHTML = '<div class="text-center py-8"><p class="text-5xl mb-2">🎯</p><p class="text-gray-500">¡Sé el primero!</p></div>';
+        return;
+    }
+    
     c.innerHTML = fil.map((s,i) => {
         const e = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
         const bg = i<3?'bg-yellow-50 border-l-4 border-yellow-400':'bg-white';
-        const d = s.date ? formatDate(s.date) : 'Hoy';
+        const d = s.date ? (typeof s.date === 'string' ? s.date : new Date(s.date).toLocaleDateString('es-ES')) : 'Hoy';
         return `<div class="flex justify-between items-center p-3 ${bg} rounded-xl shadow-sm mb-1"><div class="flex items-center gap-2"><span class="text-xl w-8">${e}</span><div><div class="font-bold text-gray-800">${s.name}</div><div class="text-xs text-gray-500">${d}</div></div></div><div class="text-xl font-bold text-blue-600">${s.score}</div></div>`;
     }).join('');
 };
@@ -716,46 +757,92 @@ window.saveRk_completa_numero = async function(score, level) {
     const msg = document.getElementById('smsg-completa-numero');
     const name = ni ? ni.value.trim().toUpperCase() || 'JUGADOR' : 'JUGADOR';
     if (msg) msg.innerHTML = '<span class="text-blue-600">💾 Guardando...</span>';
+    
     try {
-        const d = { name: name.substring(0,15), score: parseInt(score), level: level, date: new Date().toISOString() };
-        if (typeof saveScoreToFirebase === 'function') await saveScoreToFirebase(d.name, d.score, d.level, 'completa-numero');
-        else { let s = JSON.parse(localStorage.getItem('scores_completa-numero') || '[]'); s.push(d); s.sort((a,b)=>b.score-a.score); localStorage.setItem('scores_completa-numero', JSON.stringify(s.slice(0,100))); }
+        if (useFirebase && typeof saveScoreToFirebase === 'function') {
+            await saveScoreToFirebase(name, score, level, GAME_NAME);
+        } else {
+            let s = JSON.parse(localStorage.getItem(`scores_${GAME_NAME}`) || '[]');
+            s.push({ name: name.substring(0,15), score: parseInt(score), level: level, date: new Date().toLocaleDateString('es-ES') });
+            s.sort((a,b)=>b.score-a.score);
+            localStorage.setItem(`scores_${GAME_NAME}`, JSON.stringify(s.slice(0,100)));
+        }
+        
         if (msg) msg.innerHTML = '<span class="text-green-600 font-bold">✅ ¡Guardado!</span>';
         if (ni) ni.disabled = true;
+        
+        // Actualizar ranking inline
         const ic = document.getElementById('irank-completa-numero');
         if (ic) {
             let s2 = [];
-            try { if (typeof getTopScoresFromFirebase === 'function') s2 = await getTopScoresFromFirebase(100); else s2 = JSON.parse(localStorage.getItem('scores_completa-numero') || '[]'); } catch(e) {}
+            try {
+                if (useFirebase && typeof getTopScoresFromFirebase === 'function') {
+                    s2 = await getTopScoresFromFirebase(100);
+                } else {
+                    s2 = JSON.parse(localStorage.getItem(`scores_${GAME_NAME}`) || '[]');
+                }
+            } catch(e) {}
+            
             ic.innerHTML = s2.filter(s=>s.level===level).sort((a,b)=>b.score-a.score).slice(0,5).map((s,i) => {
                 const e=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
                 const isMe=s.name===name&&s.score===score;
                 return `<div class="flex justify-between p-2 rounded ${isMe?'bg-yellow-100 font-bold':''} text-sm"><span>${e} ${s.name}</span><span class="text-blue-600 font-bold">${s.score}</span></div>`;
             }).join('');
         }
-    } catch(e) { if (msg) msg.innerHTML = '<span class="text-red-600">❌ Error</span>'; }
+    } catch(e) {
+        if (msg) msg.innerHTML = '<span class="text-red-600">❌ Error</span>';
+        console.error('Error guardando:', e);
+    }
 };
 
-addEventListener('DOMContentLoaded', function() {
-    setTimeout(async () => {
-        // Esperar a que Firebase esté listo
-        if (typeof initFirebase === 'function') {
-            await initFirebase('completa-numero');
-        }
-        
-        const cfg = typeof getGameConfig === 'function' ? getGameConfig('completa-numero') : {};
-        const sec = document.getElementById('dsec-completa-numero');
-        const desc = document.getElementById('gdesc-completa-numero');
-        if (sec && desc) {
-            if (cfg.showDescription === false) sec.style.display = 'none';
-            else { desc.textContent = cfg.description || 'Entrena tu mente buscando el número que falta en cada operación. ¡Crea rachas de aciertos y supera tu récord!'; sec.style.display = 'block'; }
-        }
-        window.loadRk_completa_numero('facil');
-    }, 600);
-});
+// ===== FUNCIONES DE COMPARTIR EN REDES SOCIALES =====
+window.compartirWhatsApp = function(nombreJuego, score, nivel, urlJuego) {
+  const mensaje = `🎮 ¡Acabo de conseguir ${score} puntos en ${nombreJuego}! 🏆\n\n¿Crees que puedes superarme? ¡Acepta el reto! 👇\n${urlJuego}`;
+  const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+};
+
+window.compartirFacebook = function(urlJuego) {
+  const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlJuego)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+};
+
+window.compartirTwitter = function(nombreJuego, score, urlJuego) {
+  const texto = `🎮 ${score} puntos en ${nombreJuego}! 🔥\n\n¿Puedes superar mi puntuación? ¡Demuéstralo! 💪`;
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(urlJuego)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+};
+
+window.compartirTelegram = function(nombreJuego, score, urlJuego) {
+  const mensaje = `🏆 ¡${score} puntos en ${nombreJuego}!\n\n¿Aceptas el desafío? ¡Juega ahora! 🎯`;
+  const url = `https://t.me/share/url?url=${encodeURIComponent(urlJuego)}&text=${encodeURIComponent(mensaje)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+};
+
+window.copiarEnlace = function(urlJuego, botonId) {
+  navigator.clipboard.writeText(urlJuego).then(() => {
+    const boton = document.getElementById(botonId);
+    if (!boton) return;
+    const textoOriginal = boton.innerHTML;
+    boton.innerHTML = '<span class="text-xl">✅</span> ¡Copiado!';
+    boton.classList.add('bg-green-500');
+    boton.classList.remove('bg-gray-500');
+    setTimeout(() => {
+      boton.innerHTML = textoOriginal;
+      boton.classList.remove('bg-green-500');
+      boton.classList.add('bg-gray-500');
+    }, 2000);
+  }).catch(() => alert('No se pudo copiar. Copia manualmente: ' + urlJuego));
+};
+
+window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
+  const mensaje = `🎯 TE RETO A SUPERAR MI PUNTUACIÓN 🎯\n\nAcabo de hacer ${score} puntos en ${nombreJuego} (nivel ${nivel})\n\n¿Crees que puedes hacerlo mejor?\n\n¡Juega aquí! 👇\n${urlJuego}\n\n¡Que gane el mejor! 🏆`;
+  navigator.clipboard.writeText(mensaje).then(() => {
+    alert('📋 ¡Mensaje copiado!\n\nAhora pégalo donde quieras: WhatsApp, Instagram, TikTok, Discord...\n\n¡Reta a tus amigos! 🎯');
+  }).catch(() => alert('No se pudo copiar automáticamente.\n\nCopia este mensaje:\n\n' + mensaje));
+};
 </script>
 
-
-<footer class="bg-gray-900 text-white py-8 mt-auto">
   <div class="max-w-6xl mx-auto px-4">
     <div id="socialMediaLinks" class="flex justify-center gap-6 mb-6">
       <!-- initSocialMedia() las cargará aquí desde config.js -->
