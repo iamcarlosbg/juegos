@@ -728,6 +728,17 @@ window.loadRkInvasores = async function(level) {
     const c = document.getElementById('rklist-invasores');
     if (!c) return;
     c.innerHTML = '<p class="text-gray-500 text-center py-4">Cargando...</p>';
+    
+    // ESPERAR a que Firebase esté inicializado
+    if (typeof initFirebase === 'function' && !window.firebaseInitializedInvasores) {
+        try {
+            await initFirebase('invasores-matematicos');
+            window.firebaseInitializedInvasores = true;
+        } catch(e) {
+            console.log('Firebase no disponible, usando localStorage');
+        }
+    }
+    
     let sc = [];
     try {
         if (typeof getTopScoresFromFirebase === 'function') sc = await getTopScoresFromFirebase(100);

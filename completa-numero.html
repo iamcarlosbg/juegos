@@ -732,6 +732,17 @@ window.loadRk_completa_numero = async function(level) {
     const c = document.getElementById('rklist-completa-numero');
     if (!c) return;
     c.innerHTML = '<p class="text-gray-500 text-center py-4">Cargando...</p>';
+    
+    // ESPERAR a que Firebase esté inicializado
+    if (typeof initFirebase === 'function' && !window.firebaseInitialized) {
+        try {
+            await initFirebase('completa-numero');
+            window.firebaseInitialized = true;
+        } catch(e) {
+            console.log('Firebase no disponible, usando localStorage');
+        }
+    }
+    
     let sc = [];
     try { if (typeof getTopScoresFromFirebase === 'function') sc = await getTopScoresFromFirebase(100); else sc = JSON.parse(localStorage.getItem('scores_completa-numero') || '[]'); } catch(e) {}
     const fil = sc.filter(s => s.level === level).sort((a,b) => b.score - a.score).slice(0,10);
