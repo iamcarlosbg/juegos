@@ -34,9 +34,35 @@ const SITE_CONFIG = {
   },
   
   // ===== FEATURES =====
+  // ┌─────────────────────────────────────────────────────────────┐
+  // │  SISTEMA DE FEATURE FLAGS — Control central V2              │
+  // │                                                             │
+  // │  Cada flag se puede activar/desactivar independientemente.  │
+  // │  También se puede forzar por URL para testing:              │
+  // │    ?ff_newIndex=true                                        │
+  // │    ?ff_multiplayer=true                                     │
+  // │    ?ff_classMode=true                                       │
+  // │                                                             │
+  // │  INSTRUCCIONES DE ACTIVACIÓN PROGRESIVA:                    │
+  // │  ─────────────────────────────────────────                  │
+  // │  Fase actual → Todo false (desarrollo)                      │
+  // │  Fase alpha  → Probar /modo-juego.html manualmente          │
+  // │  Fase beta   → multiplayer: true, classMode: true           │
+  // │  Fase launch → newIndex: true (cambia la home principal)    │
+  // └─────────────────────────────────────────────────────────────┘
   features: {
-    ranking: true,    // Sistema de ranking global
-    firebase: true    // Usar Firebase para rankings
+    ranking: true,          // Sistema de ranking global (existente)
+    firebase: true,         // Usar Firebase para rankings (existente)
+    
+    // ─── Nuevos flags V2 ─────────────────────────
+    newIndex: false,        // true = la home redirige al nuevo index con 3 modos
+    multiplayer: false,     // true = activa modo multijugador aleatorio
+    classMode: false,       // true = activa modo clase / aulas
+    realtimeSync: false,    // true = sincronización Firebase RTDB (se activa con multiplayer o classMode)
+    
+    // ─── Desarrollo ──────────────────────────────
+    debugMode: false,       // true = logs extra en consola
+    showDevBanner: false    // true = muestra banner "VERSIÓN BETA" en modos nuevos
   },
   
   // ===== COMPARTIR EN REDES SOCIALES =====
@@ -191,26 +217,71 @@ const SITE_CONFIG = {
   }
 };
 
+// ===== FEATURE FLAGS — FUNCIONES HELPER =====
+
+/**
+ * Comprobar si una feature está activa
+ * @param {string} featureName - Nombre del flag (ej: 'multiplayer', 'classMode', 'newIndex')
+ * @returns {boolean}
+ */
+function isFeatureEnabled(featureName) {
+  return SITE_CONFIG.features[featureName] === true;
+}
+
+/**
+ * Aplicar overrides de URL para testing
+ * Permite activar features temporalmente vía URL:
+ *   ?ff_newIndex=true
+ *   ?ff_multiplayer=true
+ *   ?ff_classMode=true
+ *   ?ff_debugMode=true
+ * 
+ * SOLO para testing — los cambios NO persisten
+ */
+function applyFeatureFlagOverrides() {
+  var params = new URLSearchParams(window.location.search);
+  params.forEach(function(value, key) {
+    if (key.startsWith('ff_')) {
+      var flagName = key.replace('ff_', '');
+      if (flagName in SITE_CONFIG.features) {
+        SITE_CONFIG.features[flagName] = (value === 'true');
+        if (SITE_CONFIG.features.debugMode) {
+          console.log('[FeatureFlag] Override: ' + flagName + ' = ' + value);
+        }
+      }
+    }
+  });
+}
+
+// Aplicar overrides INMEDIATAMENTE (antes del DOMContentLoaded)
+applyFeatureFlagOverrides();
+
+
 // ===== INICIALIZACIÓN AUTOMÁTICA =====
 // Este código se ejecuta en TODAS las páginas
 document.addEventListener('DOMContentLoaded', function() {
   initSocialMedia();
   updateYear();
+  
+  // Log de features activas (si debugMode está activo)
+  if (SITE_CONFIG.features.debugMode) {
+    console.log('🚩 Feature Flags:', JSON.stringify(SITE_CONFIG.features, null, 2));
+  }
 });
 
 // Configurar enlaces de redes sociales
 function initSocialMedia() {
-  const socialLinks = {
+  var socialLinks = {
     'link-instagram': SITE_CONFIG.socialMedia.instagram,
     'link-facebook': SITE_CONFIG.socialMedia.facebook,
     'link-youtube': SITE_CONFIG.socialMedia.youtube,
     'link-amazon': SITE_CONFIG.socialMedia.amazon
   };
   
-  Object.keys(socialLinks).forEach(id => {
-    const element = document.getElementById(id);
+  Object.keys(socialLinks).forEach(function(id) {
+    var element = document.getElementById(id);
     if (element) {
-      const config = socialLinks[id];
+      var config = socialLinks[id];
       if (config && config.enabled && config.url) {
         element.href = config.url;
         element.style.display = '';
@@ -225,26 +296,27 @@ function initSocialMedia() {
 
 // Actualizar año en footer automáticamente
 function updateYear() {
-  const yearElements = document.querySelectorAll('#year, .current-year');
-  yearElements.forEach(el => {
+  var yearElements = document.querySelectorAll('#year, .current-year');
+  yearElements.forEach(function(el) {
     el.textContent = SITE_CONFIG.site.year;
   });
 }
 
 // Obtener configuración de un juego específico
 function getGameConfig(gameName) {
-  const globalConfig = {
+  var globalConfig = {
     showDescription: SITE_CONFIG.games.showDescription,
     showHowToPlay: SITE_CONFIG.games.showHowToPlay,
     showTopScores: SITE_CONFIG.games.showTopScores
   };
   
-  const gameConfig = SITE_CONFIG.games[gameName] || {};
+  var gameConfig = SITE_CONFIG.games[gameName] || {};
   
-  return {
-    ...globalConfig,
-    ...gameConfig
-  };
+  // Merge manual (compatible sin spread operator en navegadores viejos)
+  var result = {};
+  for (var key in globalConfig) { result[key] = globalConfig[key]; }
+  for (var key in gameConfig) { result[key] = gameConfig[key]; }
+  return result;
 }
 
 // Log de configuración (solo para debug)
