@@ -56,7 +56,7 @@ const SITE_CONFIG = {
     
     // ─── Nuevos flags V2 ─────────────────────────
     newIndex: false,        // true = la home redirige al nuevo index con 3 modos
-    multiplayer: false,     // true = activa modo multijugador aleatorio
+    multiplayer: true,     // true = activa modo multijugador aleatorio
     classMode: false,       // true = activa modo clase / aulas
     realtimeSync: false,    // true = sincronización Firebase RTDB (se activa con multiplayer o classMode)
     
