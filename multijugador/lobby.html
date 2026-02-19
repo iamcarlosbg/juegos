@@ -381,6 +381,9 @@
     }
 
     // ═══ PASO 4: UNIRSE A LA COLA ═══
+    var DIFFICULTY_ORDER = ['facil', 'medio', 'dificil'];
+    var FLEX_SEARCH_DELAY = 10; // segundos antes de ampliar búsqueda
+
     function joinQueue() {
       var name = document.getElementById('player-name').value.trim();
       if (!name) {
@@ -395,6 +398,8 @@
 
       lobbyState.playerName = name.substring(0, 15).toUpperCase();
       lobbyState.playerId = 'PLY_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+      lobbyState.flexActive = false;
+      lobbyState.flexListeners = [];
 
       // Guardar nombre para futuras sesiones
       sessionStorage.setItem('mp_playerName', lobbyState.playerName);
@@ -410,13 +415,17 @@
       lobbyState.searchTimer = setInterval(function() {
         lobbyState.searchSeconds++;
         document.getElementById('search-seconds').textContent = lobbyState.searchSeconds;
+
+        // Tras FLEX_SEARCH_DELAY seg, ampliar búsqueda a otros niveles
+        if (lobbyState.searchSeconds === FLEX_SEARCH_DELAY && !lobbyState.flexActive) {
+          startFlexSearch();
+        }
       }, 1000);
 
-      // Conectar a Firebase RTDB
+      // ── Cola principal (mismo juego + mismo nivel) ──
       var queueKey = lobbyState.game + '_' + lobbyState.difficulty;
       var queuePath = 'matchmaking/queue/' + queueKey;
 
-      // 1. Añadirme a la cola
       lobbyState.queueRef = rtdb.ref(queuePath + '/' + lobbyState.playerId);
       lobbyState.queueRef.set({
         name: lobbyState.playerName,
@@ -425,31 +434,16 @@
         game: lobbyState.game,
         difficulty: lobbyState.difficulty
       });
-
-      // Auto-eliminar si se desconecta
       lobbyState.queueRef.onDisconnect().remove();
 
-      // 2. Escuchar la cola — ¿hay 2 jugadores?
+      // Escuchar mi cola exacta
       var queueListRef = rtdb.ref(queuePath);
-      lobbyState.matchListener = queueListRef.on('value', function(snapshot) {
-        var players = snapshot.val();
-        if (!players) return;
-
-        var playerIds = Object.keys(players);
-        if (playerIds.length >= 2) {
-          // Ordenar por tiempo de llegada
-          var sorted = playerIds.sort(function(a, b) {
-            return (players[a].joinedAt || 0) - (players[b].joinedAt || 0);
-          });
-
-          // El primero crea la partida
-          if (sorted[0] === lobbyState.playerId) {
-            createMatch(sorted[0], sorted[1], players[sorted[0]], players[sorted[1]], queuePath);
-          }
-        }
+      var exactListener = queueListRef.on('value', function(snapshot) {
+        handleQueueSnapshot(snapshot, queuePath, lobbyState.difficulty);
       });
+      lobbyState.flexListeners.push({ ref: queueListRef, listener: exactListener });
 
-      // 3. Escuchar si me asignan un match
+      // Escuchar si me asignan un match
       lobbyState.assignRef = rtdb.ref('matchmaking/assignments/' + lobbyState.playerId);
       lobbyState.assignRef.on('value', function(snapshot) {
         var matchId = snapshot.val();
@@ -468,12 +462,95 @@
       }
     }
 
+    // ═══ BÚSQUEDA FLEXIBLE: escuchar colas de otros niveles ═══
+    function startFlexSearch() {
+      lobbyState.flexActive = true;
+      document.getElementById('search-info').innerHTML = 
+        lobbyState.game + ' · <span class="text-yellow-300">buscando en todos los niveles...</span>';
+
+      DIFFICULTY_ORDER.forEach(function(diff) {
+        if (diff === lobbyState.difficulty) return; // Ya la estamos escuchando
+
+        var queueKey = lobbyState.game + '_' + diff;
+        var queuePath = 'matchmaking/queue/' + queueKey;
+        var ref = rtdb.ref(queuePath);
+
+        var listener = ref.on('value', function(snapshot) {
+          handleCrossLevelSnapshot(snapshot, queuePath, diff);
+        });
+        lobbyState.flexListeners.push({ ref: ref, listener: listener });
+      });
+
+      console.log('🔄 Búsqueda flexible activada — escuchando todos los niveles de ' + lobbyState.game);
+    }
+
+    // ═══ HANDLER: cola del mismo nivel ═══
+    function handleQueueSnapshot(snapshot, queuePath, difficulty) {
+      var players = snapshot.val();
+      if (!players) return;
+
+      var playerIds = Object.keys(players);
+      if (playerIds.length >= 2) {
+        var sorted = playerIds.sort(function(a, b) {
+          return (players[a].joinedAt || 0) - (players[b].joinedAt || 0);
+        });
+
+        if (sorted[0] === lobbyState.playerId) {
+          var matchDifficulty = difficulty; // Mismo nivel
+          createMatch(sorted[0], sorted[1], players[sorted[0]], players[sorted[1]], queuePath, null, matchDifficulty);
+        }
+      }
+    }
+
+    // ═══ HANDLER: cola de OTRO nivel (búsqueda flexible) ═══
+    function handleCrossLevelSnapshot(snapshot, otherQueuePath, otherDifficulty) {
+      var otherPlayers = snapshot.val();
+      if (!otherPlayers) return;
+
+      // Hay alguien en otra cola del mismo juego → emparejar
+      var otherIds = Object.keys(otherPlayers);
+      if (otherIds.length >= 1) {
+        // Tomar el primero que llegó
+        var otherSorted = otherIds.sort(function(a, b) {
+          return (otherPlayers[a].joinedAt || 0) - (otherPlayers[b].joinedAt || 0);
+        });
+        var otherId = otherSorted[0];
+        var otherData = otherPlayers[otherId];
+
+        // Nivel de la partida = el más bajo de los dos
+        var myLevel = DIFFICULTY_ORDER.indexOf(lobbyState.difficulty);
+        var theirLevel = DIFFICULTY_ORDER.indexOf(otherDifficulty);
+        var matchDifficulty = DIFFICULTY_ORDER[Math.min(myLevel, theirLevel)];
+
+        // Mi cola
+        var myQueuePath = 'matchmaking/queue/' + lobbyState.game + '_' + lobbyState.difficulty;
+
+        var myData = {
+          name: lobbyState.playerName,
+          game: lobbyState.game,
+          difficulty: lobbyState.difficulty
+        };
+
+        createMatch(
+          lobbyState.playerId, otherId,
+          myData, otherData,
+          myQueuePath, otherQueuePath,
+          matchDifficulty
+        );
+      }
+    }
+
     // ═══ CREAR PARTIDA ═══
-    function createMatch(hostId, guestId, hostData, guestData, queuePath) {
+    // hostQueuePath y guestQueuePath pueden ser distintos (cross-level match)
+    // matchDifficulty = nivel más bajo de los dos
+    function createMatch(hostId, guestId, hostData, guestData, hostQueuePath, guestQueuePath, matchDifficulty) {
       var matchId = 'M_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
 
-      // Generar operaciones (mismas para ambos)
-      var operations = generateOperationsForGame(lobbyState.game, lobbyState.difficulty, 20);
+      // Usar el nivel negociado (el más bajo)
+      var finalDifficulty = matchDifficulty || lobbyState.difficulty;
+
+      // Generar operaciones con el nivel de la partida
+      var operations = generateOperationsForGame(lobbyState.game, finalDifficulty, 20);
 
       var matchData = {
         matchId: matchId,
@@ -482,7 +559,7 @@
         config: {
           subject: lobbyState.subject,
           game: lobbyState.game,
-          difficulty: lobbyState.difficulty,
+          difficulty: finalDifficulty,
           totalOperations: operations.length,
           timeLimitSeconds: 120
         },
@@ -494,6 +571,7 @@
 
       matchData.players[hostId] = {
         name: hostData.name,
+        originalDifficulty: hostData.difficulty || lobbyState.difficulty,
         score: 0,
         current: 0,
         finished: false,
@@ -501,22 +579,27 @@
       };
       matchData.players[guestId] = {
         name: guestData.name,
+        originalDifficulty: guestData.difficulty || 'unknown',
         score: 0,
         current: 0,
         finished: false,
         answers: {}
       };
 
-      // Actualización atómica: crear match + limpiar cola + asignar
+      // Actualización atómica: crear match + limpiar ambas colas + asignar
       var updates = {};
       updates['matches/' + matchId] = matchData;
-      updates[queuePath + '/' + hostId] = null;
-      updates[queuePath + '/' + guestId] = null;
+      updates[hostQueuePath + '/' + hostId] = null;
+      if (guestQueuePath) {
+        updates[guestQueuePath + '/' + guestId] = null;
+      } else {
+        updates[hostQueuePath + '/' + guestId] = null;
+      }
       updates['matchmaking/assignments/' + hostId] = matchId;
       updates['matchmaking/assignments/' + guestId] = matchId;
 
       rtdb.ref().update(updates).then(function() {
-        console.log('✅ Match creado:', matchId);
+        console.log('✅ Match creado:', matchId, '| Nivel:', finalDifficulty);
       }).catch(function(err) {
         console.error('❌ Error creando match:', err);
       });
@@ -526,8 +609,13 @@
     function onMatchFound(matchId) {
       // Detener búsqueda
       clearInterval(lobbyState.searchTimer);
-      if (lobbyState.matchListener) {
-        // Clean up listener
+
+      // Limpiar TODOS los listeners
+      if (lobbyState.flexListeners) {
+        lobbyState.flexListeners.forEach(function(item) {
+          item.ref.off('value', item.listener);
+        });
+        lobbyState.flexListeners = [];
       }
 
       // Guardar datos en sessionStorage para la página de juego
@@ -596,6 +684,15 @@
         lobbyState.assignRef.off();
         lobbyState.assignRef.remove();
       }
+
+      // Limpiar TODOS los listeners (exacto + flex)
+      if (lobbyState.flexListeners) {
+        lobbyState.flexListeners.forEach(function(item) {
+          item.ref.off('value', item.listener);
+        });
+        lobbyState.flexListeners = [];
+      }
+      lobbyState.flexActive = false;
 
       // Volver a pantalla de selección
       document.getElementById('screen-searching').classList.add('hidden');
@@ -740,6 +837,11 @@
       }
       if (lobbyState.assignRef) {
         lobbyState.assignRef.remove();
+      }
+      if (lobbyState.flexListeners) {
+        lobbyState.flexListeners.forEach(function(item) {
+          item.ref.off('value', item.listener);
+        });
       }
     });
     </script>
