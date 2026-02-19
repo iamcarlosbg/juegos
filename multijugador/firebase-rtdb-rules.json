@@ -1,0 +1,34 @@
+{
+  "rules": {
+    "matchmaking": {
+      "queue": {
+        "$queueKey": {
+          "$playerId": {
+            ".read": true,
+            ".write": true,
+            ".validate": "newData.hasChildren(['name', 'joinedAt'])"
+          }
+        }
+      },
+      "assignments": {
+        "$playerId": {
+          ".read": true,
+          ".write": true
+        }
+      }
+    },
+    "matches": {
+      "$matchId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['players', 'status'])"
+      }
+    },
+    "presence": {
+      "$userId": {
+        ".read": true,
+        ".write": true
+      }
+    }
+  }
+}

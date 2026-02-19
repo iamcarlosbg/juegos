@@ -99,4 +99,10 @@
     <priority>0.8</priority>
   </url>
 
+  <url>
+    <loc>https://aprendeyjuega.com/multijugador/lobby.html</loc>
+    <lastmod>2026-02-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>

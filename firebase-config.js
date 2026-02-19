@@ -7,6 +7,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyBa-c5fyU5sZacTB1hNXLAha_HURhanz_I",
   authDomain: "aprendeyjuega.firebaseapp.com",
+  databaseURL: "https://aprendeyjuega-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "aprendeyjuega",
   storageBucket: "aprendeyjuega.firebasestorage.app",
   messagingSenderId: "414284717970",
@@ -14,26 +15,36 @@ const firebaseConfig = {
   measurementId: "G-Q4902D1002"
 };
 
+// Inicializar Firebase App UNA SOLA VEZ al cargar el script
+// Esto permite que tanto Firestore como RTDB funcionen
+let _firebaseApp;
+try {
+  _firebaseApp = firebase.initializeApp(firebaseConfig);
+  console.log('📦 Firebase App inicializada');
+} catch (e) {
+  // Ya estaba inicializada (recarga o doble include)
+  _firebaseApp = firebase.app();
+}
+
 // Inicializar Firebase (se hace automáticamente al cargar el script)
 let db;
 let scoresCollection;
 let useFirebase = false;  // Variable global para saber si Firebase está activo
 
-// Función para inicializar Firebase
+// Función para inicializar Firebase Firestore (para rankings de juegos)
 async function initFirebase(gameName) {
   try {
     // Guardar el nombre del juego globalmente
     window.GAME_NAME = gameName;
     
-    // Inicializar Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    // Usar la app ya inicializada
     db = firebase.firestore();
     
     // Cada juego tiene su propia colección
     scoresCollection = db.collection(`scores_${gameName}`);
     
     useFirebase = true;
-    console.log('✅ Firebase inicializado correctamente para:', gameName);
+    console.log('✅ Firebase Firestore listo para:', gameName);
     return true;
   } catch (error) {
     console.error('❌ Error al inicializar Firebase:', error);

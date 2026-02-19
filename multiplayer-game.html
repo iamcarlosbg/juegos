@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partida Multijugador — Aprende y Juega</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="theme-color" content="#EA580C">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="config.js"></script>
+
+    <style>
+        @keyframes correct-flash {
+            0% { background-color: #10B981; }
+            100% { background-color: transparent; }
+        }
+        @keyframes wrong-flash {
+            0% { background-color: #EF4444; }
+            100% { background-color: transparent; }
+        }
+        .flash-correct { animation: correct-flash 0.5s ease-out; }
+        .flash-wrong { animation: wrong-flash 0.5s ease-out; }
+
+        @keyframes score-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .score-pop { animation: score-pop 0.3s ease; }
+
+        .progress-me { transition: width 0.3s ease; }
+        .progress-opponent { transition: width 0.3s ease; }
+        
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .slide-in { animation: slide-in 0.3s ease-out; }
+
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white">
+
+    <!-- ═══ PANTALLA DE JUEGO ═══ -->
+    <div id="game-screen" class="container mx-auto px-4 py-4 max-w-2xl">
+
+        <!-- Barra superior: Progreso de ambos jugadores -->
+        <div class="bg-gray-800/80 backdrop-blur rounded-2xl p-4 mb-4 border border-gray-700">
+            <!-- Jugador 1 (Tú) -->
+            <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center gap-2 w-28">
+                    <span class="text-lg">🧑</span>
+                    <span class="font-bold text-blue-400 text-sm truncate" id="g-name-me">Tú</span>
+                </div>
+                <div class="flex-1 bg-gray-700 rounded-full h-4 relative">
+                    <div id="g-progress-me" class="progress-me bg-gradient-to-r from-blue-500 to-blue-400 h-full rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="w-20 text-right">
+                    <span class="font-mono font-bold text-blue-400 text-lg" id="g-score-me">0</span>
+                    <span class="text-gray-500 text-xs"> pts</span>
+                </div>
+            </div>
+            <!-- Oponente -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 w-28">
+                    <span class="text-lg">🧑</span>
+                    <span class="font-bold text-red-400 text-sm truncate" id="g-name-opp">Rival</span>
+                </div>
+                <div class="flex-1 bg-gray-700 rounded-full h-4 relative">
+                    <div id="g-progress-opp" class="progress-opponent bg-gradient-to-r from-red-500 to-red-400 h-full rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="w-20 text-right">
+                    <span class="font-mono font-bold text-red-400 text-lg" id="g-score-opp">0</span>
+                    <span class="text-gray-500 text-xs"> pts</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer + Pregunta actual -->
+        <div class="bg-gray-800/80 backdrop-blur rounded-2xl p-6 mb-4 border border-gray-700">
+            <!-- Timer y contador -->
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-sm text-gray-400">
+                    Pregunta <span id="g-current" class="font-bold text-white">1</span> / <span id="g-total">20</span>
+                </span>
+                <span class="text-sm text-gray-400">
+                    ⏱️ <span id="g-timer" class="font-bold text-white font-mono">2:00</span>
+                </span>
+            </div>
+
+            <!-- Pregunta -->
+            <div id="g-question" class="text-center py-6">
+                <p id="g-question-text" class="text-4xl md:text-5xl font-black text-white mb-2">
+                    <!-- Se rellena dinámicamente -->
+                </p>
+                <p id="g-question-hint" class="text-sm text-gray-400">
+                    <!-- Pista o instrucción -->
+                </p>
+            </div>
+
+            <!-- Feedback -->
+            <div id="g-feedback" class="text-center text-lg font-bold mb-4 h-8">
+                <!-- ✅ ¡Correcto! +150 pts   o   ❌ Incorrecto -->
+            </div>
+
+            <!-- Input de respuesta (para juegos de tipo math/letter/typing) -->
+            <div id="g-input-area" class="max-w-md mx-auto">
+                <div class="flex gap-3">
+                    <input type="text" id="g-answer" autocomplete="off" inputmode="numeric"
+                           class="flex-1 px-4 py-3 bg-gray-700 border-2 border-gray-600 rounded-xl text-xl font-bold text-center text-white focus:outline-none focus:border-orange-500"
+                           placeholder="Tu respuesta..."
+                           onkeydown="if(event.key==='Enter') submitAnswer()">
+                    <button onclick="submitAnswer()" 
+                            class="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl text-lg hover:from-orange-600 hover:to-red-600 transition">
+                        ✓
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botones de respuesta (para juegos de tipo compare: >, <, =) -->
+            <div id="g-compare-area" class="hidden max-w-md mx-auto">
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="submitCompare('<')" class="bg-gray-700 hover:bg-blue-600 text-3xl font-black py-4 rounded-xl transition border-2 border-gray-600">&lt;</button>
+                    <button onclick="submitCompare('=')" class="bg-gray-700 hover:bg-yellow-600 text-3xl font-black py-4 rounded-xl transition border-2 border-gray-600">=</button>
+                    <button onclick="submitCompare('>')" class="bg-gray-700 hover:bg-red-600 text-3xl font-black py-4 rounded-xl transition border-2 border-gray-600">&gt;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vidas -->
+        <div class="text-center">
+            <span id="g-lives" class="text-2xl">❤️❤️❤️</span>
+        </div>
+    </div>
+
+    <!-- ═══ PANTALLA DE RESULTADOS ═══ -->
+    <div id="results-screen" class="hidden container mx-auto px-4 py-8 max-w-2xl">
+        <div class="bg-gray-800/90 backdrop-blur rounded-3xl p-8 border border-gray-700 text-center">
+
+            <!-- Resultado -->
+            <div id="r-trophy" class="text-7xl mb-4">🏆</div>
+            <h2 id="r-title" class="text-3xl font-black mb-2">¡Victoria!</h2>
+            <p id="r-subtitle" class="text-gray-400 mb-6">Has ganado la partida</p>
+
+            <!-- Comparación -->
+            <div class="flex items-center justify-center gap-6 mb-8">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-blue-900/50 border-2 border-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span class="text-3xl">🧑</span>
+                    </div>
+                    <p class="font-bold text-blue-400" id="r-name-me">Tú</p>
+                    <p class="text-3xl font-black text-white" id="r-score-me">0</p>
+                    <p class="text-sm text-gray-400"><span id="r-correct-me">0</span> aciertos</p>
+                    <p class="text-sm text-gray-400"><span id="r-time-me">0</span>s</p>
+                </div>
+
+                <div class="text-4xl font-black text-orange-500">VS</div>
+
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-red-900/50 border-2 border-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span class="text-3xl">🧑</span>
+                    </div>
+                    <p class="font-bold text-red-400" id="r-name-opp">Rival</p>
+                    <p class="text-3xl font-black text-white" id="r-score-opp">0</p>
+                    <p class="text-sm text-gray-400"><span id="r-correct-opp">0</span> aciertos</p>
+                    <p class="text-sm text-gray-400"><span id="r-time-opp">0</span>s</p>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3 justify-center flex-wrap">
+                <a href="multiplayer-lobby.html" class="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl text-lg hover:from-orange-600 hover:to-red-600 transition">
+                    🔄 Jugar de nuevo
+                </a>
+                <a href="index.html" class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-6 py-3 rounded-xl text-lg transition">
+                    🏠 Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ═══════════════════════════════════════════════════════
+    // MULTIPLAYER GAME — Lógica de partida en tiempo real
+    // ═══════════════════════════════════════════════════════
+
+    var rtdb = null;
+    var matchRef = null;
+
+    // Estado del juego
+    var game = {
+      matchId: null,
+      playerId: null,
+      opponentId: null,
+      playerName: '',
+      opponentName: '',
+      operations: [],
+      current: 0,        // Índice de pregunta actual
+      score: 0,
+      correctCount: 0,
+      lives: 3,
+      finished: false,
+      startTime: null,
+      timer: null,
+      timeLeft: 120,
+      totalOps: 20
+    };
+
+    // ═══ INICIALIZACIÓN ═══
+    window.addEventListener('load', function() {
+      // Leer parámetros de URL
+      var params = new URLSearchParams(window.location.search);
+      game.matchId = params.get('match');
+      game.playerId = params.get('player');
+      game.playerName = sessionStorage.getItem('mp_playerName') || 'Jugador';
+
+      if (!game.matchId || !game.playerId) {
+        alert('Error: No se encontró la partida. Volviendo al lobby.');
+        window.location.href = 'multiplayer-lobby.html';
+        return;
+      }
+
+      // Inicializar Firebase RTDB
+      try {
+        var app = firebase.app();
+        rtdb = firebase.database();
+        matchRef = rtdb.ref('matches/' + game.matchId);
+      } catch (e) {
+        console.error('Error Firebase:', e);
+        return;
+      }
+
+      // Cargar datos del match
+      loadMatch();
+    });
+
+    // ═══ CARGAR MATCH ═══
+    function loadMatch() {
+      matchRef.once('value').then(function(snapshot) {
+        var data = snapshot.val();
+        if (!data) {
+          alert('Partida no encontrada');
+          window.location.href = 'multiplayer-lobby.html';
+          return;
+        }
+
+        // Guardar operaciones
+        game.operations = data.operations || [];
+        game.totalOps = data.config.totalOperations || game.operations.length;
+        game.timeLeft = data.config.timeLimitSeconds || 120;
+
+        // Identificar oponente
+        Object.keys(data.players).forEach(function(pid) {
+          if (pid === game.playerId) {
+            game.playerName = data.players[pid].name;
+          } else {
+            game.opponentId = pid;
+            game.opponentName = data.players[pid].name;
+          }
+        });
+
+        // Actualizar UI
+        document.getElementById('g-name-me').textContent = game.playerName;
+        document.getElementById('g-name-opp').textContent = game.opponentName;
+        document.getElementById('g-total').textContent = game.totalOps;
+
+        // Marcar inicio
+        matchRef.child('startedAt').set(firebase.database.ServerValue.TIMESTAMP);
+        game.startTime = Date.now();
+
+        // Mostrar primera pregunta
+        showQuestion();
+
+        // Iniciar timer
+        startTimer();
+
+        // Escuchar cambios del oponente en tiempo real
+        listenToOpponent();
+
+        // Configurar input según tipo de juego
+        setupInputType();
+      });
+    }
+
+    // ═══ CONFIGURAR TIPO DE INPUT ═══
+    function setupInputType() {
+      if (game.operations.length === 0) return;
+      var type = game.operations[0].type;
+
+      if (type === 'compare') {
+        document.getElementById('g-input-area').classList.add('hidden');
+        document.getElementById('g-compare-area').classList.remove('hidden');
+      } else if (type === 'typing') {
+        document.getElementById('g-answer').inputMode = 'text';
+        document.getElementById('g-answer').placeholder = 'Escribe la frase...';
+      } else if (type === 'letter') {
+        document.getElementById('g-answer').inputMode = 'text';
+        document.getElementById('g-answer').maxLength = 1;
+        document.getElementById('g-answer').placeholder = 'Letra...';
+      } else {
+        document.getElementById('g-answer').inputMode = 'numeric';
+        document.getElementById('g-answer').placeholder = 'Tu respuesta...';
+      }
+    }
+
+    // ═══ MOSTRAR PREGUNTA ═══
+    function showQuestion() {
+      if (game.current >= game.operations.length || game.lives <= 0) {
+        finishGame();
+        return;
+      }
+
+      var op = game.operations[game.current];
+      var questionEl = document.getElementById('g-question-text');
+      var hintEl = document.getElementById('g-question-hint');
+
+      document.getElementById('g-current').textContent = game.current + 1;
+
+      if (op.type === 'math') {
+        questionEl.textContent = op.text;
+        hintEl.textContent = 'Escribe el resultado';
+      } else if (op.type === 'compare') {
+        questionEl.innerHTML = '<span class="text-blue-400">' + op.left + '</span> <span class="text-gray-500">___</span> <span class="text-red-400">' + op.right + '</span>';
+        hintEl.textContent = 'Elige: mayor, menor o igual';
+      } else if (op.type === 'letter') {
+        questionEl.textContent = op.text;
+        hintEl.textContent = 'Escribe la letra que falta';
+      } else if (op.type === 'typing') {
+        questionEl.textContent = op.text;
+        questionEl.style.fontSize = '1.5rem';
+        hintEl.textContent = 'Escribe la frase exacta';
+      } else if (op.type === 'pattern') {
+        questionEl.textContent = op.text;
+        hintEl.textContent = 'Escribe el emoji que sigue';
+      }
+
+      // Limpiar input
+      var answerEl = document.getElementById('g-answer');
+      answerEl.value = '';
+      answerEl.focus();
+
+      // Limpiar feedback
+      document.getElementById('g-feedback').textContent = '';
+    }
+
+    // ═══ ENVIAR RESPUESTA ═══
+    function submitAnswer() {
+      if (game.finished) return;
+      var answerEl = document.getElementById('g-answer');
+      var userAnswer = answerEl.value.trim();
+      if (!userAnswer) return;
+
+      var op = game.operations[game.current];
+      var correct = false;
+
+      if (op.type === 'math') {
+        correct = parseInt(userAnswer) === op.answer;
+      } else if (op.type === 'letter') {
+        correct = userAnswer.toUpperCase() === op.answer.toUpperCase();
+      } else if (op.type === 'typing') {
+        correct = userAnswer === op.answer;
+      } else if (op.type === 'pattern') {
+        correct = userAnswer === op.answer;
+      }
+
+      processAnswer(correct, op);
+    }
+
+    function submitCompare(symbol) {
+      if (game.finished) return;
+      var op = game.operations[game.current];
+      var correct = symbol === op.answer;
+      processAnswer(correct, op);
+    }
+
+    // ═══ PROCESAR RESPUESTA ═══
+    function processAnswer(correct, op) {
+      var feedbackEl = document.getElementById('g-feedback');
+      var questionEl = document.getElementById('g-question');
+
+      if (correct) {
+        // Puntuación con bonus de tiempo
+        var timeBonus = Math.max(0, Math.floor(game.timeLeft / 10)) * 5;
+        var points = 100 + timeBonus;
+        game.score += points;
+        game.correctCount++;
+
+        feedbackEl.innerHTML = '<span class="text-green-400">✅ ¡Correcto! +' + points + ' pts</span>';
+        questionEl.classList.add('flash-correct');
+        setTimeout(function() { questionEl.classList.remove('flash-correct'); }, 500);
+
+        // Animar score
+        var scoreEl = document.getElementById('g-score-me');
+        scoreEl.textContent = game.score;
+        scoreEl.classList.add('score-pop');
+        setTimeout(function() { scoreEl.classList.remove('score-pop'); }, 300);
+      } else {
+        game.lives--;
+        feedbackEl.innerHTML = '<span class="text-red-400">❌ Incorrecto</span>';
+        if (op.type === 'math') {
+          feedbackEl.innerHTML += '<span class="text-gray-400 text-sm"> (era ' + op.answer + ')</span>';
+        }
+        questionEl.classList.add('flash-wrong');
+        setTimeout(function() { questionEl.classList.remove('flash-wrong'); }, 500);
+
+        // Actualizar vidas
+        document.getElementById('g-lives').textContent = '❤️'.repeat(Math.max(0, game.lives)) + '🖤'.repeat(3 - Math.max(0, game.lives));
+      }
+
+      // Actualizar progreso
+      var progress = ((game.current + 1) / game.totalOps) * 100;
+      document.getElementById('g-progress-me').style.width = progress + '%';
+
+      // Enviar a Firebase
+      var updates = {};
+      updates['players/' + game.playerId + '/score'] = game.score;
+      updates['players/' + game.playerId + '/current'] = game.current + 1;
+      updates['players/' + game.playerId + '/answers/' + op.id] = {
+        correct: correct,
+        timeMs: Date.now() - game.startTime
+      };
+      matchRef.update(updates);
+
+      // Siguiente pregunta
+      game.current++;
+      setTimeout(function() {
+        showQuestion();
+      }, correct ? 400 : 800);
+    }
+
+    // ═══ TIMER ═══
+    function startTimer() {
+      game.timer = setInterval(function() {
+        game.timeLeft--;
+        var mins = Math.floor(game.timeLeft / 60);
+        var secs = game.timeLeft % 60;
+        document.getElementById('g-timer').textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+        if (game.timeLeft <= 0) {
+          clearInterval(game.timer);
+          finishGame();
+        }
+
+        // Color del timer
+        var timerEl = document.getElementById('g-timer');
+        if (game.timeLeft <= 10) {
+          timerEl.classList.add('text-red-400');
+        } else if (game.timeLeft <= 30) {
+          timerEl.classList.add('text-yellow-400');
+          timerEl.classList.remove('text-red-400');
+        }
+      }, 1000);
+    }
+
+    // ═══ ESCUCHAR OPONENTE EN TIEMPO REAL ═══
+    function listenToOpponent() {
+      if (!game.opponentId) return;
+
+      matchRef.child('players/' + game.opponentId).on('value', function(snapshot) {
+        var oppData = snapshot.val();
+        if (!oppData) return;
+
+        // Actualizar score del oponente
+        document.getElementById('g-score-opp').textContent = oppData.score || 0;
+
+        // Actualizar progreso del oponente
+        var oppProgress = ((oppData.current || 0) / game.totalOps) * 100;
+        document.getElementById('g-progress-opp').style.width = oppProgress + '%';
+
+        // Si el oponente terminó
+        if (oppData.finished && !game.finished) {
+          // No terminar automáticamente — deja que el jugador siga
+          // pero muestra indicador
+          document.getElementById('g-name-opp').textContent = game.opponentName + ' ✅';
+        }
+      });
+    }
+
+    // ═══ FINALIZAR PARTIDA ═══
+    function finishGame() {
+      if (game.finished) return;
+      game.finished = true;
+      clearInterval(game.timer);
+
+      var totalTime = Math.round((Date.now() - game.startTime) / 1000);
+
+      // Marcar como terminado en Firebase
+      var updates = {};
+      updates['players/' + game.playerId + '/finished'] = true;
+      updates['players/' + game.playerId + '/score'] = game.score;
+      updates['players/' + game.playerId + '/finishTime'] = totalTime;
+      matchRef.update(updates);
+
+      // Esperar un momento para que el oponente también termine, o mostrar resultados
+      setTimeout(function() {
+        showResults(totalTime);
+      }, 1500);
+    }
+
+    // ═══ MOSTRAR RESULTADOS ═══
+    function showResults(myTime) {
+      // Leer datos finales del match
+      matchRef.once('value').then(function(snapshot) {
+        var data = snapshot.val();
+        if (!data) return;
+
+        var myData = data.players[game.playerId];
+        var oppData = data.players[game.opponentId];
+
+        var myScore = myData.score || 0;
+        var oppScore = oppData.score || 0;
+        var myCorrect = game.correctCount;
+        var oppCorrect = 0;
+
+        // Contar aciertos del oponente
+        if (oppData.answers) {
+          Object.values(oppData.answers).forEach(function(a) {
+            if (a.correct) oppCorrect++;
+          });
+        }
+
+        var oppTime = oppData.finishTime || '—';
+
+        // Determinar ganador
+        var iWon = myScore > oppScore;
+        var tie = myScore === oppScore;
+
+        // Actualizar UI
+        document.getElementById('r-name-me').textContent = game.playerName;
+        document.getElementById('r-name-opp').textContent = game.opponentName;
+        document.getElementById('r-score-me').textContent = myScore;
+        document.getElementById('r-score-opp').textContent = oppScore;
+        document.getElementById('r-correct-me').textContent = myCorrect;
+        document.getElementById('r-correct-opp').textContent = oppCorrect;
+        document.getElementById('r-time-me').textContent = myTime;
+        document.getElementById('r-time-opp').textContent = oppTime;
+
+        if (tie) {
+          document.getElementById('r-trophy').textContent = '🤝';
+          document.getElementById('r-title').textContent = '¡Empate!';
+          document.getElementById('r-subtitle').textContent = 'Habéis empatado. ¡La revancha!';
+        } else if (iWon) {
+          document.getElementById('r-trophy').textContent = '🏆';
+          document.getElementById('r-title').textContent = '¡Victoria!';
+          document.getElementById('r-title').classList.add('text-yellow-400');
+          document.getElementById('r-subtitle').textContent = '¡Has ganado la partida!';
+        } else {
+          document.getElementById('r-trophy').textContent = '😤';
+          document.getElementById('r-title').textContent = 'Derrota';
+          document.getElementById('r-subtitle').textContent = game.opponentName + ' ha ganado esta vez. ¡Inténtalo de nuevo!';
+        }
+
+        // Marcar match como finalizado
+        matchRef.update({
+          status: 'finished',
+          finishedAt: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        // Cambiar pantalla
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('results-screen').classList.remove('hidden');
+
+        // Limpiar assignment
+        rtdb.ref('matchmaking/assignments/' + game.playerId).remove();
+      });
+    }
+
+    // ═══ LIMPIEZA ═══
+    window.addEventListener('beforeunload', function() {
+      if (matchRef && game.playerId) {
+        matchRef.child('players/' + game.playerId + '/connected').set(false);
+      }
+    });
+    </script>
+
+</body>
+</html>
