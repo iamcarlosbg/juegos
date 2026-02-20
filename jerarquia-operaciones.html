@@ -383,20 +383,87 @@
         generateOperation();
     }
 
+    // ═══ GENERACIÓN DE OPERACIONES ═══
+    // Genera operaciones con jerarquía (multiplicación/división antes que suma/resta)
+    // - Fácil: a + b × c  |  a - b × c  (resultado siempre >= 0)
+    // - Medio: a + b × c  |  a - b × c  (rango mayor, resultado siempre >= 0)
+    // - Difícil: incluye divisiones exactas (a + b ÷ c | a - b ÷ c, resultado >= 0)
     function generateOperation() {
         const config = levelConfig[gameState.level];
-        const num1 = Math.floor(Math.random() * (config.max - config.min + 1)) + config.min;
-        const num2 = Math.floor(Math.random() * (config.max - config.min + 1)) + config.min;
-        const num3 = Math.floor(Math.random() * (config.max - config.min + 1)) + config.min;
-        
-        gameState.correctAnswer = num1 + (num2 * num3);
-        document.getElementById('operation').textContent = `${num1} + ${num2} × ${num3} = ?`;
+        let operationText, answer;
+        let attempts = 0;
+
+        do {
+            attempts++;
+            const result = buildOperation(config, gameState.level);
+            operationText = result.text;
+            answer = result.answer;
+            // Reintentar si el resultado es negativo (seguridad)
+        } while (answer < 0 && attempts < 50);
+
+        gameState.correctAnswer = answer;
+        document.getElementById('operation').textContent = `${operationText} = ?`;
         document.getElementById('answer').value = '';
         document.getElementById('answer').focus();
         document.getElementById('feedback').textContent = '';
         
         gameState.timeLeft = 30;
         updateTimer();
+    }
+
+    // Construye una operación respetando jerarquía y garantizando resultado >= 0
+    function buildOperation(config, level) {
+        const rng = function() {
+            return Math.floor(Math.random() * (config.max - config.min + 1)) + config.min;
+        };
+
+        // Decidir tipo de operación prioritaria (×  o ÷)
+        let useDiv = false;
+        if (level === 'Difícil') {
+            useDiv = Math.random() < 0.4; // 40% divisiones en difícil
+        }
+
+        // Decidir si suma o resta como operación secundaria
+        const useSub = Math.random() < 0.5; // 50% restas en todos los niveles
+
+        let a, b, c, priorityResult, text, answer;
+
+        if (useDiv) {
+            // ── División exacta: b ÷ c donde b es múltiplo de c ──
+            c = Math.floor(Math.random() * (config.max - 1)) + 2; // divisor >= 2
+            const quotient = rng(); // resultado de la división
+            b = c * quotient; // dividendo = divisor × cociente (división exacta)
+            priorityResult = quotient;
+
+            if (useSub) {
+                // a - b ÷ c → a - quotient >= 0 → a >= quotient
+                a = quotient + Math.floor(Math.random() * config.max);
+                answer = a - priorityResult;
+                text = `${a} - ${b} ÷ ${c}`;
+            } else {
+                a = rng();
+                answer = a + priorityResult;
+                text = `${a} + ${b} ÷ ${c}`;
+            }
+        } else {
+            // ── Multiplicación: b × c ──
+            b = rng();
+            c = rng();
+            priorityResult = b * c;
+
+            if (useSub) {
+                // a - b × c >= 0 → a >= b × c
+                a = priorityResult + Math.floor(Math.random() * config.max);
+                answer = a - priorityResult;
+                text = `${a} - ${b} × ${c}`;
+            } else {
+                a = rng();
+                answer = a + priorityResult;
+                text = `${a} + ${b} × ${c}`;
+            }
+        }
+
+        return { text: text, answer: answer };
     }
 
     function updateTimer() {
