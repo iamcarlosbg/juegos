@@ -121,7 +121,7 @@
                            class="flex-1 px-4 py-3 bg-gray-700 border-2 border-gray-600 rounded-xl text-xl font-bold text-center text-white focus:outline-none focus:border-orange-500"
                            placeholder="Tu respuesta..."
                            onkeydown="if(event.key==='Enter') submitAnswer()">
-                    <button onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="submitAnswer()" 
+                    <button onclick="submitAnswer(); document.getElementById('g-answer').focus();" 
                             class="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl text-lg hover:from-orange-600 hover:to-red-600 transition">
                         ✓
                     </button>
