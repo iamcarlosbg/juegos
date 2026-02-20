@@ -107,7 +107,7 @@
             <section class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
                 <h2 class="text-lg font-bold text-gray-800 mb-3">Juegos educativos multijugador disponibles</h2>
                 <div class="grid md:grid-cols-2 gap-3 text-sm text-gray-600">
-                    <div><h3 class="font-bold text-blue-700 mb-1">🔢 Matemáticas</h3><p>Invasores Matemáticos, Jerarquía de Operaciones, Mayor o Menor y Completa el Número. Practica sumas, restas y multiplicaciones compitiendo contra otro jugador en tiempo real.</p></div>
+                    <div><h3 class="font-bold text-blue-700 mb-1">🔢 Matemáticas</h3><p>Cálculo Mental, Jerarquía de Operaciones, Mayor o Menor y Completa el Número. Practica sumas, restas, multiplicaciones y divisiones compitiendo contra otro jugador en tiempo real.</p></div>
                     <div><h3 class="font-bold text-green-700 mb-1">📖 Lengua</h3><p>Sopa de Letras y Completa la Letra. Mejora vocabulario y ortografía en modo competitivo contra otros jugadores.</p></div>
                     <div><h3 class="font-bold text-purple-700 mb-1">🧩 Lógica</h3><p>Seguir Patrones. Compite memorizando y repitiendo secuencias de colores cada vez más complejas.</p></div>
                     <div><h3 class="font-bold text-orange-700 mb-1">⌨️ Mecanografía</h3><p>Práctica de Escritura. Escribe frases a contrarreloj y descubre quién teclea más rápido y con menos errores.</p></div>
@@ -187,8 +187,8 @@
     <script>
     var MULTIPLAYER_GAMES = {
       matematicas: [
-        { id: 'invasores-matematicos', name: 'Invasores Matemáticos', emoji: '👾', desc: 'Resuelve operaciones rápidamente' },
-        { id: 'jerarquia-operaciones', name: 'Jerarquía Operaciones', emoji: '🧮', desc: 'Orden correcto de operaciones' },
+        { id: 'invasores-matematicos', name: 'Cálculo Mental', emoji: '🧠', desc: 'Resuelve operaciones rápidamente' },
+        { id: 'jerarquia-operaciones', name: 'Jerarquía Operaciones', emoji: '🧮', desc: 'Resuelve operaciones con jerarquía (+, -, ×, ÷)' },
         { id: 'mayor-menor', name: 'Mayor o Menor', emoji: '⚖️', desc: 'Compara números y operaciones' },
         { id: 'completa-numero', name: 'Completa el Número', emoji: '🔢', desc: 'Encuentra el número que falta' }
       ],
@@ -570,7 +570,8 @@
       for(var i=0;i<count;i++){
         var op;
         switch(game){
-          case 'invasores-matematicos':case 'jerarquia-operaciones':case 'completa-numero': op=genMath(diff);break;
+          case 'invasores-matematicos':case 'completa-numero': op=genMath(diff);break;
+          case 'jerarquia-operaciones': op=genJerarquia(diff);break;
           case 'mayor-menor': op=genCompare(diff);break;
           case 'sopa-letras':case 'completa-letra': op=genLetter(diff,i);break;
           case 'seguir-patrones': op=genPattern(diff,i);break;
@@ -587,6 +588,28 @@
       if(t==='suma'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*r)+1;ans=a+b;txt=a+' + '+b;}
       else if(t==='resta'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*a)+1;ans=a-b;txt=a+' - '+b;}
       else{a=Math.floor(Math.random()*10)+1;b=Math.floor(Math.random()*10)+1;ans=a*b;txt=a+' × '+b;}
+      return{type:'math',text:txt+' = ?',answer:ans};
+    }
+    // Jerarquía de operaciones: a ± (b × c) o a ± (b ÷ c), resultado >= 0
+    function genJerarquia(d){
+      var max=d==='facil'?5:d==='medio'?10:15;
+      var rng=function(){return Math.floor(Math.random()*max)+1;};
+      var useDiv=(d==='dificil'&&Math.random()<0.4);
+      var useSub=Math.random()<0.5;
+      var a,b,c,pr,txt,ans;
+      if(useDiv){
+        c=Math.floor(Math.random()*(max-1))+2;
+        var q=rng(); b=c*q; pr=q;
+      } else {
+        b=rng(); c=rng(); pr=b*c;
+      }
+      if(useSub){
+        a=pr+Math.floor(Math.random()*max); ans=a-pr;
+        txt=a+(useDiv?' - '+b+' ÷ '+c:' - '+b+' × '+c);
+      } else {
+        a=rng(); ans=a+pr;
+        txt=a+(useDiv?' + '+b+' ÷ '+c:' + '+b+' × '+c);
+      }
       return{type:'math',text:txt+' = ?',answer:ans};
     }
     function genCompare(d){
