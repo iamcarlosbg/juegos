@@ -121,7 +121,7 @@
                            class="flex-1 px-4 py-3 bg-gray-700 border-2 border-gray-600 rounded-xl text-xl font-bold text-center text-white focus:outline-none focus:border-orange-500"
                            placeholder="Tu respuesta..."
                            onkeydown="if(event.key==='Enter') submitAnswer()">
-                    <button onclick="submitAnswer()" 
+                    <button onmousedown="event.preventDefault()" ontouchstart="event.preventDefault()" onclick="submitAnswer()" 
                             class="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl text-lg hover:from-orange-600 hover:to-red-600 transition">
                         ✓
                     </button>
@@ -290,6 +290,9 @@
 
         // Configurar input según tipo de juego
         setupInputType();
+
+        // Activar sistema de foco permanente para móvil
+        initMobileFocus();
       });
     }
 
@@ -335,6 +338,11 @@
         return;
       }
 
+      // Foco inmediato y síncrono — fundamental para que iOS mantenga el teclado abierto
+      var answerEl = document.getElementById('g-answer');
+      answerEl.value = '';
+      answerEl.focus();
+
       var op = game.operations[game.current];
       var questionEl = document.getElementById('g-question-text');
       var hintEl = document.getElementById('g-question-hint');
@@ -359,18 +367,47 @@
         hintEl.textContent = 'Escribe el emoji que sigue';
       }
 
-      // Limpiar input y forzar foco (importante para móvil)
+      // Limpiar input — el foco se mantiene siempre activo (ver forceFocus abajo)
       var answerEl = document.getElementById('g-answer');
       answerEl.value = '';
-      // Delay para que el DOM se actualice antes del focus (necesario en iOS/Android)
-      setTimeout(function() {
-        answerEl.focus();
-        // Doble intento para dispositivos que ignoran el primer focus
-        answerEl.click();
-      }, 100);
 
       // Limpiar feedback
       document.getElementById('g-feedback').textContent = '';
+    }
+
+    // ═══ FORZAR FOCO PERMANENTE EN MÓVIL ═══
+    // En móvil, focus() programático no abre el teclado fuera de eventos de usuario.
+    // Estrategia: nunca dejamos que el input pierda el foco. Si lo pierde, lo recuperamos.
+    function initMobileFocus() {
+      var input = document.getElementById('g-answer');
+      if (!input) return;
+
+      // Prevenir que el input pierda el foco durante el juego
+      input.addEventListener('blur', function() {
+        if (game.finished) return;
+        // Refocus inmediato — en móvil esto no abre el teclado si no hay gesto,
+        // pero al menos mantiene el cursor listo
+        setTimeout(function() {
+          if (!game.finished) input.focus();
+        }, 50);
+      });
+
+      // Tocar CUALQUIER parte de la pantalla del juego devuelve el foco al input
+      document.getElementById('game-screen').addEventListener('touchstart', function(e) {
+        if (game.finished) return;
+        var tag = e.target.tagName;
+        // No interferir con botones (compare, submit)
+        if (tag === 'BUTTON') return;
+        e.preventDefault();
+        input.focus();
+      }, { passive: false });
+
+      // También con click (para escritorio)
+      document.getElementById('game-screen').addEventListener('click', function(e) {
+        if (game.finished) return;
+        if (e.target.tagName === 'BUTTON') return;
+        input.focus();
+      });
     }
 
     // ═══ ENVIAR RESPUESTA ═══
