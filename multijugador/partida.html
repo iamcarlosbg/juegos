@@ -297,20 +297,34 @@
     function setupInputType() {
       if (game.operations.length === 0) return;
       var type = game.operations[0].type;
+      var input = document.getElementById('g-answer');
+
+      // Atributos base para móvil
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('autocorrect', 'off');
+      input.setAttribute('autocapitalize', 'off');
+      input.setAttribute('spellcheck', 'false');
 
       if (type === 'compare') {
         document.getElementById('g-input-area').classList.add('hidden');
         document.getElementById('g-compare-area').classList.remove('hidden');
       } else if (type === 'typing') {
-        document.getElementById('g-answer').inputMode = 'text';
-        document.getElementById('g-answer').placeholder = 'Escribe la frase...';
+        input.inputMode = 'text';
+        input.type = 'text';
+        input.placeholder = 'Escribe la frase...';
+        input.removeAttribute('maxLength');
       } else if (type === 'letter') {
-        document.getElementById('g-answer').inputMode = 'text';
-        document.getElementById('g-answer').maxLength = 1;
-        document.getElementById('g-answer').placeholder = 'Letra...';
+        input.inputMode = 'text';
+        input.type = 'text';
+        input.maxLength = 1;
+        input.placeholder = 'Letra...';
       } else {
-        document.getElementById('g-answer').inputMode = 'numeric';
-        document.getElementById('g-answer').placeholder = 'Tu respuesta...';
+        // math — teclado numérico en móvil
+        input.inputMode = 'numeric';
+        input.type = 'number';
+        input.pattern = '[0-9]*';
+        input.placeholder = 'Tu respuesta...';
+        input.removeAttribute('maxLength');
       }
     }
 
@@ -345,10 +359,15 @@
         hintEl.textContent = 'Escribe el emoji que sigue';
       }
 
-      // Limpiar input
+      // Limpiar input y forzar foco (importante para móvil)
       var answerEl = document.getElementById('g-answer');
       answerEl.value = '';
-      answerEl.focus();
+      // Delay para que el DOM se actualice antes del focus (necesario en iOS/Android)
+      setTimeout(function() {
+        answerEl.focus();
+        // Doble intento para dispositivos que ignoran el primer focus
+        answerEl.click();
+      }, 100);
 
       // Limpiar feedback
       document.getElementById('g-feedback').textContent = '';
@@ -502,10 +521,45 @@
       updates['players/' + game.playerId + '/finishTime'] = totalTime;
       matchRef.update(updates);
 
-      // Esperar un momento para que el oponente también termine, o mostrar resultados
+      // Mostrar mensaje de espera en la zona de pregunta
+      document.getElementById('g-question-text').textContent = '✅ ¡Has terminado!';
+      document.getElementById('g-question-hint').textContent = '';
+      document.getElementById('g-input-area').classList.add('hidden');
+      document.getElementById('g-compare-area').classList.add('hidden');
+      document.getElementById('g-feedback').textContent = '';
+
+      // Comprobar si el oponente ya terminó
+      matchRef.child('players/' + game.opponentId).once('value').then(function(snap) {
+        var oppData = snap.val();
+        if (oppData && oppData.finished) {
+          // Oponente ya terminó → mostrar resultados
+          showResults(totalTime);
+        } else {
+          // Oponente sigue jugando → esperar
+          document.getElementById('g-question-hint').textContent = 'Esperando a que tu oponente termine...';
+          waitForOpponent(totalTime);
+        }
+      });
+    }
+
+    // ═══ ESPERAR AL OPONENTE ═══
+    function waitForOpponent(myTime) {
+      var waitListener = matchRef.child('players/' + game.opponentId + '/finished').on('value', function(snap) {
+        if (snap.val() === true) {
+          // Oponente terminó → dejar de escuchar y mostrar resultados
+          matchRef.child('players/' + game.opponentId + '/finished').off('value', waitListener);
+          // Pequeña pausa para que Firebase sincronice el score final
+          setTimeout(function() {
+            showResults(myTime);
+          }, 800);
+        }
+      });
+
+      // Timeout de seguridad: si el oponente no termina en 60s, mostrar resultados igualmente
       setTimeout(function() {
-        showResults(totalTime);
-      }, 1500);
+        matchRef.child('players/' + game.opponentId + '/finished').off('value', waitListener);
+        showResults(myTime);
+      }, 60000);
     }
 
     // ═══ MOSTRAR RESULTADOS ═══
