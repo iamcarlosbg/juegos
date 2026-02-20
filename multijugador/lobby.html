@@ -7,16 +7,57 @@
     <meta name="description" content="Compite en juegos educativos de matemáticas, lengua y lógica contra otros jugadores en tiempo real. Mismas operaciones, mismo tiempo. ¡Reta a tus amigos o busca un oponente aleatorio!">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Aprende y Juega">
-    <meta property="og:title" content="Modo Multijugador — Juegos Educativos en Tiempo Real">
-    <meta property="og:description" content="Compite en juegos educativos contra otros jugadores o reta a un amigo con un enlace directo.">
+    <meta property="og:title" id="og-title" content="Multijugador — Juegos Educativos en Tiempo Real">
+    <meta property="og:description" id="og-desc" content="Compite en juegos educativos contra otros jugadores o reta a un amigo con un enlace directo.">
     <meta property="og:url" content="https://aprendeyjuega.com/multijugador/lobby.html">
-    <meta property="og:image" content="https://aprendeyjuega.com/imagenes/preview-academia.png">
+    <meta property="og:image" id="og-image" content="https://aprendeyjuega.com/imagenes/preview-general.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Modo Multijugador — Juegos Educativos en Tiempo Real">
-    <meta name="twitter:description" content="Compite en juegos educativos contra otros jugadores o reta a un amigo.">
-    <meta name="twitter:image" content="https://aprendeyjuega.com/imagenes/preview-academia.png">
+    <meta name="twitter:title" id="tw-title" content="Multijugador — Juegos Educativos en Tiempo Real">
+    <meta name="twitter:description" id="tw-desc" content="Compite en juegos educativos contra otros jugadores o reta a un amigo.">
+    <meta name="twitter:image" id="tw-image" content="https://aprendeyjuega.com/imagenes/preview-general.png">
+
+    <!-- OG dinámico: si la URL tiene ?reto=, ajustar imagen y texto según materia -->
+    <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var reto = params.get('reto');
+      var materia = params.get('materia');
+      if (!reto) return;
+      
+      var OG_IMAGES = {
+        matematicas: 'preview-matematicas.png',
+        lengua: 'preview-lengua.png',
+        logica: 'preview-logica.png',
+        mecanografia: 'preview-mecanografia.png'
+      };
+      var OG_TITLES = {
+        matematicas: 'Te retan a un duelo de Matematicas!',
+        lengua: 'Te retan a un duelo de Lengua!',
+        logica: 'Te retan a un duelo de Logica!',
+        mecanografia: 'Te retan a un duelo de Escritura!'
+      };
+
+      var img = OG_IMAGES[materia] || 'preview-reto.png';
+      var title = OG_TITLES[materia] || 'Te retan a un duelo! Crees que puedes ganar?';
+      var desc = 'Acepta el reto y compite en tiempo real en aprendeyjuega.com';
+      var imgUrl = 'https://aprendeyjuega.com/imagenes/' + img;
+
+      // Update meta tags
+      var updates = {
+        'og-title': title, 'og-desc': desc, 'og-image': imgUrl,
+        'tw-title': title, 'tw-desc': desc, 'tw-image': imgUrl
+      };
+      Object.keys(updates).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+          var attr = el.getAttribute('property') ? 'content' : 'content';
+          el.setAttribute('content', updates[id]);
+        }
+      });
+    })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="canonical" href="https://aprendeyjuega.com/multijugador/lobby.html">
     <meta name="theme-color" content="#EA580C">
@@ -498,7 +539,7 @@
       });
       lobbyState.challengeRef.onDisconnect().update({status:'expired'});
       // Build URL preserving feature flags
-      var base = window.location.origin+window.location.pathname+'?reto='+cid;
+      var base = window.location.origin+window.location.pathname+'?reto='+cid+'&materia='+lobbyState.subject;
       var cur = new URLSearchParams(window.location.search);
       cur.forEach(function(v,k){ if(k.startsWith('ff_')) base+='&'+k+'='+v; });
       document.getElementById('challenge-url').value = base;
