@@ -15,7 +15,7 @@ const SITE_CONFIG = {
     },
     facebook: {
       enabled: false,  // ← Cambiar a true para mostrar en TODAS las páginas
-      url: "https://www.facebook.com/CuentosHermanosRomero/"  // ← Tu URL aquí
+      url: "https://www.facebook.com/aprendejuega/"  // ← Tu URL aquí
     },
     youtube: {
       enabled: false,  // ← Cambiar a true para mostrar en TODAS las páginas
