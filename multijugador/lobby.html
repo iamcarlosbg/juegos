@@ -273,7 +273,7 @@
       }
       try { rtdb = firebase.database(); console.log('✅ RTDB listo'); } catch(e) { console.error('❌ RTDB:', e); }
       if (typeof isFeatureEnabled === 'function' && isFeatureEnabled('showDevBanner')) document.getElementById('dev-banner').style.display = 'block';
-      var saved = sessionStorage.getItem('mp_playerName');
+      var saved = localStorage.getItem('mp_playerName');
       if (saved) document.getElementById('player-name').value = saved;
       checkChallengeInvite();
     });
@@ -292,11 +292,11 @@
         var gn = GAME_NAMES[d.game] ? GAME_NAMES[d.game].name : d.game;
         var dl = DIFFICULTY_LABELS[d.difficulty] || d.difficulty;
         if (confirm('🎯 ' + d.hostName + ' te reta a ' + gn + ' (' + dl + ')\n\n¿Aceptas el reto?')) {
-          var name = prompt('Escribe tu nombre:', sessionStorage.getItem('mp_playerName') || '');
+          var name = prompt('Escribe tu nombre:', localStorage.getItem('mp_playerName') || '');
           if (!name) return;
           lobbyState.playerName = name.substring(0, 15).toUpperCase();
           lobbyState.playerId = 'PLY_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-          sessionStorage.setItem('mp_playerName', lobbyState.playerName);
+          localStorage.setItem('mp_playerName', lobbyState.playerName);
           joinChallenge(cid, d);
         }
       });
@@ -396,7 +396,7 @@
       lobbyState.playerName = name.substring(0,15).toUpperCase();
       lobbyState.playerId = 'PLY_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
       lobbyState.game = gid; lobbyState.difficulty = diff;
-      sessionStorage.setItem('mp_playerName', lobbyState.playerName);
+      localStorage.setItem('mp_playerName', lobbyState.playerName);
 
       var qp = 'matchmaking/queue/'+gid+'_'+diff;
       lobbyState.queueRef = rtdb.ref(qp+'/'+lobbyState.playerId);
@@ -443,7 +443,7 @@
       lobbyState.playerName = name.substring(0,15).toUpperCase();
       lobbyState.playerId = 'PLY_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
       lobbyState.flexActive = false; lobbyState.flexListeners = [];
-      sessionStorage.setItem('mp_playerName', lobbyState.playerName);
+      localStorage.setItem('mp_playerName', lobbyState.playerName);
 
       document.getElementById('screen-select').classList.add('hidden');
       document.getElementById('screen-searching').classList.remove('hidden');
@@ -452,6 +452,7 @@
       lobbyState.searchTimer = setInterval(function(){
         lobbyState.searchSeconds++; document.getElementById('search-seconds').textContent=lobbyState.searchSeconds;
         if (lobbyState.searchSeconds===FLEX_SEARCH_DELAY && !lobbyState.flexActive) startFlexSearch();
+        if (lobbyState.searchSeconds>=30) startBotMatch();
       },1000);
 
       var qk = lobbyState.game+'_'+lobbyState.difficulty;
@@ -528,7 +529,7 @@
       if (!lobbyState.game||!lobbyState.difficulty) { alert('Elige juego y dificultad primero'); return; }
       lobbyState.playerName = name.substring(0,15).toUpperCase();
       lobbyState.playerId = 'PLY_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
-      sessionStorage.setItem('mp_playerName', lobbyState.playerName);
+      localStorage.setItem('mp_playerName', lobbyState.playerName);
       var cid = 'R_'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);
       lobbyState.challengeId = cid;
       lobbyState.challengeRef = rtdb.ref('challenges/'+cid);
@@ -575,7 +576,7 @@
       lobbyState.flexListeners.forEach(function(i){i.ref.off('value',i.listener);}); lobbyState.flexListeners=[];
       sessionStorage.setItem('mp_matchId',mid);
       sessionStorage.setItem('mp_playerId',lobbyState.playerId);
-      sessionStorage.setItem('mp_playerName',lobbyState.playerName);
+      localStorage.setItem('mp_playerName',lobbyState.playerName);
       sessionStorage.setItem('mp_game',lobbyState.game);
       rtdb.ref('matches/'+mid).once('value').then(function(snap){
         var m=snap.val(); if(!m) return;
@@ -614,7 +615,8 @@
           case 'invasores-matematicos':case 'completa-numero': op=genMath(diff);break;
           case 'jerarquia-operaciones': op=genJerarquia(diff);break;
           case 'mayor-menor': op=genCompare(diff);break;
-          case 'sopa-letras':case 'completa-letra': op=genLetter(diff,i);break;
+          case 'sopa-letras': op=genSopa(diff,i);break;
+          case 'completa-letra': op=genLetter(diff,i);break;
           case 'seguir-patrones': op=genPattern(diff,i);break;
           case 'practica-escritura': op=genTyping(diff,i);break;
           default: op=genMath(diff);
@@ -664,6 +666,42 @@
       var word=w[(i*7+3)%w.length],hi=(i*3+1)%word.length;
       return{type:'letter',text:word.substring(0,hi)+'_'+word.substring(hi+1),answer:word[hi],fullWord:word};
     }
+    function genSopa(d,i){
+      var banks={
+        facil:[
+          {word:'GATO',hint:'Animal que maúlla'},{word:'CASA',hint:'Donde vivimos'},{word:'PERRO',hint:'Animal que ladra'},
+          {word:'LUNA',hint:'Brilla de noche'},{word:'SOL',hint:'Estrella que nos calienta'},{word:'MESA',hint:'Mueble para comer'},
+          {word:'FLOR',hint:'Crece en el jardín'},{word:'ARBOL',hint:'Tiene hojas y ramas'},{word:'PATO',hint:'Ave que nada'},
+          {word:'RANA',hint:'Salta y dice croac'},{word:'VACA',hint:'Da leche'},{word:'LEON',hint:'Rey de la selva'},
+          {word:'PERA',hint:'Fruta verde'},{word:'OSO',hint:'Animal grande del bosque'},{word:'MAR',hint:'Agua salada'},
+          {word:'PAN',hint:'Se come en el desayuno'},{word:'TORO',hint:'Animal con cuernos'},{word:'SILLA',hint:'Para sentarse'},
+          {word:'PUMA',hint:'Felino americano'},{word:'LOBO',hint:'Aúlla a la luna'}
+        ],
+        medio:[
+          {word:'ELEFANTE',hint:'Animal con trompa'},{word:'MARIPOSA',hint:'Insecto con alas de colores'},
+          {word:'JIRAFA',hint:'Animal de cuello largo'},{word:'TORTUGA',hint:'Lleva su casa encima'},
+          {word:'DELFIN',hint:'Mamífero marino inteligente'},{word:'CABALLO',hint:'Animal que se monta'},
+          {word:'GUITARRA',hint:'Instrumento de cuerdas'},{word:'ESTRELLA',hint:'Brilla en el cielo'},
+          {word:'PLANETA',hint:'Cuerpo celeste que orbita'},{word:'VENTANA',hint:'Para mirar afuera'},
+          {word:'COHETE',hint:'Viaja al espacio'},{word:'PELOTA',hint:'Se usa en deportes'},
+          {word:'GALLETA',hint:'Dulce crujiente'},{word:'PINTURA',hint:'Arte con colores'},
+          {word:'CAMION',hint:'Vehículo grande de carga'}
+        ],
+        dificil:[
+          {word:'DINOSAURIO',hint:'Reptil extinto gigante'},{word:'COMPUTADORA',hint:'Máquina para trabajar y jugar'},
+          {word:'HELICOPTERO',hint:'Vuela con hélices'},{word:'REFRIGERADOR',hint:'Mantiene la comida fría'},
+          {word:'BICICLETA',hint:'Vehículo de dos ruedas'},{word:'TELEVISION',hint:'Pantalla para ver programas'},
+          {word:'CALENDARIO',hint:'Muestra los días del mes'},{word:'ASTRONAUTA',hint:'Viaja al espacio'},
+          {word:'BIBLIOTECA',hint:'Lugar con muchos libros'},{word:'VENTILADOR',hint:'Da aire fresco'},
+          {word:'MATEMATICAS',hint:'Ciencia de los números'},{word:'CONSTRUCTOR',hint:'Persona que construye'}
+        ]
+      };
+      var list=banks[d]||banks.facil;
+      var item=list[i%list.length];
+      var shuffled=item.word.split('').sort(function(){return Math.random()-0.5;}).join('');
+      if(shuffled===item.word) shuffled=item.word.split('').reverse().join('');
+      return{type:'sopa',text:shuffled,hint:item.hint,answer:item.word};
+    }
     function genPattern(d,i){
       var c=['🔴','🔵','🟢','🟡','🟣','🟠'],len=d==='facil'?3:d==='medio'?4:5,p=[],s=i*17+42;
       for(var j=0;j<len;j++) p.push(c[(s+j*13)%c.length]);
@@ -674,6 +712,35 @@
         medio:['Los pájaros cantan en el árbol','Mi hermana lee un libro grande','El mar tiene olas enormes','Jugamos en el parque con amigos','La profesora explica la lección','El tren llega a las ocho','Necesito un lápiz y una goma','Mañana vamos de excursión','El viento mueve las hojas','Estudiamos para el examen'],
         dificil:['La biblioteca municipal cierra los domingos','Los científicos descubrieron una nueva especie','El campeonato internacional comienza mañana','La temperatura ha descendido esta semana','El restaurante ofrece platos vegetarianos']};
       var l=ph[d]||ph.facil; return{type:'typing',text:l[i%l.length],answer:l[i%l.length]};
+    }
+
+    // ═══ BOT MATCH AFTER 30s ═══
+    function startBotMatch() {
+      clearInterval(lobbyState.searchTimer);
+      if(lobbyState.queueRef) lobbyState.queueRef.remove();
+      lobbyState.flexListeners.forEach(function(i){i.ref.off('value',i.listener);});
+
+      var mid = 'M_BOT_'+Date.now()+'_'+Math.random().toString(36).substr(2,8);
+      var botId = 'BOT_'+Date.now();
+      var ops = generateOperationsForGame(lobbyState.game, lobbyState.difficulty, 20);
+
+      var md = { matchId:mid, players:{}, operations:ops,
+        config:{subject:lobbyState.subject,game:lobbyState.game,difficulty:lobbyState.difficulty,totalOperations:ops.length,timeLimitSeconds:120},
+        status:'active', isBot:true, createdAt:firebase.database.ServerValue.TIMESTAMP };
+      md.players[lobbyState.playerId] = {name:lobbyState.playerName, score:0, current:0, finished:false, answers:{}};
+      md.players[botId] = {name:'Bot 🤖', score:0, current:0, finished:false, answers:{}, isBot:true};
+
+      var up = {};
+      up['matches/'+mid] = md;
+      up['matchmaking/assignments/'+lobbyState.playerId] = mid;
+
+      rtdb.ref().update(up).then(function(){
+        sessionStorage.setItem('mp_matchId',mid);
+        sessionStorage.setItem('mp_playerId',lobbyState.playerId);
+        sessionStorage.setItem('mp_game',lobbyState.game);
+        sessionStorage.setItem('mp_isBot','true');
+        onMatchFound(mid);
+      });
     }
 
     // ═══ CLEANUP ═══

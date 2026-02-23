@@ -178,11 +178,17 @@
                 </div>
             </div>
 
-            <!-- Botones -->
+            <!-- Rematch / Botones -->
+            <div id="r-rematch-area" class="mb-4 hidden">
+                <p id="r-rematch-status" class="text-sm text-gray-400 mb-2"></p>
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div id="r-rematch-bar" class="bg-orange-500 h-full rounded-full transition-all" style="width:100%"></div>
+                </div>
+            </div>
             <div class="flex gap-3 justify-center flex-wrap">
-                <a href="lobby.html" class="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl text-lg hover:from-orange-600 hover:to-red-600 transition">
+                <button id="btn-rematch" onclick="requestRematch()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl text-lg hover:from-orange-600 hover:to-red-600 transition">
                     🔄 Jugar de nuevo
-                </a>
+                </button>
                 <a href="../index.html" class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-6 py-3 rounded-xl text-lg transition">
                     🏠 Inicio
                 </a>
@@ -223,7 +229,7 @@
       var params = new URLSearchParams(window.location.search);
       game.matchId = params.get('match');
       game.playerId = params.get('player');
-      game.playerName = sessionStorage.getItem('mp_playerName') || 'Jugador';
+      game.playerName = localStorage.getItem('mp_playerName') || 'Jugador';
 
       if (!game.matchId || !game.playerId) {
         alert('Error: No se encontró la partida. Volviendo al lobby.');
@@ -285,6 +291,15 @@
         // Iniciar timer
         startTimer();
 
+        // Detectar si es partida contra bot
+        if (data.isBot || sessionStorage.getItem('mp_isBot') === 'true') {
+          bot.active = true;
+          game.opponentName = 'Bot 🤖';
+          document.getElementById('g-name-opp').textContent = 'Bot 🤖';
+          sessionStorage.removeItem('mp_isBot');
+          setTimeout(() => startBotOpponent(), 2000);
+        }
+
         // Escuchar cambios del oponente en tiempo real
         listenToOpponent();
 
@@ -308,7 +323,11 @@
       input.setAttribute('autocapitalize', 'off');
       input.setAttribute('spellcheck', 'false');
 
-      if (type === 'compare') {
+      if (type === 'sopa') {
+        input.inputMode = 'text';
+        input.type = 'text';
+        input.placeholder = 'Escribe la palabra...';
+      } else if (type === 'compare') {
         document.getElementById('g-input-area').classList.add('hidden');
         document.getElementById('g-compare-area').classList.remove('hidden');
       } else if (type === 'typing') {
@@ -362,6 +381,13 @@
         questionEl.textContent = op.text;
         questionEl.style.fontSize = '1.5rem';
         hintEl.textContent = 'Escribe la frase exacta';
+      } else if (op.type === 'sopa') {
+        questionEl.textContent = op.text;
+        hintEl.textContent = '💡 ' + (op.hint || 'Ordena las letras');
+        var input = document.getElementById('g-answer');
+        input.inputMode = 'text';
+        input.type = 'text';
+        input.placeholder = 'Escribe la palabra...';
       } else if (op.type === 'pattern') {
         questionEl.textContent = op.text;
         hintEl.textContent = 'Escribe el emoji que sigue';
@@ -426,6 +452,8 @@
         correct = userAnswer.toUpperCase() === op.answer.toUpperCase();
       } else if (op.type === 'typing') {
         correct = userAnswer === op.answer;
+      } else if (op.type === 'sopa') {
+        correct = userAnswer.toUpperCase() === op.answer.toUpperCase();
       } else if (op.type === 'pattern') {
         correct = userAnswer === op.answer;
       }
@@ -652,6 +680,9 @@
           document.getElementById('r-subtitle').textContent = game.opponentName + ' ha ganado esta vez. ¡Inténtalo de nuevo!';
         }
 
+        // Guardar resultado en Firestore
+        saveMultiplayerResult(myScore, oppScore, bot.active);
+
         // Marcar match como finalizado
         matchRef.update({
           status: 'finished',
@@ -667,11 +698,215 @@
       });
     }
 
+    // ═══ GUARDAR RESULTADO EN FIRESTORE ═══
+    function saveMultiplayerResult(myScore, oppScore, isBot) {
+      try {
+        const db = firebase.firestore();
+        db.collection('scores_multiplayer').add({
+          name: game.playerName,
+          score: myScore,
+          opponentName: game.opponentName,
+          opponentScore: oppScore,
+          matchId: game.matchId,
+          game: sessionStorage.getItem('mp_game') || 'unknown',
+          type: isBot ? 'bot' : 'humano',
+          result: myScore > oppScore ? 'victoria' : myScore < oppScore ? 'derrota' : 'empate',
+          date: new Date().toISOString(),
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch(e) { console.error('Error guardando resultado:', e); }
+    }
+
+    // ═══ SISTEMA DE BOT ═══
+    const bot = {
+      active: false,
+      timer: null,
+      score: 0,
+      current: 0,
+      correct: 0,
+      avgResponseTime: 3000,
+      accuracy: 0.75,
+      adaptMultiplier: 1
+    };
+
+    function startBotOpponent() {
+      bot.active = true;
+      game.opponentName = 'Bot 🤖';
+      document.getElementById('g-name-opp').textContent = 'Bot 🤖';
+      scheduleBotAnswer();
+    }
+
+    function scheduleBotAnswer() {
+      if (game.finished || bot.current >= game.totalOps) {
+        finishBot();
+        return;
+      }
+      const baseTime = bot.avgResponseTime * bot.adaptMultiplier;
+      const variance = baseTime * 0.4 * (Math.random() - 0.5);
+      const delay = Math.max(1500, baseTime + variance);
+
+      bot.timer = setTimeout(() => {
+        if (game.finished) return;
+        const isCorrect = Math.random() < bot.accuracy;
+        if (isCorrect) {
+          const timeBonus = Math.max(0, Math.floor((120 - bot.current * 5) / 10)) * 5;
+          bot.score += 100 + timeBonus;
+          bot.correct++;
+        }
+        bot.current++;
+
+        document.getElementById('g-score-opp').textContent = bot.score;
+        const progress = (bot.current / game.totalOps) * 100;
+        document.getElementById('g-progress-opp').style.width = progress + '%';
+
+        if (bot.current >= game.totalOps) {
+          finishBot();
+        } else {
+          adaptBotDifficulty();
+          scheduleBotAnswer();
+        }
+      }, delay);
+    }
+
+    function adaptBotDifficulty() {
+      if (game.score > bot.score * 1.3) {
+        bot.accuracy = Math.min(0.92, bot.accuracy + 0.02);
+        bot.avgResponseTime = Math.max(1800, bot.avgResponseTime - 100);
+      } else if (bot.score > game.score * 1.3) {
+        bot.accuracy = Math.max(0.55, bot.accuracy - 0.02);
+        bot.avgResponseTime = Math.min(5000, bot.avgResponseTime + 100);
+      }
+    }
+
+    function finishBot() {
+      if (!bot.active) return;
+      matchRef.child('players/' + game.opponentId).update({
+        finished: true, score: bot.score, finishTime: Math.round((Date.now() - game.startTime) / 1000)
+      });
+    }
+
+    // ═══ REMATCH SYSTEM ═══
+    let rematchState = { requested: false, timer: null, countdown: 15 };
+
+    function requestRematch() {
+      if (rematchState.requested) return;
+      rematchState.requested = true;
+
+      const btn = document.getElementById('btn-rematch');
+      btn.disabled = true;
+      btn.textContent = '⏳ Esperando rival...';
+
+      if (bot.active) {
+        window.location.href = 'lobby.html';
+        return;
+      }
+
+      matchRef.child('rematch/' + game.playerId).set({
+        ready: true, timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      document.getElementById('r-rematch-area').classList.remove('hidden');
+      rematchState.countdown = 15;
+      updateRematchUI();
+
+      matchRef.child('rematch/' + game.opponentId).on('value', function(snap) {
+        if (snap.val() && snap.val().ready) {
+          clearInterval(rematchState.timer);
+          matchRef.child('rematch/' + game.opponentId).off();
+          createRematch();
+        }
+      });
+
+      rematchState.timer = setInterval(function() {
+        rematchState.countdown--;
+        updateRematchUI();
+        if (rematchState.countdown <= 0) {
+          clearInterval(rematchState.timer);
+          matchRef.child('rematch/' + game.opponentId).off();
+          matchRef.child('rematch/' + game.playerId).remove();
+          window.location.href = 'lobby.html';
+        }
+      }, 1000);
+    }
+
+    function updateRematchUI() {
+      document.getElementById('r-rematch-status').textContent =
+        'Esperando a ' + game.opponentName + '... ' + rematchState.countdown + 's';
+      document.getElementById('r-rematch-bar').style.width =
+        (rematchState.countdown / 15 * 100) + '%';
+    }
+
+    function createRematch() {
+      const params = new URLSearchParams(window.location.search);
+      const sorted = [game.playerId, game.opponentId].sort();
+      if (sorted[0] !== game.playerId) return;
+
+      const gameName = sessionStorage.getItem('mp_game') || 'invasores-matematicos';
+      const script = document.createElement('script');
+      script.src = 'lobby.html';
+
+      const mid = 'M_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+      matchRef.once('value').then(function(snap) {
+        const oldData = snap.val();
+        const diff = oldData.config.difficulty;
+        const subject = oldData.config.subject;
+
+        fetch('lobby.html').then(r => r.text()).then(function() {
+          const ops = [];
+          for (let i = 0; i < 20; i++) {
+            ops.push({ id: i + 1, type: 'math', text: '0 + 0 = ?', answer: 0 });
+          }
+
+          const newMatch = {
+            matchId: mid,
+            players: {},
+            operations: oldData.operations.map((op, i) => {
+              const nop = { ...op }; nop.id = i + 1; return nop;
+            }),
+            config: oldData.config,
+            status: 'active',
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+            isRematch: true,
+            previousMatch: game.matchId
+          };
+
+          newMatch.operations = generateRematchOps(gameName, diff);
+          newMatch.players[game.playerId] = { name: game.playerName, score: 0, current: 0, finished: false, answers: {} };
+          newMatch.players[game.opponentId] = { name: game.opponentName, score: 0, current: 0, finished: false, answers: {} };
+
+          const updates = {};
+          updates['matches/' + mid] = newMatch;
+          updates['matchmaking/assignments/' + game.playerId] = mid;
+          updates['matchmaking/assignments/' + game.opponentId] = mid;
+
+          rtdb.ref().update(updates).then(function() {
+            window.location.href = 'partida.html?match=' + mid + '&player=' + game.playerId;
+          });
+        });
+      });
+    }
+
+    function generateRematchOps(gameName, diff) {
+      const ops = [];
+      for (let i = 0; i < 20; i++) {
+        let op;
+        const r = diff === 'facil' ? 9 : diff === 'medio' ? 50 : 99;
+        const a = Math.floor(Math.random() * r) + 1;
+        const b = Math.floor(Math.random() * r) + 1;
+        op = { type: 'math', text: a + ' + ' + b + ' = ?', answer: a + b };
+        op.id = i + 1;
+        ops.push(op);
+      }
+      return ops;
+    }
+
     // ═══ LIMPIEZA ═══
     window.addEventListener('beforeunload', function() {
       if (matchRef && game.playerId) {
         matchRef.child('players/' + game.playerId + '/connected').set(false);
       }
+      if (bot.timer) clearTimeout(bot.timer);
+      if (rematchState.timer) clearInterval(rematchState.timer);
     });
     </script>
 
