@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modo Clase — Juegos Educativos para el Aula | Aprende y Juega</title>
+    <meta name="description" content="El profesor crea una sala y toda la clase juega a la vez. Ranking en tiempo real, mismas preguntas y resultados comparativos. Perfecto para el aula.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="theme-color" content="#059669">
+    <link rel="canonical" href="https://aprendeyjuega.com/clase/">
+    <meta property="og:title" content="Modo Clase — Juegos Educativos para el Aula">
+    <meta property="og:description" content="El profesor crea una sala y toda la clase compite en juegos educativos en tiempo real.">
+    <meta property="og:image" content="https://aprendeyjuega.com/imagenes/preview-general.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../config.js"></script>
+    <style>
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}.float{animation:float 3s ease-in-out infinite}
+        .card-hover{transition:all 0.3s ease}.card-hover:hover{transform:translateY(-8px) scale(1.02)}
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <div class="text-center mb-8">
+            <a href="../index.html" class="text-white/80 hover:text-white text-sm font-bold">← Volver al inicio</a>
+        </div>
+
+        <header class="text-center mb-10 float">
+            <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">🏫 Modo Clase</h1>
+            <p class="text-xl text-white/90 max-w-xl mx-auto">El profesor crea una sala, los alumnos se unen con un código y todos compiten a la vez con las mismas preguntas.</p>
+        </header>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-10">
+            <a href="crear.html" class="card-hover block">
+                <div class="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl text-center h-full">
+                    <div class="text-6xl mb-4">👨‍🏫</div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Soy Profesor</h2>
+                    <p class="text-gray-500 mb-4">Crea una sala, elige el juego y la dificultad. Comparte el código con tus alumnos y controla cuándo empieza la prueba.</p>
+                    <span class="inline-block bg-green-500 text-white font-bold py-2 px-6 rounded-full">Crear sala →</span>
+                </div>
+            </a>
+
+            <a href="unirse.html" class="card-hover block">
+                <div class="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl text-center h-full">
+                    <div class="text-6xl mb-4">🧑‍🎓</div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Soy Alumno</h2>
+                    <p class="text-gray-500 mb-4">Tu profesor te dará un código de 6 letras. Introdúcelo aquí para unirte a la sala y competir con tus compañeros.</p>
+                    <span class="inline-block bg-emerald-500 text-white font-bold py-2 px-6 rounded-full">Unirse con código →</span>
+                </div>
+            </a>
+        </div>
+
+        <section class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-3">¿Cómo funciona?</h2>
+            <div class="grid md:grid-cols-3 gap-4 text-sm text-gray-600">
+                <div><h3 class="font-bold text-gray-800 mb-1">1. El profesor crea la sala</h3><p>Elige materia, juego, dificultad y número de preguntas. Se genera un código de 6 caracteres.</p></div>
+                <div><h3 class="font-bold text-gray-800 mb-1">2. Los alumnos se unen</h3><p>Cada alumno introduce el código y su nombre. El profesor ve quién se ha conectado en tiempo real.</p></div>
+                <div><h3 class="font-bold text-gray-800 mb-1">3. ¡A jugar!</h3><p>Cuando el profesor pulsa "Empezar", todos reciben las mismas preguntas. Al terminar, ranking completo con tiempos, aciertos y errores.</p></div>
+            </div>
+        </section>
+
+        <section class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl">
+            <h2 class="text-lg font-bold text-gray-800 mb-3">Preguntas frecuentes</h2>
+            <div class="space-y-3 text-sm">
+                <div class="bg-gray-50 p-4 rounded-xl"><h3 class="font-bold text-gray-800 mb-1">¿Cuántos alumnos pueden unirse?</h3><p class="text-gray-600">No hay límite. Toda la clase puede unirse simultáneamente.</p></div>
+                <div class="bg-gray-50 p-4 rounded-xl"><h3 class="font-bold text-gray-800 mb-1">¿Necesitan cuenta los alumnos?</h3><p class="text-gray-600">No. Solo necesitan el código y escribir su nombre.</p></div>
+                <div class="bg-gray-50 p-4 rounded-xl"><h3 class="font-bold text-gray-800 mb-1">¿Funciona en móvil?</h3><p class="text-gray-600">Sí, funciona en cualquier dispositivo con navegador.</p></div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="bg-gray-900 text-white py-8 mt-8">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="flex justify-center gap-6 mb-6"><a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg></a></div>
+        <div class="text-center text-sm text-gray-400 mb-4">
+          <a href="../index.html" class="hover:text-white transition mx-2">Inicio</a><span>|</span>
+          <a href="../materias.html" class="hover:text-white transition mx-2">Materias</a><span>|</span>
+          <a href="../multijugador/lobby.html" class="hover:text-white transition mx-2">Multijugador</a><span>|</span>
+          <a href="../puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a><span>|</span>
+          <a href="../privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
+        </div>
+        <div class="text-center text-sm text-gray-500">© <span id="year"></span> Aprende y Juega 🎓</div>
+      </div>
+    </footer>
+</body>
+</html>

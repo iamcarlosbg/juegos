@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unirse a Clase — Modo Clase | Aprende y Juega</title>
+    <meta name="description" content="Únete a la sala de tu profesor e introduce el código para competir con tus compañeros.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="theme-color" content="#059669">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="../firebase-config.js"></script>
+    <script src="../config.js"></script>
+    <style>
+        @keyframes pulse-ring{0%{transform:scale(0.9);opacity:1}50%{transform:scale(1.1);opacity:0.5}100%{transform:scale(0.9);opacity:1}}.pulse-ring{animation:pulse-ring 2s ease-in-out infinite}
+        @keyframes correct-flash{0%{background-color:#10B981}100%{background-color:transparent}}.flash-correct{animation:correct-flash 0.5s ease-out}
+        @keyframes wrong-flash{0%{background-color:#EF4444}100%{background-color:transparent}}.flash-wrong{animation:wrong-flash 0.5s ease-out}
+        @keyframes score-pop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}.score-pop{animation:score-pop 0.3s ease}
+        @keyframes slide-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.slide-up{animation:slide-up 0.4s ease-out}
+        @keyframes confetti-fall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600">
+
+    <!-- ═══ PANTALLA 1: UNIRSE ═══ -->
+    <div id="screen-join" class="container mx-auto px-4 py-8 max-w-md">
+        <div class="text-center mb-6">
+            <a href="../index.html" class="text-white/80 hover:text-white text-sm font-bold">← Volver al inicio</a>
+        </div>
+        <div class="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl text-center">
+            <div class="text-6xl mb-4">🏫</div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Unirse a una clase</h1>
+            <p class="text-gray-500 mb-6 text-sm">Pide el código a tu profesor e introdúcelo aquí</p>
+
+            <input type="text" id="join-code" maxlength="6" placeholder="CÓDIGO"
+                   class="w-full px-4 py-4 border-3 border-green-300 rounded-2xl text-3xl font-black text-center tracking-widest uppercase focus:outline-none focus:border-green-500 mb-4"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters"
+                   oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+
+            <input type="text" id="student-name" maxlength="20" placeholder="Tu nombre"
+                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-lg font-bold text-center focus:outline-none focus:border-green-500 mb-6">
+
+            <button onclick="joinRoom()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-6 py-4 rounded-xl text-xl hover:from-green-600 hover:to-emerald-700 transition shadow-lg">
+                🚀 Unirse
+            </button>
+            <p id="join-error" class="text-red-500 text-sm mt-3 hidden"></p>
+        </div>
+    </div>
+
+    <!-- ═══ PANTALLA 2: ESPERANDO AL PROFESOR ═══ -->
+    <div id="screen-waiting" class="hidden container mx-auto px-4 py-8 max-w-md">
+        <div class="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl text-center">
+            <div class="pulse-ring inline-block mb-4">
+                <div class="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto">
+                    <span class="text-4xl">⏳</span>
+                </div>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">¡Estás dentro!</h2>
+            <p class="text-gray-500 mb-4">Esperando a que el profesor inicie la prueba...</p>
+            <div class="bg-green-50 rounded-xl p-4 mb-4">
+                <p class="text-sm text-gray-600">Profesor: <strong id="w-teacher">—</strong></p>
+                <p class="text-sm text-gray-600">Juego: <strong id="w-game">—</strong></p>
+                <p class="text-sm text-gray-600">Dificultad: <strong id="w-diff">—</strong></p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-xs text-gray-400">Alumnos conectados: <span id="w-count" class="font-bold">1</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PANTALLA 3: JUEGO EN CURSO ═══ -->
+    <div id="screen-game" class="hidden container mx-auto px-4 py-4 max-w-2xl">
+        <div class="bg-gray-800/80 backdrop-blur rounded-2xl p-4 mb-4 border border-gray-700">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-400">Pregunta <span id="g-current" class="font-bold text-white">1</span> / <span id="g-total">20</span></span>
+                <span class="text-sm text-gray-400">⏱️ <span id="g-timer" class="font-bold text-white font-mono">2:00</span></span>
+                <span class="font-mono font-bold text-green-400 text-lg" id="g-score">0 pts</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                <div id="g-progress" class="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all" style="width:0%"></div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800/80 backdrop-blur rounded-2xl p-6 mb-4 border border-gray-700">
+            <div id="g-question" class="text-center py-6">
+                <p id="g-question-text" class="text-4xl md:text-5xl font-black text-white mb-2"></p>
+                <p id="g-question-hint" class="text-sm text-gray-400"></p>
+            </div>
+            <div id="g-feedback" class="text-center text-lg font-bold mb-4 h-8"></div>
+
+            <div id="g-input-area" class="max-w-md mx-auto">
+                <div class="flex gap-3">
+                    <input type="text" id="g-answer" autocomplete="off" inputmode="numeric"
+                           class="flex-1 px-4 py-3 bg-gray-700 border-2 border-gray-600 rounded-xl text-xl font-bold text-center text-white focus:outline-none focus:border-green-500"
+                           placeholder="Tu respuesta..."
+                           onkeydown="if(event.key==='Enter') submitAnswer()">
+                    <button onclick="submitAnswer(); document.getElementById('g-answer').focus();"
+                            class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-6 py-3 rounded-xl text-lg transition">✓</button>
+                </div>
+            </div>
+
+            <div id="g-compare-area" class="hidden max-w-md mx-auto">
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="submitCompare('<')" class="bg-gray-700 hover:bg-blue-600 text-3xl font-black py-4 rounded-xl transition border-2 border-gray-600">&lt;</button>
+                    <button onclick="submitCompare('=')" class="bg-gray-700 hover:bg-yellow-600 text-3xl font-black py-4 rounded-xl transition border-2 border-gray-600">=</button>
+                    <button onclick="submitCompare('>')" class="bg-gray-700 hover:bg-red-600 text-3xl font-black py-4 rounded-xl transition border-2 border-gray-600">&gt;</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <span id="g-lives" class="text-2xl">❤️❤️❤️</span>
+        </div>
+    </div>
+
+    <!-- ═══ PANTALLA 4: ESPERANDO RESULTADOS ═══ -->
+    <div id="screen-done" class="hidden container mx-auto px-4 py-8 max-w-md">
+        <div class="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl text-center">
+            <div class="text-6xl mb-4">✅</div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Has terminado!</h2>
+            <p class="text-lg text-gray-600 mb-2">Tu puntuación: <span id="d-score" class="font-black text-green-600 text-3xl">0</span></p>
+            <p class="text-gray-500 mb-4">Aciertos: <span id="d-correct">0</span> · Errores: <span id="d-errors">0</span></p>
+            <div class="pulse-ring inline-block mb-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                    <span class="text-2xl">⏳</span>
+                </div>
+            </div>
+            <p class="text-sm text-gray-400">Esperando a que todos terminen...</p>
+            <p class="text-xs text-gray-300 mt-2">El profesor mostrará los resultados completos</p>
+        </div>
+    </div>
+
+    <!-- ═══ PANTALLA 5: RESULTADOS ALUMNO ═══ -->
+    <div id="screen-results" class="hidden container mx-auto px-4 py-8 max-w-md">
+        <div class="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl text-center">
+            <div id="r-medal" class="text-7xl mb-4">🏆</div>
+            <h2 id="r-title" class="text-3xl font-bold text-gray-800 mb-2">¡Resultados!</h2>
+            <p id="r-position" class="text-lg text-gray-500 mb-4"></p>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-blue-50 rounded-xl p-4"><div id="r-score" class="text-2xl font-black text-blue-600">0</div><div class="text-xs text-gray-500">Puntos</div></div>
+                <div class="bg-green-50 rounded-xl p-4"><div id="r-pct" class="text-2xl font-black text-green-600">0%</div><div class="text-xs text-gray-500">Acierto</div></div>
+                <div class="bg-yellow-50 rounded-xl p-4"><div id="r-time" class="text-2xl font-black text-yellow-600">—</div><div class="text-xs text-gray-500">Tiempo</div></div>
+                <div class="bg-purple-50 rounded-xl p-4"><div id="r-speed" class="text-2xl font-black text-purple-600">—</div><div class="text-xs text-gray-500">Velocidad</div></div>
+            </div>
+
+            <div id="r-ranking" class="bg-gray-50 rounded-xl p-4 mb-6 text-left"></div>
+
+            <a href="../index.html" class="inline-block bg-gray-700 hover:bg-gray-600 text-white font-bold px-6 py-3 rounded-xl transition">🏠 Inicio</a>
+        </div>
+    </div>
+
+    <script>
+    const GAME_NAMES = {
+      'invasores-matematicos': 'Cálculo Mental', 'jerarquia-operaciones': 'Jerarquía',
+      'mayor-menor': 'Mayor o Menor', 'completa-numero': 'Completa Número',
+      'sopa-letras': 'Sopa de Letras', 'completa-letra': 'Completa Letra',
+      'seguir-patrones': 'Patrones', 'practica-escritura': 'Escritura'
+    };
+    const DIFF_LABELS = { facil: 'Fácil', medio: 'Medio', dificil: 'Difícil' };
+
+    let rtdb = null;
+    let roomRef = null;
+    let me = { id: null, name: '', roomId: null };
+    let game = { operations: [], current: 0, score: 0, correctCount: 0, errorCount: 0, lives: 3, finished: false, startTime: null, timer: null, timeLeft: 120, totalOps: 20 };
+
+    window.addEventListener('load', () => {
+      try { rtdb = firebase.database(); } catch(e) { console.error(e); }
+      const saved = localStorage.getItem('classroom_studentName');
+      if (saved) document.getElementById('student-name').value = saved;
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      if (code) document.getElementById('join-code').value = code.toUpperCase();
+    });
+
+    function joinRoom() {
+      const code = document.getElementById('join-code').value.trim().toUpperCase();
+      const name = document.getElementById('student-name').value.trim();
+      const errEl = document.getElementById('join-error');
+
+      if (!code || code.length < 4) { errEl.textContent = 'Introduce el código de la sala'; errEl.classList.remove('hidden'); return; }
+      if (!name) { errEl.textContent = 'Escribe tu nombre'; errEl.classList.remove('hidden'); return; }
+
+      me.name = name.substring(0, 20).toUpperCase();
+      me.id = 'STU_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+      me.roomId = 'ROOM_' + code;
+      localStorage.setItem('classroom_studentName', me.name);
+
+      roomRef = rtdb.ref('classrooms/' + me.roomId);
+      roomRef.once('value').then(snap => {
+        const data = snap.val();
+        if (!data) { errEl.textContent = 'Sala no encontrada. Comprueba el código.'; errEl.classList.remove('hidden'); return; }
+        if (data.status === 'finished' || data.status === 'closed') { errEl.textContent = 'Esta sala ya ha terminado.'; errEl.classList.remove('hidden'); return; }
+
+        roomRef.child('students/' + me.id).set({
+          name: me.name, score: 0, current: 0, finished: false, answers: {},
+          joinedAt: firebase.database.ServerValue.TIMESTAMP
+        });
+        roomRef.child('students/' + me.id).onDisconnect().update({ disconnected: true });
+
+        document.getElementById('w-teacher').textContent = data.teacherName;
+        document.getElementById('w-game').textContent = GAME_NAMES[data.game] || data.game;
+        document.getElementById('w-diff').textContent = DIFF_LABELS[data.difficulty] || data.difficulty;
+
+        document.getElementById('screen-join').classList.add('hidden');
+
+        if (data.status === 'active') {
+          startGame(data);
+        } else {
+          document.getElementById('screen-waiting').classList.remove('hidden');
+          waitForStart(data);
+        }
+      });
+    }
+
+    function waitForStart(initialData) {
+      roomRef.child('students').on('value', snap => {
+        const count = Object.keys(snap.val() || {}).length;
+        document.getElementById('w-count').textContent = count;
+      });
+
+      roomRef.child('status').on('value', snap => {
+        if (snap.val() === 'active') {
+          roomRef.child('status').off();
+          roomRef.once('value').then(s => startGame(s.val()));
+        }
+      });
+    }
+
+    function startGame(roomData) {
+      game.operations = roomData.operations || [];
+      game.totalOps = roomData.config.totalOperations || game.operations.length;
+      game.timeLeft = roomData.config.timeLimitSeconds || 120;
+      game.startTime = Date.now();
+
+      document.getElementById('screen-waiting').classList.add('hidden');
+      document.getElementById('screen-game').classList.remove('hidden');
+      document.getElementById('g-total').textContent = game.totalOps;
+
+      setupInputType();
+      showQuestion();
+      startTimer();
+      initMobileFocus();
+    }
+
+    function setupInputType() {
+      if (!game.operations.length) return;
+      const type = game.operations[0].type;
+      const input = document.getElementById('g-answer');
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('autocorrect', 'off');
+
+      if (type === 'compare') {
+        document.getElementById('g-input-area').classList.add('hidden');
+        document.getElementById('g-compare-area').classList.remove('hidden');
+      } else if (type === 'typing' || type === 'sopa') {
+        input.inputMode = 'text'; input.type = 'text';
+        input.placeholder = type === 'sopa' ? 'Escribe la palabra...' : 'Escribe la frase...';
+      } else if (type === 'letter') {
+        input.inputMode = 'text'; input.type = 'text'; input.maxLength = 1; input.placeholder = 'Letra...';
+      } else {
+        input.inputMode = 'numeric'; input.type = 'number'; input.pattern = '[0-9]*'; input.placeholder = 'Respuesta...';
+      }
+    }
+
+    function showQuestion() {
+      if (game.current >= game.operations.length || game.lives <= 0) { finishGame(); return; }
+
+      const input = document.getElementById('g-answer');
+      input.value = ''; input.focus();
+
+      const op = game.operations[game.current];
+      const qEl = document.getElementById('g-question-text');
+      const hEl = document.getElementById('g-question-hint');
+      document.getElementById('g-current').textContent = game.current + 1;
+
+      if (op.type === 'math') { qEl.textContent = op.text; hEl.textContent = 'Escribe el resultado'; }
+      else if (op.type === 'compare') { qEl.innerHTML = '<span class="text-blue-400">' + op.left + '</span> <span class="text-gray-500">___</span> <span class="text-red-400">' + op.right + '</span>'; hEl.textContent = 'Mayor, menor o igual'; }
+      else if (op.type === 'letter') { qEl.textContent = op.text; hEl.textContent = 'Escribe la letra que falta'; }
+      else if (op.type === 'sopa') { qEl.textContent = op.text; hEl.textContent = '💡 ' + (op.hint || 'Ordena las letras'); }
+      else if (op.type === 'typing') { qEl.textContent = op.text; qEl.style.fontSize = '1.5rem'; hEl.textContent = 'Escribe la frase exacta'; }
+      else if (op.type === 'pattern') { qEl.textContent = op.text; hEl.textContent = 'Escribe el emoji que sigue'; }
+
+      document.getElementById('g-feedback').textContent = '';
+    }
+
+    function initMobileFocus() {
+      const input = document.getElementById('g-answer');
+      if (!input) return;
+      input.addEventListener('blur', () => { if (!game.finished) setTimeout(() => { if (!game.finished) input.focus(); }, 50); });
+      document.getElementById('screen-game').addEventListener('touchstart', (e) => { if (!game.finished && e.target.tagName !== 'BUTTON') { e.preventDefault(); input.focus(); } }, { passive: false });
+      document.getElementById('screen-game').addEventListener('click', (e) => { if (!game.finished && e.target.tagName !== 'BUTTON') input.focus(); });
+    }
+
+    function submitAnswer() {
+      if (game.finished) return;
+      const input = document.getElementById('g-answer');
+      const val = input.value.trim();
+      if (!val) return;
+      const op = game.operations[game.current];
+      let correct = false;
+
+      if (op.type === 'math') correct = parseInt(val) === op.answer;
+      else if (op.type === 'letter') correct = val.toUpperCase() === op.answer.toUpperCase();
+      else if (op.type === 'sopa') correct = val.toUpperCase() === op.answer.toUpperCase();
+      else if (op.type === 'typing') correct = val === op.answer;
+      else if (op.type === 'pattern') correct = val === op.answer;
+
+      processAnswer(correct, op);
+    }
+
+    function submitCompare(sym) {
+      if (game.finished) return;
+      const op = game.operations[game.current];
+      processAnswer(sym === op.answer, op);
+    }
+
+    function processAnswer(correct, op) {
+      const feedEl = document.getElementById('g-feedback');
+      const qEl = document.getElementById('g-question');
+
+      if (correct) {
+        const bonus = Math.max(0, Math.floor(game.timeLeft / 10)) * 5;
+        const pts = 100 + bonus;
+        game.score += pts;
+        game.correctCount++;
+        feedEl.innerHTML = '<span class="text-green-400">✅ ¡Correcto! +' + pts + '</span>';
+        qEl.classList.add('flash-correct'); setTimeout(() => qEl.classList.remove('flash-correct'), 500);
+        document.getElementById('g-score').textContent = game.score + ' pts';
+        document.getElementById('g-score').classList.add('score-pop'); setTimeout(() => document.getElementById('g-score').classList.remove('score-pop'), 300);
+      } else {
+        game.lives--;
+        game.errorCount++;
+        feedEl.innerHTML = '<span class="text-red-400">❌ Incorrecto</span>';
+        if (op.type === 'math') feedEl.innerHTML += '<span class="text-gray-400 text-sm"> (era ' + op.answer + ')</span>';
+        qEl.classList.add('flash-wrong'); setTimeout(() => qEl.classList.remove('flash-wrong'), 500);
+        document.getElementById('g-lives').textContent = '❤️'.repeat(Math.max(0, game.lives)) + '🖤'.repeat(3 - Math.max(0, game.lives));
+      }
+
+      const progress = ((game.current + 1) / game.totalOps) * 100;
+      document.getElementById('g-progress').style.width = progress + '%';
+
+      roomRef.child('students/' + me.id).update({
+        score: game.score, current: game.current + 1,
+        ['answers/' + op.id]: { correct: correct, timeMs: Date.now() - game.startTime }
+      });
+
+      game.current++;
+      setTimeout(() => showQuestion(), correct ? 400 : 800);
+    }
+
+    function startTimer() {
+      game.timer = setInterval(() => {
+        game.timeLeft--;
+        const m = Math.floor(game.timeLeft / 60);
+        const s = game.timeLeft % 60;
+        document.getElementById('g-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+        if (game.timeLeft <= 10) document.getElementById('g-timer').classList.add('text-red-400');
+        if (game.timeLeft <= 0) { clearInterval(game.timer); finishGame(); }
+      }, 1000);
+    }
+
+    function finishGame() {
+      if (game.finished) return;
+      game.finished = true;
+      clearInterval(game.timer);
+      const totalTime = Math.round((Date.now() - game.startTime) / 1000);
+
+      roomRef.child('students/' + me.id).update({
+        finished: true, score: game.score, finishTime: totalTime
+      });
+
+      document.getElementById('d-score').textContent = game.score;
+      document.getElementById('d-correct').textContent = game.correctCount;
+      document.getElementById('d-errors').textContent = game.errorCount;
+
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-done').classList.remove('hidden');
+
+      roomRef.child('status').on('value', snap => {
+        if (snap.val() === 'finished') {
+          roomRef.child('status').off();
+          roomRef.once('value').then(s => showStudentResults(s.val()));
+        }
+      });
+    }
+
+    function showStudentResults(roomData) {
+      const students = roomData.students || {};
+      const results = Object.entries(students).map(([id, s]) => {
+        let correct = 0, wrong = 0;
+        if (s.answers) Object.values(s.answers).forEach(a => { if (a.correct) correct++; else wrong++; });
+        const total = correct + wrong;
+        return { id, name: s.name, score: s.score || 0, correct, wrong, total, pct: total > 0 ? Math.round(correct / total * 100) : 0, time: s.finishTime || 0 };
+      }).sort((a, b) => b.score - a.score);
+
+      const myResult = results.find(r => r.id === me.id);
+      const myPos = results.findIndex(r => r.id === me.id) + 1;
+
+      if (myPos === 1) { document.getElementById('r-medal').textContent = '🥇'; document.getElementById('r-title').textContent = '¡Primer puesto!'; }
+      else if (myPos === 2) { document.getElementById('r-medal').textContent = '🥈'; document.getElementById('r-title').textContent = '¡Segundo puesto!'; }
+      else if (myPos === 3) { document.getElementById('r-medal').textContent = '🥉'; document.getElementById('r-title').textContent = '¡Tercer puesto!'; }
+      else { document.getElementById('r-medal').textContent = '📊'; document.getElementById('r-title').textContent = 'Tus resultados'; }
+
+      document.getElementById('r-position').textContent = 'Puesto ' + myPos + ' de ' + results.length;
+
+      if (myResult) {
+        document.getElementById('r-score').textContent = myResult.score;
+        document.getElementById('r-pct').textContent = myResult.pct + '%';
+        document.getElementById('r-time').textContent = myResult.time ? myResult.time + 's' : '—';
+        const speed = myResult.total > 0 && myResult.time ? (myResult.time / myResult.total).toFixed(1) + 's' : '—';
+        document.getElementById('r-speed').textContent = speed;
+      }
+
+      const rankingEl = document.getElementById('r-ranking');
+      rankingEl.innerHTML = '<h4 class="font-bold text-gray-800 text-sm mb-2">Ranking de la clase</h4>' +
+        results.map((r, i) => {
+          const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
+          const isMe = r.id === me.id;
+          return `<div class="flex items-center justify-between py-1 ${isMe ? 'bg-green-100 rounded px-2 font-bold' : ''}">
+            <span class="text-sm">${medal} ${r.name}${isMe ? ' (tú)' : ''}</span>
+            <span class="text-sm font-mono font-bold text-blue-600">${r.score}</span>
+          </div>`;
+        }).join('');
+
+      document.getElementById('screen-done').classList.add('hidden');
+      document.getElementById('screen-results').classList.remove('hidden');
+    }
+    </script>
+</body>
+</html>

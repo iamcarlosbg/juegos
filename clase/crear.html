@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Sala — Modo Clase | Aprende y Juega</title>
+    <meta name="description" content="Crea una sala para tu clase y compite con tus alumnos en juegos educativos en tiempo real.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="theme-color" content="#059669">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="../firebase-config.js"></script>
+    <script src="../config.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F5E13E7QHY"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F5E13E7QHY');</script>
+    <style>
+        @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}.pulse-dot{animation:pulse-dot 1.5s ease infinite}
+        @keyframes slide-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.slide-up{animation:slide-up 0.4s ease-out}
+        .student-card{transition:all 0.3s ease}
+        .student-card.new{animation:slide-up 0.4s ease-out}
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600">
+
+    <!-- ═══ PANTALLA 1: CONFIGURAR SALA ═══ -->
+    <div id="screen-setup" class="container mx-auto px-4 py-6 max-w-3xl">
+        <div class="flex items-center justify-between mb-6">
+            <a href="../index.html" class="bg-white/90 text-green-700 px-4 py-2 rounded-xl font-bold hover:bg-white transition shadow-lg text-sm">🏠 Inicio</a>
+            <h1 class="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">🏫 Crear Sala de Clase</h1>
+            <div class="w-20"></div>
+        </div>
+
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 slide-up">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">👨‍🏫 Datos del profesor</h2>
+            <input type="text" id="teacher-name" maxlength="30" placeholder="Tu nombre (ej: Profesora María)"
+                   class="w-full px-4 py-3 border-2 border-green-300 rounded-xl text-lg font-bold focus:outline-none focus:border-green-500 mb-4">
+        </div>
+
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 slide-up">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">1️⃣ Elige la materia</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="subject-grid">
+                <button onclick="pickSubject('matematicas')" data-sub="matematicas" class="bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-xl p-4 text-center transition"><div class="text-4xl mb-2">🔢</div><div class="font-bold text-blue-700 text-sm">Matemáticas</div></button>
+                <button onclick="pickSubject('lengua')" data-sub="lengua" class="bg-green-50 hover:bg-green-100 border-2 border-green-200 rounded-xl p-4 text-center transition"><div class="text-4xl mb-2">📖</div><div class="font-bold text-green-700 text-sm">Lengua</div></button>
+                <button onclick="pickSubject('logica')" data-sub="logica" class="bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 rounded-xl p-4 text-center transition"><div class="text-4xl mb-2">🧩</div><div class="font-bold text-purple-700 text-sm">Lógica</div></button>
+                <button onclick="pickSubject('mecanografia')" data-sub="mecanografia" class="bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-xl p-4 text-center transition"><div class="text-4xl mb-2">⌨️</div><div class="font-bold text-orange-700 text-sm">Mecanografía</div></button>
+            </div>
+        </div>
+
+        <div id="step-game" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">2️⃣ Elige el juego</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="game-grid"></div>
+        </div>
+
+        <div id="step-difficulty" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">3️⃣ Dificultad</h2>
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="pickDifficulty('facil')" data-diff="facil" class="bg-green-50 hover:bg-green-100 border-2 border-green-200 rounded-xl p-4 text-center transition"><div class="text-3xl mb-1">😊</div><div class="font-bold text-green-700">Fácil</div></button>
+                <button onclick="pickDifficulty('medio')" data-diff="medio" class="bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-200 rounded-xl p-4 text-center transition"><div class="text-3xl mb-1">🤔</div><div class="font-bold text-yellow-700">Medio</div></button>
+                <button onclick="pickDifficulty('dificil')" data-diff="dificil" class="bg-red-50 hover:bg-red-100 border-2 border-red-200 rounded-xl p-4 text-center transition"><div class="text-3xl mb-1">🔥</div><div class="font-bold text-red-700">Difícil</div></button>
+            </div>
+        </div>
+
+        <div id="step-options" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">4️⃣ Opciones</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm font-bold text-gray-600 block mb-1">Preguntas</label>
+                    <select id="opt-questions" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2">
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20" selected>20</option>
+                        <option value="30">30</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm font-bold text-gray-600 block mb-1">Tiempo (segundos)</label>
+                    <select id="opt-time" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2">
+                        <option value="60">60s</option>
+                        <option value="120" selected>120s</option>
+                        <option value="180">180s</option>
+                        <option value="300">300s</option>
+                    </select>
+                </div>
+            </div>
+            <button onclick="createRoom()" class="w-full mt-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-6 py-4 rounded-xl text-xl hover:from-green-600 hover:to-emerald-700 transition shadow-lg">
+                🏫 Crear Sala
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ PANTALLA 2: SALA DE ESPERA (PROFESOR) ═══ -->
+    <div id="screen-lobby" class="hidden container mx-auto px-4 py-6 max-w-3xl">
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 text-center">
+            <div class="text-5xl mb-3">🏫</div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Sala creada</h2>
+            <p class="text-gray-500 mb-4">Comparte este código con tus alumnos:</p>
+            <div class="bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl p-6 mb-4">
+                <p id="room-code" class="text-6xl font-black text-green-700 tracking-widest font-mono">----</p>
+            </div>
+            <div class="flex gap-3 justify-center flex-wrap mb-4">
+                <button onclick="copyRoomCode()" id="btn-copy-code" class="bg-gray-700 hover:bg-gray-800 text-white font-bold px-5 py-2 rounded-xl transition text-sm">📋 Copiar código</button>
+                <button onclick="copyRoomLink()" id="btn-copy-link" class="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2 rounded-xl transition text-sm">🔗 Copiar enlace</button>
+                <button onclick="shareWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-2 rounded-xl transition text-sm">💬 WhatsApp</button>
+            </div>
+            <p class="text-sm text-gray-400">Los alumnos entran en <strong>aprendeyjuega.com/clase/unirse.html</strong> e introducen el código</p>
+        </div>
+
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-800"><span class="pulse-dot inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span> Alumnos conectados</h3>
+                <span class="text-sm text-gray-500" id="student-count">0 alumnos</span>
+            </div>
+            <div id="students-list" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <p class="text-gray-400 text-sm text-center col-span-full py-6">Esperando a que se unan alumnos...</p>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button onclick="startSession()" id="btn-start" disabled
+                    class="bg-gradient-to-r from-orange-500 to-red-500 disabled:from-gray-300 disabled:to-gray-400 text-white font-bold px-10 py-4 rounded-2xl text-xl transition shadow-xl">
+                🚀 Empezar prueba
+            </button>
+            <p class="text-white/70 text-sm mt-2" id="start-hint">Necesitas al menos 1 alumno para empezar</p>
+        </div>
+    </div>
+
+    <!-- ═══ PANTALLA 3: EN PROGRESO (PROFESOR VE DASHBOARD) ═══ -->
+    <div id="screen-live" class="hidden container mx-auto px-4 py-6 max-w-4xl">
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800">📊 Prueba en progreso</h2>
+                <div class="flex items-center gap-3">
+                    <span class="pulse-dot inline-block w-3 h-3 bg-red-500 rounded-full"></span>
+                    <span class="text-sm text-gray-500">EN VIVO</span>
+                    <span id="live-timer" class="font-mono font-bold text-lg text-gray-800">2:00</span>
+                </div>
+            </div>
+            <div id="live-ranking" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- ═══ PANTALLA 4: RESULTADOS FINALES ═══ -->
+    <div id="screen-results" class="hidden container mx-auto px-4 py-6 max-w-4xl">
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 text-center">
+            <div class="text-6xl mb-3">🏆</div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Resultados de la prueba</h2>
+            <p id="results-subtitle" class="text-gray-500 mb-6"></p>
+        </div>
+
+        <!-- Podio -->
+        <div id="podium" class="flex items-end justify-center gap-4 mb-8 h-64"></div>
+
+        <!-- Tabla completa -->
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📋 Detalle completo</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm" id="results-table">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 text-xs uppercase">
+                            <th class="px-3 py-2">#</th>
+                            <th class="px-3 py-2 text-left">Alumno</th>
+                            <th class="px-3 py-2">Puntos</th>
+                            <th class="px-3 py-2">Aciertos</th>
+                            <th class="px-3 py-2">Errores</th>
+                            <th class="px-3 py-2">% Acierto</th>
+                            <th class="px-3 py-2">Tiempo</th>
+                            <th class="px-3 py-2">Velocidad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Estadísticas de clase -->
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Estadísticas de la clase</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="class-stats"></div>
+        </div>
+
+        <div class="flex gap-3 justify-center flex-wrap">
+            <button onclick="newSession()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-6 py-3 rounded-xl text-lg transition">🔄 Nueva prueba</button>
+            <a href="../index.html" class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-6 py-3 rounded-xl text-lg transition">🏠 Inicio</a>
+        </div>
+    </div>
+
+    <script>
+    const GAMES = {
+      matematicas: [
+        { id: 'invasores-matematicos', name: 'Cálculo Mental', emoji: '🧠', desc: 'Resuelve operaciones rápidamente' },
+        { id: 'jerarquia-operaciones', name: 'Jerarquía Operaciones', emoji: '🧮', desc: 'Orden de operaciones (+, -, ×, ÷)' },
+        { id: 'mayor-menor', name: 'Mayor o Menor', emoji: '⚖️', desc: 'Compara números' },
+        { id: 'completa-numero', name: 'Completa el Número', emoji: '🔢', desc: 'Encuentra el número que falta' }
+      ],
+      lengua: [
+        { id: 'sopa-letras', name: 'Sopa de Letras', emoji: '🔤', desc: 'Ordena las letras' },
+        { id: 'completa-letra', name: 'Completa la Letra', emoji: '✏️', desc: 'Completa la palabra' }
+      ],
+      logica: [
+        { id: 'seguir-patrones', name: 'Seguir Patrones', emoji: '🧩', desc: 'Secuencias de colores' }
+      ],
+      mecanografia: [
+        { id: 'practica-escritura', name: 'Práctica de Escritura', emoji: '⌨️', desc: 'Escribe frases' }
+      ]
+    };
+
+    const DIFF_LABELS = { facil: 'Fácil', medio: 'Medio', dificil: 'Difícil' };
+
+    let rtdb = null;
+    let roomRef = null;
+    let room = { id: null, subject: null, game: null, difficulty: null, teacherName: '', code: '' };
+
+    window.addEventListener('load', () => {
+      try { rtdb = firebase.database(); } catch(e) { console.error('RTDB error:', e); }
+    });
+
+    function pickSubject(s) {
+      room.subject = s;
+      document.querySelectorAll('#subject-grid button').forEach(b => b.classList.remove('ring-4','ring-green-400','scale-105'));
+      document.querySelector(`[data-sub="${s}"]`).classList.add('ring-4','ring-green-400','scale-105');
+      const games = GAMES[s] || [];
+      document.getElementById('game-grid').innerHTML = games.map(g =>
+        `<button onclick="pickGame('${g.id}')" data-game="${g.id}" class="bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl p-4 text-left flex items-center gap-3 transition">
+          <span class="text-3xl">${g.emoji}</span>
+          <div><div class="font-bold text-gray-800">${g.name}</div><div class="text-sm text-gray-500">${g.desc}</div></div>
+        </button>`
+      ).join('');
+      document.getElementById('step-game').classList.remove('hidden');
+      document.getElementById('step-difficulty').classList.add('hidden');
+      document.getElementById('step-options').classList.add('hidden');
+    }
+
+    function pickGame(id) {
+      room.game = id;
+      document.querySelectorAll('#game-grid button').forEach(b => b.classList.remove('ring-4','ring-green-400','scale-105'));
+      document.querySelector(`[data-game="${id}"]`)?.classList.add('ring-4','ring-green-400','scale-105');
+      document.getElementById('step-difficulty').classList.remove('hidden');
+      document.getElementById('step-options').classList.add('hidden');
+    }
+
+    function pickDifficulty(d) {
+      room.difficulty = d;
+      document.querySelectorAll('[data-diff]').forEach(b => b.classList.remove('ring-4','ring-green-400','scale-105'));
+      document.querySelector(`[data-diff="${d}"]`).classList.add('ring-4','ring-green-400','scale-105');
+      document.getElementById('step-options').classList.remove('hidden');
+    }
+
+    function createRoom() {
+      room.teacherName = document.getElementById('teacher-name').value.trim();
+      if (!room.teacherName) { document.getElementById('teacher-name').classList.add('border-red-500'); document.getElementById('teacher-name').focus(); return; }
+      if (!room.subject || !room.game || !room.difficulty) { alert('Completa todos los pasos'); return; }
+
+      const code = generateCode();
+      room.code = code;
+      room.id = 'ROOM_' + code;
+
+      const totalQ = parseInt(document.getElementById('opt-questions').value);
+      const timeLimit = parseInt(document.getElementById('opt-time').value);
+      const ops = generateOperationsForGame(room.game, room.difficulty, totalQ);
+
+      roomRef = rtdb.ref('classrooms/' + room.id);
+      roomRef.set({
+        code: code,
+        teacherName: room.teacherName,
+        subject: room.subject,
+        game: room.game,
+        difficulty: room.difficulty,
+        operations: ops,
+        config: { totalOperations: ops.length, timeLimitSeconds: timeLimit },
+        status: 'waiting',
+        students: {},
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+      roomRef.onDisconnect().update({ status: 'closed' });
+
+      document.getElementById('room-code').textContent = code;
+      document.getElementById('screen-setup').classList.add('hidden');
+      document.getElementById('screen-lobby').classList.remove('hidden');
+
+      roomRef.child('students').on('value', snap => {
+        const students = snap.val() || {};
+        renderStudents(students);
+      });
+    }
+
+    function generateCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+      return code;
+    }
+
+    function renderStudents(students) {
+      const list = document.getElementById('students-list');
+      const entries = Object.entries(students);
+      document.getElementById('student-count').textContent = entries.length + ' alumnos';
+
+      if (entries.length === 0) {
+        list.innerHTML = '<p class="text-gray-400 text-sm text-center col-span-full py-6">Esperando a que se unan alumnos...</p>';
+        document.getElementById('btn-start').disabled = true;
+        return;
+      }
+
+      document.getElementById('btn-start').disabled = false;
+      document.getElementById('start-hint').textContent = entries.length + ' alumno' + (entries.length > 1 ? 's' : '') + ' listo' + (entries.length > 1 ? 's' : '');
+
+      list.innerHTML = entries.map(([id, s]) =>
+        `<div class="student-card bg-green-50 border-2 border-green-200 rounded-xl p-3 text-center">
+          <div class="text-2xl mb-1">🧑‍🎓</div>
+          <div class="font-bold text-gray-800 text-sm truncate">${s.name}</div>
+          <div class="text-xs text-green-600">Conectado</div>
+        </div>`
+      ).join('');
+    }
+
+    function startSession() {
+      if (!roomRef) return;
+      roomRef.update({
+        status: 'active',
+        startedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      document.getElementById('screen-lobby').classList.add('hidden');
+      document.getElementById('screen-live').classList.remove('hidden');
+
+      startLiveDashboard();
+    }
+
+    let liveTimer = null;
+    let liveTimeLeft = 0;
+
+    function startLiveDashboard() {
+      liveTimeLeft = parseInt(document.getElementById('opt-time')?.value || 120);
+
+      liveTimer = setInterval(() => {
+        liveTimeLeft--;
+        const m = Math.floor(liveTimeLeft / 60);
+        const s = liveTimeLeft % 60;
+        document.getElementById('live-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+        if (liveTimeLeft <= 0) {
+          clearInterval(liveTimer);
+          endSession();
+        }
+      }, 1000);
+
+      roomRef.child('students').on('value', snap => {
+        const students = snap.val() || {};
+        renderLiveRanking(students);
+
+        const allFinished = Object.values(students).every(s => s.finished);
+        if (allFinished && Object.keys(students).length > 0) {
+          clearInterval(liveTimer);
+          setTimeout(() => endSession(), 1500);
+        }
+      });
+    }
+
+    function renderLiveRanking(students) {
+      const entries = Object.entries(students)
+        .map(([id, s]) => ({ id, ...s }))
+        .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+      const container = document.getElementById('live-ranking');
+      container.innerHTML = entries.map((s, i) => {
+        const totalOps = parseInt(document.getElementById('opt-questions')?.value || 20);
+        const progress = Math.round(((s.current || 0) / totalOps) * 100);
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+        const status = s.finished ? '✅' : '<span class="pulse-dot inline-block w-2 h-2 bg-green-500 rounded-full"></span>';
+
+        return `<div class="flex items-center gap-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
+          <span class="text-lg font-bold w-8 text-center">${medal}</span>
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-gray-800 text-sm">${s.name}</span>
+              <span class="font-mono font-bold text-blue-600">${s.score || 0} pts</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all" style="width:${progress}%"></div>
+            </div>
+          </div>
+          <span class="text-sm">${status}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function endSession() {
+      clearInterval(liveTimer);
+      roomRef.update({ status: 'finished', finishedAt: firebase.database.ServerValue.TIMESTAMP });
+
+      roomRef.once('value').then(snap => {
+        const data = snap.val();
+        if (!data) return;
+        showResults(data);
+      });
+    }
+
+    function showResults(data) {
+      const students = data.students || {};
+      const totalOps = data.config.totalOperations;
+      const gameName = Object.values(GAMES).flat().find(g => g.id === data.game)?.name || data.game;
+
+      document.getElementById('results-subtitle').textContent =
+        gameName + ' · ' + DIFF_LABELS[data.difficulty] + ' · ' + Object.keys(students).length + ' alumnos';
+
+      const results = Object.entries(students).map(([id, s]) => {
+        let correct = 0, wrong = 0;
+        if (s.answers) {
+          Object.values(s.answers).forEach(a => { if (a.correct) correct++; else wrong++; });
+        }
+        const total = correct + wrong;
+        const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+        const time = s.finishTime || '—';
+        const speed = total > 0 && typeof time === 'number' ? (time / total).toFixed(1) : '—';
+
+        return { name: s.name, score: s.score || 0, correct, wrong, total, pct, time, speed };
+      }).sort((a, b) => b.score - a.score);
+
+      // Podium
+      const podium = document.getElementById('podium');
+      const heights = ['h-40', 'h-48', 'h-32'];
+      const medals = ['🥈', '🥇', '🥉'];
+      const orders = [1, 0, 2];
+      const bgColors = ['bg-gray-200', 'bg-yellow-200', 'bg-orange-200'];
+
+      if (results.length >= 3) {
+        podium.innerHTML = orders.map(pos => {
+          const r = results[pos];
+          if (!r) return '';
+          return `<div class="text-center flex-1 max-w-[140px]">
+            <div class="text-4xl mb-2">${medals[pos]}</div>
+            <p class="font-bold text-gray-800 text-sm truncate">${r.name}</p>
+            <p class="text-xl font-black text-blue-600">${r.score}</p>
+            <div class="${bgColors[pos]} ${heights[pos]} rounded-t-xl mt-2 flex items-end justify-center pb-3">
+              <span class="text-2xl font-black text-gray-700">${pos + 1}°</span>
+            </div>
+          </div>`;
+        }).join('');
+      } else {
+        podium.innerHTML = results.map((r, i) =>
+          `<div class="text-center flex-1">
+            <div class="text-4xl mb-2">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
+            <p class="font-bold text-gray-800">${r.name}</p>
+            <p class="text-2xl font-black text-blue-600">${r.score} pts</p>
+          </div>`
+        ).join('');
+      }
+
+      // Table
+      document.getElementById('results-body').innerHTML = results.map((r, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+        const pctColor = r.pct >= 80 ? 'text-green-600' : r.pct >= 50 ? 'text-yellow-600' : 'text-red-600';
+        return `<tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="px-3 py-3 text-center font-bold">${medal}</td>
+          <td class="px-3 py-3 font-bold text-gray-800">${r.name}</td>
+          <td class="px-3 py-3 text-center font-mono font-bold text-blue-600">${r.score}</td>
+          <td class="px-3 py-3 text-center text-green-600 font-bold">${r.correct}</td>
+          <td class="px-3 py-3 text-center text-red-600 font-bold">${r.wrong}</td>
+          <td class="px-3 py-3 text-center font-bold ${pctColor}">${r.pct}%</td>
+          <td class="px-3 py-3 text-center font-mono">${typeof r.time === 'number' ? r.time + 's' : r.time}</td>
+          <td class="px-3 py-3 text-center text-sm text-gray-500">${r.speed !== '—' ? r.speed + 's/preg' : '—'}</td>
+        </tr>`;
+      }).join('');
+
+      // Class stats
+      const avgScore = results.length > 0 ? Math.round(results.reduce((a, r) => a + r.score, 0) / results.length) : 0;
+      const avgPct = results.length > 0 ? Math.round(results.reduce((a, r) => a + r.pct, 0) / results.length) : 0;
+      const best = results[0];
+      const totalCorrect = results.reduce((a, r) => a + r.correct, 0);
+      const totalWrong = results.reduce((a, r) => a + r.wrong, 0);
+
+      document.getElementById('class-stats').innerHTML = `
+        <div class="bg-blue-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-black text-blue-600">${avgScore}</div>
+          <div class="text-xs text-gray-500 font-bold">Media puntos</div>
+        </div>
+        <div class="bg-green-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-black text-green-600">${avgPct}%</div>
+          <div class="text-xs text-gray-500 font-bold">Media acierto</div>
+        </div>
+        <div class="bg-yellow-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-black text-yellow-600">${totalCorrect} / ${totalCorrect + totalWrong}</div>
+          <div class="text-xs text-gray-500 font-bold">Aciertos totales</div>
+        </div>
+        <div class="bg-purple-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-black text-purple-600">${best ? best.name : '—'}</div>
+          <div class="text-xs text-gray-500 font-bold">Mejor alumno</div>
+        </div>`;
+
+      document.getElementById('screen-live').classList.add('hidden');
+      document.getElementById('screen-results').classList.remove('hidden');
+    }
+
+    function newSession() { location.reload(); }
+
+    function copyRoomCode() {
+      navigator.clipboard.writeText(room.code).then(() => {
+        const b = document.getElementById('btn-copy-code');
+        b.textContent = '✅ Copiado'; setTimeout(() => b.textContent = '📋 Copiar código', 2000);
+      });
+    }
+    function copyRoomLink() {
+      const url = window.location.origin + '/clase/unirse.html?code=' + room.code;
+      navigator.clipboard.writeText(url).then(() => {
+        const b = document.getElementById('btn-copy-link');
+        b.textContent = '✅ Copiado'; setTimeout(() => b.textContent = '🔗 Copiar enlace', 2000);
+      });
+    }
+    function shareWhatsApp() {
+      const url = window.location.origin + '/clase/unirse.html?code=' + room.code;
+      const msg = '🏫 ¡Únete a mi clase en Aprende y Juega!\n\nCódigo: ' + room.code + '\n\nEntra aquí: ' + url;
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    }
+
+    // ═══ GENERATORS (copied from lobby for independence) ═══
+    function generateOperationsForGame(game, diff, count) {
+      const ops = [];
+      for (let i = 0; i < count; i++) {
+        let op;
+        switch(game) {
+          case 'invasores-matematicos': case 'completa-numero': op = genMath(diff); break;
+          case 'jerarquia-operaciones': op = genJerarquia(diff); break;
+          case 'mayor-menor': op = genCompare(diff); break;
+          case 'sopa-letras': op = genSopa(diff, i); break;
+          case 'completa-letra': op = genLetter(diff, i); break;
+          case 'seguir-patrones': op = genPattern(diff, i); break;
+          case 'practica-escritura': op = genTyping(diff, i); break;
+          default: op = genMath(diff);
+        }
+        op.id = i + 1;
+        ops.push(op);
+      }
+      return ops;
+    }
+    function genMath(d){var r=d==='facil'?9:d==='medio'?50:99,ts=d==='facil'?['suma','resta']:['suma','resta','multiplicar'];var t=ts[Math.floor(Math.random()*ts.length)],a,b,ans,txt;if(t==='suma'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*r)+1;ans=a+b;txt=a+' + '+b;}else if(t==='resta'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*a)+1;ans=a-b;txt=a+' - '+b;}else{a=Math.floor(Math.random()*10)+1;b=Math.floor(Math.random()*10)+1;ans=a*b;txt=a+' × '+b;}return{type:'math',text:txt+' = ?',answer:ans};}
+    function genJerarquia(d){var mx=d==='facil'?5:d==='medio'?10:15;var rng=()=>Math.floor(Math.random()*mx)+1;var useDiv=d==='dificil'&&Math.random()<0.4;var useSub=Math.random()<0.5;var a,b,c,pr,txt,ans;if(useDiv){c=Math.floor(Math.random()*(mx-1))+2;var q=rng();b=c*q;pr=q;}else{b=rng();c=rng();pr=b*c;}if(useSub){a=pr+Math.floor(Math.random()*mx);ans=a-pr;txt=a+(useDiv?' - '+b+' ÷ '+c:' - '+b+' × '+c);}else{a=rng();ans=a+pr;txt=a+(useDiv?' + '+b+' ÷ '+c:' + '+b+' × '+c);}return{type:'math',text:txt+' = ?',answer:ans};}
+    function genCompare(d){var r=d==='facil'?20:d==='medio'?50:100;var l=Math.floor(Math.random()*r)+1,ri=Math.floor(Math.random()*r)+1;if(Math.random()>0.2&&l===ri)ri=l+Math.floor(Math.random()*5)+1;return{type:'compare',left:l,right:ri,text:l+' ___ '+ri,answer:l>ri?'>':l<ri?'<':'='};}
+    function genLetter(d,i){var w=['GATO','CASA','PERRO','MESA','LUNA','SILLA','SOL','MAR','FLOR','ARBOL','LIBRO','CIELO','AGUA','FUEGO','TIERRA','ESTRELLA','NUBE','ROCA','VIENTO','LUZ'];var word=w[(i*7+3)%w.length],hi=(i*3+1)%word.length;return{type:'letter',text:word.substring(0,hi)+'_'+word.substring(hi+1),answer:word[hi]};}
+    function genSopa(d,i){var banks={facil:[{word:'GATO',hint:'Animal que maúlla'},{word:'CASA',hint:'Donde vivimos'},{word:'PERRO',hint:'Animal que ladra'},{word:'LUNA',hint:'Brilla de noche'},{word:'SOL',hint:'Estrella que nos calienta'},{word:'MESA',hint:'Mueble para comer'},{word:'FLOR',hint:'Crece en el jardín'},{word:'ARBOL',hint:'Tiene hojas y ramas'},{word:'PATO',hint:'Ave que nada'},{word:'RANA',hint:'Salta y dice croac'}],medio:[{word:'ELEFANTE',hint:'Animal con trompa'},{word:'MARIPOSA',hint:'Insecto con alas de colores'},{word:'JIRAFA',hint:'Animal de cuello largo'},{word:'TORTUGA',hint:'Lleva su casa encima'},{word:'GUITARRA',hint:'Instrumento de cuerdas'},{word:'ESTRELLA',hint:'Brilla en el cielo'},{word:'PLANETA',hint:'Cuerpo celeste'}],dificil:[{word:'DINOSAURIO',hint:'Reptil extinto'},{word:'COMPUTADORA',hint:'Máquina digital'},{word:'HELICOPTERO',hint:'Vuela con hélices'},{word:'REFRIGERADOR',hint:'Mantiene la comida fría'},{word:'BICICLETA',hint:'Vehículo de dos ruedas'}]};var list=banks[d]||banks.facil;var item=list[i%list.length];var shuffled=item.word.split('').sort(()=>Math.random()-0.5).join('');if(shuffled===item.word)shuffled=item.word.split('').reverse().join('');return{type:'sopa',text:shuffled,hint:item.hint,answer:item.word};}
+    function genPattern(d,i){var c=['🔴','🔵','🟢','🟡','🟣','🟠'],len=d==='facil'?3:d==='medio'?4:5,p=[],s=i*17+42;for(var j=0;j<len;j++)p.push(c[(s+j*13)%c.length]);return{type:'pattern',sequence:p,text:p.join(' ')+' → ?',answer:p[0]};}
+    function genTyping(d,i){var ph={facil:['El sol brilla hoy','Mi gato duerme','La luna es bonita','El perro corre','Hoy es un buen día'],medio:['Los pájaros cantan en el árbol','Mi hermana lee un libro grande','El mar tiene olas enormes','Jugamos en el parque con amigos'],dificil:['La biblioteca municipal cierra los domingos','Los científicos descubrieron una nueva especie','El campeonato internacional comienza mañana']};var l=ph[d]||ph.facil;return{type:'typing',text:l[i%l.length],answer:l[i%l.length]};}
+    </script>
+</body>
+</html>
