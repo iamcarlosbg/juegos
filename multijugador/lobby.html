@@ -70,6 +70,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="../firebase-config.js"></script>
     <script src="../config.js"></script>
+    <script src="../palabras-lengua.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F5E13E7QHY"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F5E13E7QHY');</script>
     <style>
@@ -95,6 +96,17 @@
                 <h2 class="text-lg font-bold text-gray-800 mb-2">Compite contra otros jugadores en juegos educativos</h2>
                 <p class="text-gray-600 text-sm leading-relaxed">El modo multijugador te permite enfrentarte a otros jugadores en tiempo real. Ambos resolvéis exactamente las mismas operaciones al mismo tiempo y al final se comparan los resultados. Elige una materia, un juego y la dificultad para buscar un oponente aleatorio, únete directamente a alguien que ya esté esperando, o <strong>reta a un amigo</strong> enviándole un enlace directo.</p>
             </div>
+            <!-- Jugadores esperando (visible siempre, se filtra al seleccionar) -->
+            <div id="step-waiting-players" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800"><span class="live-dot mr-2"></span> Jugadores esperando ahora</h2>
+                    <span class="text-sm text-gray-400" id="waiting-count">0 en cola</span>
+                </div>
+                <div id="waiting-list" class="space-y-2 max-h-72 overflow-y-auto">
+                    <p class="text-gray-400 text-sm text-center py-4" id="waiting-empty">Cargando...</p>
+                </div>
+            </div>
+
             <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">1️⃣ Elige la materia</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="subject-grid">
@@ -104,16 +116,7 @@
                     <button onclick="selectSubject('mecanografia')" data-subject="mecanografia" class="game-option bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-xl p-4 text-center"><div class="text-4xl mb-2">⌨️</div><div class="font-bold text-orange-700 text-sm">Mecanografía</div></button>
                 </div>
             </div>
-            <!-- Jugadores esperando -->
-            <div id="step-waiting-players" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold text-gray-800"><span class="live-dot mr-2"></span> Jugadores esperando ahora</h2>
-                    <span class="text-sm text-gray-400" id="waiting-count">0 en cola</span>
-                </div>
-                <div id="waiting-list" class="space-y-2 max-h-64 overflow-y-auto">
-                    <p class="text-gray-400 text-sm text-center py-4" id="waiting-empty">No hay nadie esperando en esta materia. ¡Sé el primero!</p>
-                </div>
-            </div>
+
             <div id="step-game" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">2️⃣ Elige el juego</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="game-grid"></div>
@@ -149,7 +152,7 @@
                 <h2 class="text-lg font-bold text-gray-800 mb-3">Juegos educativos multijugador disponibles</h2>
                 <div class="grid md:grid-cols-2 gap-3 text-sm text-gray-600">
                     <div><h3 class="font-bold text-blue-700 mb-1">🔢 Matemáticas</h3><p>Cálculo Mental, Jerarquía de Operaciones, Mayor o Menor y Completa el Número. Practica sumas, restas, multiplicaciones y divisiones compitiendo contra otro jugador en tiempo real.</p></div>
-                    <div><h3 class="font-bold text-green-700 mb-1">📖 Lengua</h3><p>Sopa de Letras y Completa la Letra. Mejora vocabulario y ortografía en modo competitivo contra otros jugadores.</p></div>
+                    <div><h3 class="font-bold text-green-700 mb-1">📖 Lengua</h3><p>Ordena la Palabra y Completa la Letra. Mejora vocabulario y ortografía en modo competitivo contra otros jugadores.</p></div>
                     <div><h3 class="font-bold text-purple-700 mb-1">🧩 Lógica</h3><p>Seguir Patrones. Compite memorizando y repitiendo secuencias de colores cada vez más complejas.</p></div>
                     <div><h3 class="font-bold text-orange-700 mb-1">⌨️ Mecanografía</h3><p>Práctica de Escritura. Escribe frases a contrarreloj y descubre quién teclea más rápido y con menos errores.</p></div>
                 </div>
@@ -234,7 +237,7 @@
         { id: 'completa-numero', name: 'Completa el Número', emoji: '🔢', desc: 'Encuentra el número que falta' }
       ],
       lengua: [
-        { id: 'sopa-letras', name: 'Sopa de Letras', emoji: '🔤', desc: 'Encuentra las palabras escondidas' },
+        { id: 'sopa-letras', name: 'Ordena la Palabra', emoji: '🔤', desc: 'Descifra las letras desordenadas' },
         { id: 'completa-letra', name: 'Completa la Letra', emoji: '✏️', desc: 'Completa la palabra con la letra correcta' }
       ],
       logica: [
@@ -276,6 +279,7 @@
       var saved = localStorage.getItem('mp_playerName');
       if (saved) document.getElementById('player-name').value = saved;
       checkChallengeInvite();
+      initWaitingPlayers();
     });
 
     // ═══ CHALLENGE INVITE CHECK ═══
@@ -339,47 +343,86 @@
       showWaitingPlayers(subject);
     }
 
-    // ═══ WAITING PLAYERS LIST ═══
-    function showWaitingPlayers(subject) {
-      var panel = document.getElementById('step-waiting-players');
-      panel.classList.remove('hidden'); panel.classList.add('slide-up');
-      if (lobbyState.waitingListener) lobbyState.waitingListener.ref.off('value', lobbyState.waitingListener.fn);
+    // ═══ WAITING PLAYERS LIST (global, with filtering) ═══
+    function initWaitingPlayers() {
+      if (!rtdb) return;
       var qRef = rtdb.ref('matchmaking/queue');
       var fn = qRef.on('value', function(snapshot) {
+        lobbyState.allWaiting = [];
         var all = snapshot.val() || {};
-        var waiting = [];
-        var gamesInSubject = (MULTIPLAYER_GAMES[subject]||[]).map(function(g){return g.id;});
         Object.keys(all).forEach(function(qk) {
           var parts = qk.split('_'); var diff = parts.pop(); var gid = parts.join('_');
-          if (gamesInSubject.indexOf(gid) === -1) return;
           var players = all[qk];
+          // Find which subject this game belongs to
+          var sub = null;
+          Object.keys(MULTIPLAYER_GAMES).forEach(function(s) {
+            MULTIPLAYER_GAMES[s].forEach(function(g) { if (g.id === gid) sub = s; });
+          });
           Object.keys(players).forEach(function(pid) {
-            waiting.push({ id: pid, name: players[pid].name, game: gid, difficulty: diff, joinedAt: players[pid].joinedAt });
+            lobbyState.allWaiting.push({ id: pid, name: players[pid].name, game: gid, subject: sub, difficulty: diff, joinedAt: players[pid].joinedAt });
           });
         });
-        renderWaitingList(waiting);
+        renderFilteredWaiting();
       });
       lobbyState.waitingListener = { ref: qRef, fn: fn };
     }
+
+    function renderFilteredWaiting() {
+      var all = lobbyState.allWaiting || [];
+      var filtered = all;
+
+      // Filter by subject if selected
+      if (lobbyState.subject) {
+        var gamesInSubject = (MULTIPLAYER_GAMES[lobbyState.subject]||[]).map(function(g){return g.id;});
+        filtered = filtered.filter(function(p) { return gamesInSubject.indexOf(p.game) !== -1; });
+      }
+      // Filter by game if selected
+      if (lobbyState.game) {
+        filtered = filtered.filter(function(p) { return p.game === lobbyState.game; });
+      }
+
+      renderWaitingList(filtered);
+    }
+
+    // Kept for compatibility
+    function showWaitingPlayers(subject) { renderFilteredWaiting(); }
 
     function renderWaitingList(players) {
       var list = document.getElementById('waiting-list');
       document.getElementById('waiting-count').textContent = players.length + ' en cola';
       if (players.length === 0) {
-        list.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">No hay nadie esperando en esta materia. ¡Sé el primero!</p>';
+        var msg = lobbyState.subject ? 'No hay nadie esperando. ¡Sé el primero!' : 'No hay jugadores esperando ahora mismo.';
+        list.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">' + msg + '</p>';
         return;
       }
-      list.innerHTML = players.map(function(p) {
-        var gi = GAME_NAMES[p.game]; var gn = gi?gi.name:p.game; var ge = gi?gi.emoji:'🎮';
-        var dl = DIFFICULTY_LABELS[p.difficulty]||p.difficulty;
-        var dc = p.difficulty==='facil'?'green':p.difficulty==='medio'?'yellow':'red';
-        return '<div class="flex items-center justify-between bg-gray-50 rounded-xl p-3 border border-gray-100">'+
-          '<div class="flex items-center gap-3"><span class="text-xl">'+ge+'</span>'+
-          '<div><div class="font-bold text-gray-800 text-sm">'+p.name+'</div>'+
-          '<div class="text-xs text-gray-500">'+gn+' · <span class="text-'+dc+'-600">'+dl+'</span></div></div></div>'+
-          '<button onclick="joinSpecificPlayer(\''+p.id+'\',\''+p.game+'\',\''+p.difficulty+'\')" '+
-          'class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-1 rounded-lg text-sm transition">⚡ Unirse</button></div>';
-      }).join('');
+
+      // Group by subject
+      var SUBJECT_LABELS = { matematicas: '🔢 Matemáticas', lengua: '📖 Lengua', logica: '🧩 Lógica', mecanografia: '⌨️ Mecanografía' };
+      var grouped = {};
+      players.forEach(function(p) {
+        var s = p.subject || 'otro';
+        if (!grouped[s]) grouped[s] = [];
+        grouped[s].push(p);
+      });
+
+      var html = '';
+      Object.keys(grouped).forEach(function(sub) {
+        if (!lobbyState.subject) {
+          html += '<div class="text-xs font-bold text-gray-500 uppercase mt-2 mb-1">' + (SUBJECT_LABELS[sub] || sub) + '</div>';
+        }
+        grouped[sub].forEach(function(p) {
+          var gi = GAME_NAMES[p.game]; var gn = gi?gi.name:p.game; var ge = gi?gi.emoji:'🎮';
+          var dl = DIFFICULTY_LABELS[p.difficulty]||p.difficulty;
+          var dc = p.difficulty==='facil'?'green':p.difficulty==='medio'?'yellow':'red';
+          html += '<div class="flex items-center justify-between bg-gray-50 rounded-xl p-3 border border-gray-100">' +
+            '<div class="flex items-center gap-3"><span class="text-xl">' + ge + '</span>' +
+            '<div><div class="font-bold text-gray-800 text-sm">' + p.name + '</div>' +
+            '<div class="text-xs text-gray-500">' + gn + ' · <span class="text-' + dc + '-600">' + dl + '</span></div></div></div>' +
+            '<button onclick="joinSpecificPlayer(\'' + p.id + '\',\'' + p.game + '\',\'' + p.difficulty + '\')" ' +
+            'class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-1 rounded-lg text-sm transition">⚡ Unirse</button></div>';
+        });
+      });
+      list.innerHTML = html;
     }
 
     // ═══ JOIN SPECIFIC PLAYER ═══
@@ -424,6 +467,7 @@
       document.getElementById('step-difficulty').classList.remove('hidden');
       document.getElementById('step-difficulty').classList.add('slide-up');
       document.getElementById('step-name').classList.add('hidden');
+      renderFilteredWaiting();
     }
     function selectDifficulty(d) {
       lobbyState.difficulty = d;
@@ -607,6 +651,13 @@
     }
 
     // ═══ GENERATORS ═══
+    // Fisher-Yates shuffle utility
+    function shuffleArr(arr) {
+      var a=[].concat(arr);
+      for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+      return a;
+    }
+
     function generateOperationsForGame(game, diff, count) {
       var ops=[];
       for(var i=0;i<count;i++){
@@ -662,56 +713,30 @@
       return{type:'compare',left:l,right:ri,text:l+' ___ '+ri,answer:l>ri?'>':l<ri?'<':'='};
     }
     function genLetter(d,i){
-      var w=['GATO','CASA','PERRO','MESA','LUNA','SILLA','SOL','MAR','FLOR','ARBOL','LIBRO','CIELO','AGUA','FUEGO','TIERRA','ESTRELLA','NUBE','ROCA','VIENTO','LUZ','MONTE','PLAYA','BOSQUE','CAMPO','PUENTE','CAMINO','TORRE','BARCO','AVION','TREN'];
-      var word=w[(i*7+3)%w.length],hi=(i*3+1)%word.length;
-      return{type:'letter',text:word.substring(0,hi)+'_'+word.substring(hi+1),answer:word[hi],fullWord:word};
+      var pool=PALABRAS_LENGUA[d]||PALABRAS_LENGUA.facil;
+      var item=pool[Math.floor(Math.random()*pool.length)];
+      var word=item.palabra;
+      var hi=Math.floor(Math.random()*word.length);
+      return{type:'letter',text:word.substring(0,hi)+'_'+word.substring(hi+1),answer:word[hi],fullWord:word,hint:item.pista};
     }
     function genSopa(d,i){
-      var banks={
-        facil:[
-          {word:'GATO',hint:'Animal que maúlla'},{word:'CASA',hint:'Donde vivimos'},{word:'PERRO',hint:'Animal que ladra'},
-          {word:'LUNA',hint:'Brilla de noche'},{word:'SOL',hint:'Estrella que nos calienta'},{word:'MESA',hint:'Mueble para comer'},
-          {word:'FLOR',hint:'Crece en el jardín'},{word:'ARBOL',hint:'Tiene hojas y ramas'},{word:'PATO',hint:'Ave que nada'},
-          {word:'RANA',hint:'Salta y dice croac'},{word:'VACA',hint:'Da leche'},{word:'LEON',hint:'Rey de la selva'},
-          {word:'PERA',hint:'Fruta verde'},{word:'OSO',hint:'Animal grande del bosque'},{word:'MAR',hint:'Agua salada'},
-          {word:'PAN',hint:'Se come en el desayuno'},{word:'TORO',hint:'Animal con cuernos'},{word:'SILLA',hint:'Para sentarse'},
-          {word:'PUMA',hint:'Felino americano'},{word:'LOBO',hint:'Aúlla a la luna'}
-        ],
-        medio:[
-          {word:'ELEFANTE',hint:'Animal con trompa'},{word:'MARIPOSA',hint:'Insecto con alas de colores'},
-          {word:'JIRAFA',hint:'Animal de cuello largo'},{word:'TORTUGA',hint:'Lleva su casa encima'},
-          {word:'DELFIN',hint:'Mamífero marino inteligente'},{word:'CABALLO',hint:'Animal que se monta'},
-          {word:'GUITARRA',hint:'Instrumento de cuerdas'},{word:'ESTRELLA',hint:'Brilla en el cielo'},
-          {word:'PLANETA',hint:'Cuerpo celeste que orbita'},{word:'VENTANA',hint:'Para mirar afuera'},
-          {word:'COHETE',hint:'Viaja al espacio'},{word:'PELOTA',hint:'Se usa en deportes'},
-          {word:'GALLETA',hint:'Dulce crujiente'},{word:'PINTURA',hint:'Arte con colores'},
-          {word:'CAMION',hint:'Vehículo grande de carga'}
-        ],
-        dificil:[
-          {word:'DINOSAURIO',hint:'Reptil extinto gigante'},{word:'COMPUTADORA',hint:'Máquina para trabajar y jugar'},
-          {word:'HELICOPTERO',hint:'Vuela con hélices'},{word:'REFRIGERADOR',hint:'Mantiene la comida fría'},
-          {word:'BICICLETA',hint:'Vehículo de dos ruedas'},{word:'TELEVISION',hint:'Pantalla para ver programas'},
-          {word:'CALENDARIO',hint:'Muestra los días del mes'},{word:'ASTRONAUTA',hint:'Viaja al espacio'},
-          {word:'BIBLIOTECA',hint:'Lugar con muchos libros'},{word:'VENTILADOR',hint:'Da aire fresco'},
-          {word:'MATEMATICAS',hint:'Ciencia de los números'},{word:'CONSTRUCTOR',hint:'Persona que construye'}
-        ]
-      };
-      var list=banks[d]||banks.facil;
-      var item=list[i%list.length];
-      var shuffled=item.word.split('').sort(function(){return Math.random()-0.5;}).join('');
-      if(shuffled===item.word) shuffled=item.word.split('').reverse().join('');
-      return{type:'sopa',text:shuffled,hint:item.hint,answer:item.word};
+      var pool=PALABRAS_LENGUA[d]||PALABRAS_LENGUA.facil;
+      var item=pool[Math.floor(Math.random()*pool.length)];
+      var word=item.palabra;
+      var shuffled=word.split('').sort(function(){return Math.random()-0.5;}).join('');
+      if(shuffled===word) shuffled=word.split('').reverse().join('');
+      return{type:'sopa',text:shuffled,hint:item.pista,answer:word};
     }
     function genPattern(d,i){
-      var c=['🔴','🔵','🟢','🟡','🟣','🟠'],len=d==='facil'?3:d==='medio'?4:5,p=[],s=i*17+42;
-      for(var j=0;j<len;j++) p.push(c[(s+j*13)%c.length]);
+      var c=['🔴','🔵','🟢','🟡','🟣','🟠'],len=d==='facil'?3:d==='medio'?4:5,p=[];
+      for(var j=0;j<len;j++) p.push(c[Math.floor(Math.random()*c.length)]);
       return{type:'pattern',sequence:p,text:p.join(' ')+' → ?',answer:p[0]};
     }
     function genTyping(d,i){
       var ph={facil:['El sol brilla hoy','Mi gato duerme','La luna es bonita','El perro corre','Hoy es un buen día','Me gusta jugar','El cielo es azul','La flor es roja','El agua está fría','Yo como fruta'],
         medio:['Los pájaros cantan en el árbol','Mi hermana lee un libro grande','El mar tiene olas enormes','Jugamos en el parque con amigos','La profesora explica la lección','El tren llega a las ocho','Necesito un lápiz y una goma','Mañana vamos de excursión','El viento mueve las hojas','Estudiamos para el examen'],
         dificil:['La biblioteca municipal cierra los domingos','Los científicos descubrieron una nueva especie','El campeonato internacional comienza mañana','La temperatura ha descendido esta semana','El restaurante ofrece platos vegetarianos']};
-      var l=ph[d]||ph.facil; return{type:'typing',text:l[i%l.length],answer:l[i%l.length]};
+      var l=ph[d]||ph.facil; var item=l[Math.floor(Math.random()*l.length)]; return{type:'typing',text:item,answer:item};
     }
 
     // ═══ BOT MATCH AFTER 30s ═══

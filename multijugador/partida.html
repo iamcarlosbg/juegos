@@ -281,9 +281,17 @@
         document.getElementById('g-name-opp').textContent = game.opponentName;
         document.getElementById('g-total').textContent = game.totalOps;
 
-        // Marcar inicio
-        matchRef.child('startedAt').set(firebase.database.ServerValue.TIMESTAMP);
-        game.startTime = Date.now();
+        // Usar timestamp del servidor para sincronizar timer
+        if (data.startedAt) {
+          game.startTime = data.startedAt;
+          var elapsed = Math.round((Date.now() - data.startedAt) / 1000);
+          game.timeLeft = Math.max(0, game.timeLeft - elapsed);
+        } else {
+          matchRef.child('startedAt').set(firebase.database.ServerValue.TIMESTAMP);
+          game.startTime = Date.now();
+        }
+        // Guardar deadline absoluto en el match
+        matchRef.child('deadline').set(Date.now() + (game.timeLeft * 1000));
 
         // Mostrar primera pregunta
         showQuestion();
@@ -299,6 +307,10 @@
           sessionStorage.removeItem('mp_isBot');
           setTimeout(() => startBotOpponent(), 2000);
         }
+
+        // Marcar como conectado
+        matchRef.child('players/' + game.playerId + '/connected').set(true);
+        matchRef.child('players/' + game.playerId + '/connected').onDisconnect().set(false);
 
         // Escuchar cambios del oponente en tiempo real
         listenToOpponent();
@@ -593,14 +605,29 @@
       document.getElementById('g-compare-area').classList.add('hidden');
       document.getElementById('g-feedback').textContent = '';
 
+      // Si es bot, terminar inmediatamente con estimación
+      if (bot.active) {
+        // Estimar resultado final del bot basado en ritmo actual
+        if (bot.current < game.totalOps) {
+          var remaining = game.totalOps - bot.current;
+          var estimatedCorrect = Math.round(remaining * bot.accuracy * 0.8);
+          for (var ec = 0; ec < estimatedCorrect; ec++) {
+            bot.score += 100 + Math.floor(Math.random() * 30);
+            bot.correct++;
+          }
+          bot.current = game.totalOps;
+        }
+        finishBot();
+        setTimeout(function() { showResults(totalTime); }, 300);
+        return;
+      }
+
       // Comprobar si el oponente ya terminó
       matchRef.child('players/' + game.opponentId).once('value').then(function(snap) {
         var oppData = snap.val();
         if (oppData && oppData.finished) {
-          // Oponente ya terminó → mostrar resultados
           showResults(totalTime);
         } else {
-          // Oponente sigue jugando → esperar
           document.getElementById('g-question-hint').textContent = 'Esperando a que tu oponente termine...';
           waitForOpponent(totalTime);
         }
@@ -611,20 +638,34 @@
     function waitForOpponent(myTime) {
       var waitListener = matchRef.child('players/' + game.opponentId + '/finished').on('value', function(snap) {
         if (snap.val() === true) {
-          // Oponente terminó → dejar de escuchar y mostrar resultados
           matchRef.child('players/' + game.opponentId + '/finished').off('value', waitListener);
-          // Pequeña pausa para que Firebase sincronice el score final
-          setTimeout(function() {
-            showResults(myTime);
-          }, 800);
+          setTimeout(function() { showResults(myTime); }, 800);
         }
       });
 
-      // Timeout de seguridad: si el oponente no termina en 60s, mostrar resultados igualmente
+      // Monitor opponent connection
+      var connListener = matchRef.child('players/' + game.opponentId + '/connected').on('value', function(snap) {
+        if (snap.val() === false) {
+          // Opponent disconnected — give 10s grace period then force results
+          setTimeout(function() {
+            matchRef.child('players/' + game.opponentId + '/finished').once('value', function(fSnap) {
+              if (!fSnap.val()) {
+                matchRef.child('players/' + game.opponentId + '/finished').off('value', waitListener);
+                matchRef.child('players/' + game.opponentId + '/connected').off('value', connListener);
+                showResults(myTime);
+              }
+            });
+          }, 10000);
+        }
+      });
+
+      // Timeout: max remaining game time + 5s buffer
+      var maxWait = Math.max(5000, game.timeLeft * 1000 + 5000);
       setTimeout(function() {
         matchRef.child('players/' + game.opponentId + '/finished').off('value', waitListener);
+        matchRef.child('players/' + game.opponentId + '/connected').off('value', connListener);
         showResults(myTime);
-      }, 60000);
+      }, maxWait);
     }
 
     // ═══ MOSTRAR RESULTADOS ═══
