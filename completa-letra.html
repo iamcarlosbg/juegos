@@ -110,80 +110,83 @@ window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
 
           const wordBank = {
             facil: [
-              {palabra: "GATO", indice: 1},
-              {palabra: "CASA", indice: 2},
-              {palabra: "PERRO", indice: 3},
-              {palabra: "MESA", indice: 1},
-              {palabra: "LUNA", indice: 2},
-              {palabra: "SILLA", indice: 3},
-              {palabra: "SOL", indice: 1},
-              {palabra: "MAR", indice: 0},
-              {palabra: "FLOR", indice: 2},
-              {palabra: "ARBOL", indice: 3},
-              {palabra: "LIBRO", indice: 1},
-              {palabra: "PATO", indice: 2},
-              {palabra: "GOMA", indice: 1},
-              {palabra: "OSO", indice: 1},
-              {palabra: "LOBO", indice: 2},
-              {palabra: "RANA", indice: 1},
-              {palabra: "PUMA", indice: 2},
-              {palabra: "VACA", indice: 1},
-              {palabra: "CAMA", indice: 1},
-              {palabra: "PAN", indice: 1},
-              {palabra: "LEON", indice: 2},
-              {palabra: "PELO", indice: 1},
-              {palabra: "TORO", indice: 1},
-              {palabra: "PERA", indice: 2}
+              {palabra: "GATO", indice: 1, categoria: "Animal"},
+              {palabra: "CASA", indice: 2, categoria: "Lugar"},
+              {palabra: "PERRO", indice: 3, categoria: "Animal"},
+              {palabra: "MESA", indice: 1, categoria: "Mueble"},
+              {palabra: "LUNA", indice: 2, categoria: "Naturaleza"},
+              {palabra: "SILLA", indice: 3, categoria: "Mueble"},
+              {palabra: "SOL", indice: 1, categoria: "Naturaleza"},
+              {palabra: "MAR", indice: 0, categoria: "Naturaleza"},
+              {palabra: "FLOR", indice: 2, categoria: "Naturaleza"},
+              {palabra: "ARBOL", indice: 3, categoria: "Naturaleza"},
+              {palabra: "LIBRO", indice: 1, categoria: "Objeto"},
+              {palabra: "PATO", indice: 2, categoria: "Animal"},
+              {palabra: "GOMA", indice: 1, categoria: "Objeto"},
+              {palabra: "OSO", indice: 1, categoria: "Animal"},
+              {palabra: "LOBO", indice: 2, categoria: "Animal"},
+              {palabra: "RANA", indice: 1, categoria: "Animal"},
+              {palabra: "PUMA", indice: 2, categoria: "Animal"},
+              {palabra: "VACA", indice: 1, categoria: "Animal"},
+              {palabra: "CAMA", indice: 1, categoria: "Mueble"},
+              {palabra: "PAN", indice: 1, categoria: "Comida"},
+              {palabra: "LEON", indice: 2, categoria: "Animal"},
+              {palabra: "PELO", indice: 1, categoria: "Cuerpo"},
+              {palabra: "TORO", indice: 1, categoria: "Animal"},
+              {palabra: "PERA", indice: 2, categoria: "Comida"}
             ],
             medio: [
-              {palabra: "ELEFANTE", indices: [2, 5]},
-              {palabra: "MARIPOSA", indices: [1, 6]},
-              {palabra: "JIRAFA", indices: [0, 4]},
-              {palabra: "TORTUGA", indices: [1, 5]},
-              {palabra: "DELFIN", indices: [0, 4]},
-              {palabra: "CABALLO", indices: [1, 5]},
-              {palabra: "ZAPATO", indices: [0, 4]},
-              {palabra: "VENTANA", indices: [1, 5]},
-              {palabra: "GUITARRA", indices: [2, 6]},
-              {palabra: "PELOTA", indices: [1, 4]},
-              {palabra: "CAMION", indices: [1, 4]},
-              {palabra: "MUÑECA", indices: [1, 4]},
-              {palabra: "COHETE", indices: [1, 4]},
-              {palabra: "PLANETA", indices: [1, 5]},
-              {palabra: "ESTRELLA", indices: [2, 6]},
-              {palabra: "GALLETA", indices: [1, 5]},
-              {palabra: "PINTURA", indices: [1, 5]},
-              {palabra: "TECLADO", indices: [1, 5]}
+              {palabra: "ELEFANTE", indices: [2, 5], categoria: "Animal"},
+              {palabra: "MARIPOSA", indices: [1, 6], categoria: "Animal"},
+              {palabra: "JIRAFA", indices: [0, 4], categoria: "Animal"},
+              {palabra: "TORTUGA", indices: [1, 5], categoria: "Animal"},
+              {palabra: "DELFIN", indices: [0, 4], categoria: "Animal"},
+              {palabra: "CABALLO", indices: [1, 5], categoria: "Animal"},
+              {palabra: "ZAPATO", indices: [0, 4], categoria: "Ropa"},
+              {palabra: "VENTANA", indices: [1, 5], categoria: "Casa"},
+              {palabra: "GUITARRA", indices: [2, 6], categoria: "Instrumento"},
+              {palabra: "PELOTA", indices: [1, 4], categoria: "Deporte"},
+              {palabra: "CAMION", indices: [1, 4], categoria: "Vehículo"},
+              {palabra: "MUÑECA", indices: [1, 4], categoria: "Juguete"},
+              {palabra: "COHETE", indices: [1, 4], categoria: "Espacio"},
+              {palabra: "PLANETA", indices: [1, 5], categoria: "Espacio"},
+              {palabra: "ESTRELLA", indices: [2, 6], categoria: "Espacio"},
+              {palabra: "GALLETA", indices: [1, 5], categoria: "Comida"},
+              {palabra: "PINTURA", indices: [1, 5], categoria: "Arte"},
+              {palabra: "TECLADO", indices: [1, 5], categoria: "Tecnología"}
             ],
             dificil: [
-              {palabra: "DINOSAURIO", indices: [1, 4, 7]},
-              {palabra: "COMPUTADORA", indices: [1, 5, 9]},
-              {palabra: "HELICOPTERO", indices: [0, 5, 9]},
-              {palabra: "REFRIGERADOR", indices: [1, 6, 10]},
-              {palabra: "BICICLETA", indices: [1, 5, 7]},
-              {palabra: "TELEVISION", indices: [1, 5, 8]},
-              {palabra: "AUTOMOVIL", indices: [1, 5, 7]},
-              {palabra: "CALENDARIO", indices: [1, 5, 8]},
-              {palabra: "VENTILADOR", indices: [1, 6, 9]},
-              {palabra: "SUPERHEROE", indices: [1, 6, 9]},
-              {palabra: "ASTRONAUTA", indices: [1, 6, 8]},
-              {palabra: "MATEMATICAS", indices: [1, 6, 9]},
-              {palabra: "BIBLIOTECA", indices: [1, 6, 8]},
-              {palabra: "CONSTRUCTOR", indices: [1, 6, 9]},
-              {palabra: "PARACAIDAS", indices: [1, 5, 8]}
+              {palabra: "DINOSAURIO", indices: [1, 4, 7], categoria: "Animal"},
+              {palabra: "COMPUTADORA", indices: [1, 5, 9], categoria: "Tecnología"},
+              {palabra: "HELICOPTERO", indices: [0, 5, 9], categoria: "Vehículo"},
+              {palabra: "REFRIGERADOR", indices: [1, 6, 10], categoria: "Electrodoméstico"},
+              {palabra: "BICICLETA", indices: [1, 5, 7], categoria: "Vehículo"},
+              {palabra: "TELEVISION", indices: [1, 5, 8], categoria: "Tecnología"},
+              {palabra: "AUTOMOVIL", indices: [1, 5, 7], categoria: "Vehículo"},
+              {palabra: "CALENDARIO", indices: [1, 5, 8], categoria: "Objeto"},
+              {palabra: "VENTILADOR", indices: [1, 6, 9], categoria: "Electrodoméstico"},
+              {palabra: "SUPERHEROE", indices: [1, 6, 9], categoria: "Personaje"},
+              {palabra: "ASTRONAUTA", indices: [1, 6, 8], categoria: "Profesión"},
+              {palabra: "MATEMATICAS", indices: [1, 6, 9], categoria: "Asignatura"},
+              {palabra: "BIBLIOTECA", indices: [1, 6, 8], categoria: "Lugar"},
+              {palabra: "CONSTRUCTOR", indices: [1, 6, 9], categoria: "Profesión"},
+              {palabra: "PARACAIDAS", indices: [1, 5, 8], categoria: "Objeto"}
             ]
           };
 
+          const [shuffledQueue, setShuffledQueue] = useState([]);
+
           const generateQuestion = (selectedLevel) => {
-            const words = wordBank[selectedLevel];
-            const availableWords = words.filter(w => !usedWords.includes(w.palabra));
+            let queue = shuffledQueue;
             
-            if (availableWords.length === 0) {
-              setUsedWords([]);
-              return generateQuestion(selectedLevel);
+            if (queue.length === 0) {
+              queue = shuffleArray([...wordBank[selectedLevel]]);
+              setShuffledQueue(queue.slice(1));
+            } else {
+              setShuffledQueue(queue.slice(1));
             }
 
-            const wordData = availableWords[Math.floor(Math.random() * availableWords.length)];
+            const wordData = queue[0];
             setUsedWords(prev => [...prev, wordData.palabra]);
 
             const word = wordData.palabra;
@@ -214,6 +217,7 @@ window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
             setStreak(0);
             setGameOver(false);
             setUsedWords([]);
+            setShuffledQueue(shuffleArray([...wordBank[selectedLevel]]));
             const time = selectedLevel === 'facil' ? 12 : selectedLevel === 'medio' ? 10 : 8;
             setBaseTime(time);
             const newQuestion = generateQuestion(selectedLevel);

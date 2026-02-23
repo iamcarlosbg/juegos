@@ -462,7 +462,7 @@ window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
                         onChange={(e) => setUserAnswer(e.target.value)}
                         disabled={!!feedback}
                         autoFocus
-                        className="w-full text-6xl text-center p-6 border-4 border-blue-400 rounded-2xl focus:outline-none focus:border-blue-600 font-bold"
+                        className="w-full text-6xl text-center p-6 border-4 border-blue-400 rounded-2xl focus:outline-none focus:border-blue-600 font-bold" inputMode="numeric" pattern="[0-9]*" autoComplete="off"
                         placeholder="?"
                       />
                       <button

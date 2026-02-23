@@ -504,9 +504,9 @@ window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
 
                   <div className="grid grid-cols-2 gap-8 max-w-3xl mx-auto">
                     <button
-                      onClick={() => checkAnswer('left')}
+                      onClick={(e) => { e.target.blur(); checkAnswer('left'); }}}
                       disabled={!!feedback}
-                      className={`bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-3xl p-12 transform transition hover:scale-105 ${
+                      className={`bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-3xl p-12 focus:outline-none transform transition hover:scale-105 ${
                         feedback === 'correct' && question.correctAnswer === 'left' ? 'bg-green-500 ring-8 ring-green-300' :
                         feedback === 'incorrect' && question.correctAnswer === 'left' ? 'bg-green-500' : ''
                       }`}
@@ -517,9 +517,9 @@ window.retarAmigo = function(nombreJuego, score, nivel, urlJuego) {
                     </button>
 
                     <button
-                      onClick={() => checkAnswer('right')}
+                      onClick={(e) => { e.target.blur(); checkAnswer('right'); }}}
                       disabled={!!feedback}
-                      className={`bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white rounded-3xl p-12 transform transition hover:scale-105 ${
+                      className={`bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white rounded-3xl p-12 focus:outline-none transform transition hover:scale-105 ${
                         feedback === 'correct' && question.correctAnswer === 'right' ? 'bg-green-500 ring-8 ring-green-300' :
                         feedback === 'incorrect' && question.correctAnswer === 'right' ? 'bg-green-500' : ''
                       }`}

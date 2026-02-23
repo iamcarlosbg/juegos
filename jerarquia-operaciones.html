@@ -156,7 +156,7 @@
 
                 <div class="max-w-md mx-auto">
                     <input type="number" id="answer" 
-                           class="w-full text-3xl text-center p-4 border-4 border-purple-300 rounded-xl focus:border-purple-500 focus:outline-none" 
+                           class="w-full text-3xl text-center p-4 border-4 border-purple-300 rounded-xl focus:border-purple-500 focus:outline-none" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" 
                            placeholder="?" 
                            onkeypress="if(event.key === 'Enter') checkAnswer()">
                     <button onclick="checkAnswer()" 
@@ -404,7 +404,9 @@
         gameState.correctAnswer = answer;
         document.getElementById('operation').textContent = `${operationText} = ?`;
         document.getElementById('answer').value = '';
-        document.getElementById('answer').focus();
+        const ansEl = document.getElementById('answer');
+        ansEl.focus();
+        setTimeout(() => { ansEl.click(); }, 50);
         document.getElementById('feedback').textContent = '';
         
         gameState.timeLeft = 30;

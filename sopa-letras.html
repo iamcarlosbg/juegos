@@ -875,12 +875,26 @@
         }
 
         function checkSelection() {
+            if (selectedCells.length < 2) return;
             const selectedWord = selectedCells.map(c => grid[c.row][c.col]).join('');
             const reversedWord = selectedWord.split('').reverse().join('');
             
+            let found = false;
             wordPositions.forEach(({ word, positions }) => {
-                if ((selectedWord === word || reversedWord === word) && !foundWords.has(word)) {
+                if (found || foundWords.has(word)) return;
+                if (selectedCells.length !== positions.length) return;
+                
+                const matchForward = positions.every((p, i) => 
+                    selectedCells[i].row === p[0] && selectedCells[i].col === p[1]
+                );
+                const matchReverse = positions.every((p, i) => 
+                    selectedCells[selectedCells.length - 1 - i].row === p[0] && 
+                    selectedCells[selectedCells.length - 1 - i].col === p[1]
+                );
+                
+                if ((matchForward || matchReverse) && (selectedWord === word || reversedWord === word)) {
                     foundWords.add(word);
+                    found = true;
                     
                     score += 100;
                     updateScore();
