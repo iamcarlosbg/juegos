@@ -14,7 +14,7 @@ const SITE_CONFIG = {
       url: "https://instagram.com/@iamcarlosbg"  // ← Tu URL aquí
     },
     facebook: {
-      enabled: false,  // ← Cambiar a true para mostrar en TODAS las páginas
+      enabled: true,  // ← Cambiar a true para mostrar en TODAS las páginas
       url: "https://www.facebook.com/aprendejuega/"  // ← Tu URL aquí
     },
     youtube: {
