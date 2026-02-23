@@ -13,6 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="../firebase-config.js"></script>
     <script src="../config.js"></script>
+    <script src="../palabras-lengua.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F5E13E7QHY"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F5E13E7QHY');</script>
     <style>
@@ -195,7 +196,7 @@
         { id: 'completa-numero', name: 'Completa el Número', emoji: '🔢', desc: 'Encuentra el número que falta' }
       ],
       lengua: [
-        { id: 'sopa-letras', name: 'Sopa de Letras', emoji: '🔤', desc: 'Ordena las letras' },
+        { id: 'sopa-letras', name: 'Ordena la Palabra', emoji: '🔤', desc: 'Descifra las letras desordenadas' },
         { id: 'completa-letra', name: 'Completa la Letra', emoji: '✏️', desc: 'Completa la palabra' }
       ],
       logica: [
@@ -536,10 +537,10 @@
     function genMath(d){var r=d==='facil'?9:d==='medio'?50:99,ts=d==='facil'?['suma','resta']:['suma','resta','multiplicar'];var t=ts[Math.floor(Math.random()*ts.length)],a,b,ans,txt;if(t==='suma'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*r)+1;ans=a+b;txt=a+' + '+b;}else if(t==='resta'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*a)+1;ans=a-b;txt=a+' - '+b;}else{a=Math.floor(Math.random()*10)+1;b=Math.floor(Math.random()*10)+1;ans=a*b;txt=a+' × '+b;}return{type:'math',text:txt+' = ?',answer:ans};}
     function genJerarquia(d){var mx=d==='facil'?5:d==='medio'?10:15;var rng=()=>Math.floor(Math.random()*mx)+1;var useDiv=d==='dificil'&&Math.random()<0.4;var useSub=Math.random()<0.5;var a,b,c,pr,txt,ans;if(useDiv){c=Math.floor(Math.random()*(mx-1))+2;var q=rng();b=c*q;pr=q;}else{b=rng();c=rng();pr=b*c;}if(useSub){a=pr+Math.floor(Math.random()*mx);ans=a-pr;txt=a+(useDiv?' - '+b+' ÷ '+c:' - '+b+' × '+c);}else{a=rng();ans=a+pr;txt=a+(useDiv?' + '+b+' ÷ '+c:' + '+b+' × '+c);}return{type:'math',text:txt+' = ?',answer:ans};}
     function genCompare(d){var r=d==='facil'?20:d==='medio'?50:100;var l=Math.floor(Math.random()*r)+1,ri=Math.floor(Math.random()*r)+1;if(Math.random()>0.2&&l===ri)ri=l+Math.floor(Math.random()*5)+1;return{type:'compare',left:l,right:ri,text:l+' ___ '+ri,answer:l>ri?'>':l<ri?'<':'='};}
-    function genLetter(d,i){var w=['GATO','CASA','PERRO','MESA','LUNA','SILLA','SOL','MAR','FLOR','ARBOL','LIBRO','CIELO','AGUA','FUEGO','TIERRA','ESTRELLA','NUBE','ROCA','VIENTO','LUZ'];var word=w[(i*7+3)%w.length],hi=(i*3+1)%word.length;return{type:'letter',text:word.substring(0,hi)+'_'+word.substring(hi+1),answer:word[hi]};}
-    function genSopa(d,i){var banks={facil:[{word:'GATO',hint:'Animal que maúlla'},{word:'CASA',hint:'Donde vivimos'},{word:'PERRO',hint:'Animal que ladra'},{word:'LUNA',hint:'Brilla de noche'},{word:'SOL',hint:'Estrella que nos calienta'},{word:'MESA',hint:'Mueble para comer'},{word:'FLOR',hint:'Crece en el jardín'},{word:'ARBOL',hint:'Tiene hojas y ramas'},{word:'PATO',hint:'Ave que nada'},{word:'RANA',hint:'Salta y dice croac'}],medio:[{word:'ELEFANTE',hint:'Animal con trompa'},{word:'MARIPOSA',hint:'Insecto con alas de colores'},{word:'JIRAFA',hint:'Animal de cuello largo'},{word:'TORTUGA',hint:'Lleva su casa encima'},{word:'GUITARRA',hint:'Instrumento de cuerdas'},{word:'ESTRELLA',hint:'Brilla en el cielo'},{word:'PLANETA',hint:'Cuerpo celeste'}],dificil:[{word:'DINOSAURIO',hint:'Reptil extinto'},{word:'COMPUTADORA',hint:'Máquina digital'},{word:'HELICOPTERO',hint:'Vuela con hélices'},{word:'REFRIGERADOR',hint:'Mantiene la comida fría'},{word:'BICICLETA',hint:'Vehículo de dos ruedas'}]};var list=banks[d]||banks.facil;var item=list[i%list.length];var shuffled=item.word.split('').sort(()=>Math.random()-0.5).join('');if(shuffled===item.word)shuffled=item.word.split('').reverse().join('');return{type:'sopa',text:shuffled,hint:item.hint,answer:item.word};}
-    function genPattern(d,i){var c=['🔴','🔵','🟢','🟡','🟣','🟠'],len=d==='facil'?3:d==='medio'?4:5,p=[],s=i*17+42;for(var j=0;j<len;j++)p.push(c[(s+j*13)%c.length]);return{type:'pattern',sequence:p,text:p.join(' ')+' → ?',answer:p[0]};}
-    function genTyping(d,i){var ph={facil:['El sol brilla hoy','Mi gato duerme','La luna es bonita','El perro corre','Hoy es un buen día'],medio:['Los pájaros cantan en el árbol','Mi hermana lee un libro grande','El mar tiene olas enormes','Jugamos en el parque con amigos'],dificil:['La biblioteca municipal cierra los domingos','Los científicos descubrieron una nueva especie','El campeonato internacional comienza mañana']};var l=ph[d]||ph.facil;return{type:'typing',text:l[i%l.length],answer:l[i%l.length]};}
+    function genLetter(d,i){var pool=PALABRAS_LENGUA[d]||PALABRAS_LENGUA.facil;var item=pool[Math.floor(Math.random()*pool.length)];var word=item.palabra;var hi=Math.floor(Math.random()*word.length);return{type:'letter',text:word.substring(0,hi)+'_'+word.substring(hi+1),answer:word[hi],fullWord:word,hint:item.pista};}
+    function genSopa(d,i){var pool=PALABRAS_LENGUA[d]||PALABRAS_LENGUA.facil;var item=pool[Math.floor(Math.random()*pool.length)];var word=item.palabra;var shuffled=word.split('').sort(()=>Math.random()-0.5).join('');if(shuffled===word)shuffled=word.split('').reverse().join('');return{type:'sopa',text:shuffled,hint:item.pista,answer:word};}
+    function genPattern(d,i){var c=['🔴','🔵','🟢','🟡','🟣','🟠'],len=d==='facil'?3:d==='medio'?4:5,p=[];for(var j=0;j<len;j++)p.push(c[Math.floor(Math.random()*c.length)]);return{type:'pattern',sequence:p,text:p.join(' ')+' → ?',answer:p[0]};}
+    function genTyping(d,i){var ph={facil:['El sol brilla hoy','Mi gato duerme','La luna es bonita','El perro corre','Hoy es un buen día'],medio:['Los pájaros cantan en el árbol','Mi hermana lee un libro grande','El mar tiene olas enormes','Jugamos en el parque con amigos'],dificil:['La biblioteca municipal cierra los domingos','Los científicos descubrieron una nueva especie','El campeonato internacional comienza mañana']};var l=ph[d]||ph.facil;var item=l[Math.floor(Math.random()*l.length)];return{type:'typing',text:item,answer:item};}
     </script>
 </body>
 </html>
