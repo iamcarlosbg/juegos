@@ -496,7 +496,8 @@
       lobbyState.searchTimer = setInterval(function(){
         lobbyState.searchSeconds++; document.getElementById('search-seconds').textContent=lobbyState.searchSeconds;
         if (lobbyState.searchSeconds===FLEX_SEARCH_DELAY && !lobbyState.flexActive) startFlexSearch();
-        if (lobbyState.searchSeconds>=30) startBotMatch();
+        var botWait = (typeof SITE_CONFIG !== 'undefined' && SITE_CONFIG.features && SITE_CONFIG.features.botWaitSeconds) || 30;
+        if (lobbyState.searchSeconds>=botWait) startBotMatch();
       },1000);
 
       var qk = lobbyState.game+'_'+lobbyState.difficulty;
