@@ -6,6 +6,9 @@ Disallow: /ADSENSE-CONFIG.html
 Disallow: /test-firebase.html
 Disallow: /admin-puntuaciones.html
 Disallow: /google-analytics.html
+Disallow: /multijugador/partida.html
+Disallow: /clase/crear.html
+Disallow: /clase/unirse.html
 
 # Sitemap
 Sitemap: https://aprendeyjuega.com/sitemap.xml
