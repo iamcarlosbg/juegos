@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Bloquear páginas técnicas/admin
+Disallow: /ADSENSE-CONFIG.html
+Disallow: /test-firebase.html
+Disallow: /admin-puntuaciones.html
+Disallow: /google-analytics.html
+
+# Sitemap
+Sitemap: https://aprendeyjuega.com/sitemap.xml
