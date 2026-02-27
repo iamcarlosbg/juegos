@@ -41,17 +41,17 @@
         </div>
 
         <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 slide-up">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">1️⃣ Elige la materia</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="subject-grid">
-                <button onclick="pickSubject('matematicas')" data-sub="matematicas" class="bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-xl p-4 text-center transition"><div class="text-4xl mb-2">🔢</div><div class="font-bold text-blue-700 text-sm">Matemáticas</div></button>
-                <button onclick="pickSubject('lengua')" data-sub="lengua" class="bg-green-50 hover:bg-green-100 border-2 border-green-200 rounded-xl p-4 text-center transition"><div class="text-4xl mb-2">📖</div><div class="font-bold text-green-700 text-sm">Lengua</div></button>
-                <button onclick="pickSubject('logica')" data-sub="logica" class="bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 rounded-xl p-4 text-center transition"><div class="text-4xl mb-2">🧩</div><div class="font-bold text-purple-700 text-sm">Lógica</div></button>
-                <button onclick="pickSubject('mecanografia')" data-sub="mecanografia" class="bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-xl p-4 text-center transition"><div class="text-4xl mb-2">⌨️</div><div class="font-bold text-orange-700 text-sm">Mecanografía</div></button>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">1️⃣ Elige la materia</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="subject-grid">
+                <button onclick="pickSubject('matematicas')" data-sub="matematicas" class="bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border-2 border-blue-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">🔢</div><div class="font-bold text-blue-700 text-base md:text-lg">Matemáticas</div></button>
+                <button onclick="pickSubject('lengua')" data-sub="lengua" class="bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border-2 border-green-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">📖</div><div class="font-bold text-green-700 text-base md:text-lg">Lengua</div></button>
+                <button onclick="pickSubject('logica')" data-sub="logica" class="bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border-2 border-purple-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">🧩</div><div class="font-bold text-purple-700 text-base md:text-lg">Lógica</div></button>
+                <button onclick="pickSubject('mecanografia')" data-sub="mecanografia" class="bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 border-2 border-orange-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">⌨️</div><div class="font-bold text-orange-700 text-base md:text-lg">Mecanografía</div></button>
             </div>
         </div>
 
         <div id="step-game" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">2️⃣ Elige el juego</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">2️⃣ Elige el juego</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="game-grid"></div>
         </div>
 
@@ -224,9 +224,9 @@
       document.querySelector(`[data-sub="${s}"]`).classList.add('ring-4','ring-green-400','scale-105');
       const games = GAMES[s] || [];
       document.getElementById('game-grid').innerHTML = games.map(g =>
-        `<button onclick="pickGame('${g.id}')" data-game="${g.id}" class="bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl p-4 text-left flex items-center gap-3 transition">
-          <span class="text-3xl">${g.emoji}</span>
-          <div><div class="font-bold text-gray-800">${g.name}</div><div class="text-sm text-gray-500">${g.desc}</div></div>
+        `<button onclick="pickGame('${g.id}')" data-game="${g.id}" class="bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-2xl p-5 text-left flex items-center gap-4 transition-all hover:scale-[1.02]">
+          <span class="text-4xl md:text-5xl">${g.emoji}</span>
+          <div><div class="font-bold text-gray-800 text-base md:text-lg">${g.name}</div><div class="text-sm md:text-base text-gray-500">${g.desc}</div></div>
         </button>`
       ).join('');
       document.getElementById('step-game').classList.remove('hidden');
