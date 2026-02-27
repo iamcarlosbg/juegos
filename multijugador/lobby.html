@@ -108,29 +108,29 @@
             </div>
 
             <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">1️⃣ Elige la materia</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="subject-grid">
-                    <button onclick="selectSubject('matematicas')" data-subject="matematicas" class="game-option bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-xl p-4 text-center"><div class="text-4xl mb-2">🔢</div><div class="font-bold text-blue-700 text-sm">Matemáticas</div></button>
-                    <button onclick="selectSubject('lengua')" data-subject="lengua" class="game-option bg-green-50 hover:bg-green-100 border-2 border-green-200 rounded-xl p-4 text-center"><div class="text-4xl mb-2">📖</div><div class="font-bold text-green-700 text-sm">Lengua</div></button>
-                    <button onclick="selectSubject('logica')" data-subject="logica" class="game-option bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 rounded-xl p-4 text-center"><div class="text-4xl mb-2">🧩</div><div class="font-bold text-purple-700 text-sm">Lógica</div></button>
-                    <button onclick="selectSubject('mecanografia')" data-subject="mecanografia" class="game-option bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-xl p-4 text-center"><div class="text-4xl mb-2">⌨️</div><div class="font-bold text-orange-700 text-sm">Mecanografía</div></button>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">1️⃣ Elige la materia</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="subject-grid">
+                    <button onclick="selectSubject('matematicas')" data-subject="matematicas" class="game-option bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border-2 border-blue-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">🔢</div><div class="font-bold text-blue-700 text-base md:text-lg">Matemáticas</div></button>
+                    <button onclick="selectSubject('lengua')" data-subject="lengua" class="game-option bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border-2 border-green-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">📖</div><div class="font-bold text-green-700 text-base md:text-lg">Lengua</div></button>
+                    <button onclick="selectSubject('logica')" data-subject="logica" class="game-option bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border-2 border-purple-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">🧩</div><div class="font-bold text-purple-700 text-base md:text-lg">Lógica</div></button>
+                    <button onclick="selectSubject('mecanografia')" data-subject="mecanografia" class="game-option bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 border-2 border-orange-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">⌨️</div><div class="font-bold text-orange-700 text-base md:text-lg">Mecanografía</div></button>
                 </div>
             </div>
 
             <div id="step-game" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
-                <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">2️⃣ Elige el juego</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="game-grid"></div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">2️⃣ Elige el juego</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="game-grid"></div>
             </div>
             <div id="step-difficulty" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
-                <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">3️⃣ Elige la dificultad</h2>
-                <div class="grid grid-cols-3 gap-3" id="difficulty-grid">
-                    <button onclick="selectDifficulty('facil')" data-diff="facil" class="game-option bg-green-50 hover:bg-green-100 border-2 border-green-200 rounded-xl p-4 text-center"><div class="text-3xl mb-1">😊</div><div class="font-bold text-green-700">Fácil</div></button>
-                    <button onclick="selectDifficulty('medio')" data-diff="medio" class="game-option bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-200 rounded-xl p-4 text-center"><div class="text-3xl mb-1">🤔</div><div class="font-bold text-yellow-700">Medio</div></button>
-                    <button onclick="selectDifficulty('dificil')" data-diff="dificil" class="game-option bg-red-50 hover:bg-red-100 border-2 border-red-200 rounded-xl p-4 text-center"><div class="text-3xl mb-1">🔥</div><div class="font-bold text-red-700">Difícil</div></button>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">3️⃣ Elige la dificultad</h2>
+                <div class="grid grid-cols-3 gap-4" id="difficulty-grid">
+                    <button onclick="selectDifficulty('facil')" data-diff="facil" class="game-option bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border-2 border-green-200 rounded-2xl p-5 text-center transition-all hover:scale-105"><div class="text-4xl mb-2">😊</div><div class="font-bold text-green-700 text-base md:text-lg">Fácil</div></button>
+                    <button onclick="selectDifficulty('medio')" data-diff="medio" class="game-option bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 border-2 border-yellow-200 rounded-2xl p-5 text-center transition-all hover:scale-105"><div class="text-4xl mb-2">🤔</div><div class="font-bold text-yellow-700 text-base md:text-lg">Medio</div></button>
+                    <button onclick="selectDifficulty('dificil')" data-diff="dificil" class="game-option bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border-2 border-red-200 rounded-2xl p-5 text-center transition-all hover:scale-105"><div class="text-4xl mb-2">🔥</div><div class="font-bold text-red-700 text-base md:text-lg">Difícil</div></button>
                 </div>
             </div>
             <div id="step-name" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
-                <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">4️⃣ Tu nombre</h2>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">4️⃣ Tu nombre</h2>
                 <div class="flex gap-3 max-w-md mx-auto mb-4">
                     <input type="text" id="player-name" maxlength="15" placeholder="Escribe tu nombre..." class="flex-1 px-4 py-3 border-2 border-orange-300 rounded-xl text-lg font-bold text-center focus:outline-none focus:border-orange-500" onkeydown="if(event.key==='Enter') joinQueue()">
                 </div>
@@ -334,7 +334,7 @@
       document.querySelector('[data-subject="'+subject+'"]').classList.add('ring-4','ring-orange-400','scale-105');
       var games = MULTIPLAYER_GAMES[subject] || [];
       document.getElementById('game-grid').innerHTML = games.map(function(g) {
-        return '<button onclick="selectGame(\''+g.id+'\')" data-game="'+g.id+'" class="game-option bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl p-4 text-left flex items-center gap-3"><span class="text-3xl">'+g.emoji+'</span><div><div class="font-bold text-gray-800">'+g.name+'</div><div class="text-sm text-gray-500">'+g.desc+'</div></div></button>';
+        return '<button onclick="selectGame(\''+g.id+'\')" data-game="'+g.id+'" class="game-option bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-2xl p-5 text-left flex items-center gap-4 transition-all hover:scale-[1.02]"><span class="text-4xl md:text-5xl">'+g.emoji+'</span><div><div class="font-bold text-gray-800 text-base md:text-lg">'+g.name+'</div><div class="text-sm md:text-base text-gray-500">'+g.desc+'</div></div></button>';
       }).join('');
       document.getElementById('step-game').classList.remove('hidden');
       document.getElementById('step-game').classList.add('slide-up');
