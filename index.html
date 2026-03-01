@@ -76,37 +76,20 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="scroll-layout.css">
     <style>
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
+            50% { transform: translateY(-10px); }
         }
         .float-animation { animation: float 3s ease-in-out infinite; }
         
         @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.6); }
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.5); }
         }
         .glow-animation { animation: pulse-glow 2s ease-in-out infinite; }
-        
-        @keyframes shimmer {
-            0% { background-position: -200% center; }
-            100% { background-position: 200% center; }
-        }
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 3s infinite;
-        }
-        
-        .mode-card {
-            transition: all 0.3s ease;
-        }
-        .mode-card:hover {
-            transform: translateY(-8px) scale(1.02);
-        }
-        
-        /* Modo deshabilitado */
+
         .mode-disabled {
             opacity: 0.5;
             pointer-events: none;
@@ -120,14 +103,13 @@
             transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.8);
             color: white;
-            padding: 0.75rem 1.5rem;
+            padding: 0.5rem 1rem;
             border-radius: 1rem;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
             z-index: 10;
         }
 
-        /* Estilos para slots de AdSense */
         .ad-container {
             text-align: center;
             margin: 1.5rem auto;
@@ -155,325 +137,237 @@
     </script>
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400">
+<body class="bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400">
     
-    <!-- Banner de desarrollo (solo visible si showDevBanner: true) -->
-    <div id="dev-banner" style="display:none;" class="bg-yellow-500 text-black text-center py-2 font-bold text-sm">
+    <!-- Banner de desarrollo -->
+    <div id="dev-banner" style="display:none;" class="bg-yellow-500 text-black text-center py-2 font-bold text-sm fixed top-0 left-0 right-0 z-50">
         ⚠️ VERSIÓN BETA — Estás viendo el nuevo diseño en pruebas
     </div>
 
-    <div class="container mx-auto px-4 py-8">
+    <!-- ╔═══════════════════════════════════════════╗ -->
+    <!-- ║  SECCIÓN 1: ZONA JUGABLE (100vh)          ║ -->
+    <!-- ╚═══════════════════════════════════════════╝ -->
+    <section class="snap-hero bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400">
+        <div class="snap-hero-inner">
 
-        <!-- ═══ HERO / HEADER ═══ -->
-        <header class="text-center mb-10 float-animation">
-            <h1 class="text-5xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg">
-                🎓 Aprende y Juega
-            </h1>
-            <p class="text-xl md:text-2xl text-white font-semibold drop-shadow-md max-w-2xl mx-auto">
-                Juegos educativos online gratis de matemáticas, lengua y lógica. 
-                ¡Elige cómo quieres jugar!
-            </p>
-        </header>
+            <header class="text-center mb-3 float-animation">
+                <h1 class="hero-title-compact text-white font-bold drop-shadow-lg">
+                    🎓 Aprende y Juega
+                </h1>
+                <p class="hero-subtitle-compact text-white/90 font-semibold drop-shadow-md mx-auto">
+                    Juegos educativos online gratis. ¡Elige cómo quieres jugar!
+                </p>
+            </header>
 
-        <main>
+            <h2 class="text-xl md:text-2xl font-bold text-white text-center mb-3 drop-shadow-lg">
+                🎯 Elige tu modo de juego
+            </h2>
 
-
-            <!-- ═══ SECCIÓN: MODOS DE JUEGO ═══ -->
-            <section id="modos" aria-labelledby="heading-modos" class="max-w-6xl mx-auto mb-12">
-                <h2 id="heading-modos" class="text-4xl font-bold text-white text-center mb-8 drop-shadow-lg">
-                    🎯 Elige tu modo de juego
-                </h2>
-
-                <div class="grid md:grid-cols-3 gap-6">
-
-                    <!-- ═══ MODO 1: JUGAR SOLO ═══ -->
-                    <a href="materias.html" id="mode-solo" class="mode-card block">
-                        <article class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl p-8 shadow-2xl glow-animation h-full">
-                            <div class="text-center">
-                                <div class="text-7xl mb-4">🎮</div>
-                                <h3 class="text-3xl font-bold text-white mb-3">Jugar Solo</h3>
-                                <p class="text-blue-100 text-lg mb-4">
-                                    Elige tu materia favorita y practica con juegos interactivos. 
-                                    Registra tu puntuación y mejora cada día a tu propio ritmo.
-                                </p>
-                                <div class="flex justify-center gap-3 text-3xl mb-4">
-                                    <span>🔢</span>
-                                    <span>📚</span>
-                                    <span>🧩</span>
-                                    <span>⌨️</span>
-                                </div>
-                                <span class="inline-block bg-white/20 text-white font-bold py-2 px-6 rounded-full text-lg">
-                                    Empezar a jugar →
-                                </span>
-                            </div>
-                        </article>
-                    </a>
-
-                    <!-- ═══ MODO 2: MULTIJUGADOR ═══ -->
-                    <div id="mode-multiplayer" class="mode-card">
-                        <article class="bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl p-8 shadow-2xl glow-animation h-full">
-                            <div class="text-center">
-                                <div class="text-7xl mb-4">👥</div>
-                                <h3 class="text-3xl font-bold text-white mb-3">Multijugador</h3>
-                                <p class="text-orange-100 text-lg mb-4">
-                                    Compite contra otro jugador en tiempo real. 
-                                    Las mismas operaciones, el mismo tiempo. 
-                                    ¿Quién resolverá más rápido?
-                                </p>
-                                <div class="flex justify-center gap-3 text-3xl mb-4">
-                                    <span>⚡</span>
-                                    <span>🏆</span>
-                                    <span>🆚</span>
-                                </div>
-                                <span class="inline-block bg-white/20 text-white font-bold py-2 px-6 rounded-full text-lg">
-                                    Buscar partida →
-                                </span>
-                            </div>
-                        </article>
+            <div class="hero-cards-grid three-cols px-2" style="max-width: 64rem;">
+                
+                <!-- MODO 1: JUGAR SOLO -->
+                <a href="materias.html" id="mode-solo" class="hero-card bg-gradient-to-br from-blue-500 to-blue-700 shadow-2xl glow-animation">
+                    <div class="card-icon">🎮</div>
+                    <div class="card-title">Jugar Solo</div>
+                    <p class="card-desc text-blue-100">Elige tu materia favorita y practica a tu ritmo</p>
+                    <div class="flex justify-center gap-2 text-xl mb-1">
+                        <span>🔢</span><span>📚</span><span>🧩</span><span>⌨️</span>
                     </div>
-
-                    <!-- ═══ MODO 3: MODO CLASE ═══ -->
-                    <div id="mode-classroom" class="mode-card">
-                        <article class="bg-gradient-to-br from-green-500 to-emerald-700 rounded-3xl p-8 shadow-2xl glow-animation h-full">
-                            <div class="text-center">
-                                <div class="text-7xl mb-4">🏫</div>
-                                <h3 class="text-3xl font-bold text-white mb-3">Modo Clase</h3>
-                                <p class="text-green-100 text-lg mb-4">
-                                    Tu profesor crea una sala y toda la clase juega a la vez. 
-                                    Ranking en tiempo real y mismas preguntas para todos. 
-                                    Perfecto para el aula.
-                                </p>
-                                <div class="flex justify-center gap-3 text-3xl mb-4">
-                                    <span>👨‍🏫</span>
-                                    <span>📊</span>
-                                    <span>🎓</span>
-                                </div>
-                                <span class="inline-block bg-white/20 text-white font-bold py-2 px-6 rounded-full text-lg">
-                                    Crear / Unirse →
-                                </span>
-                            </div>
-                        </article>
-                    </div>
-
-                </div>
-            </section>
-
-            <!-- ═══ AD SLOT 2: Rectangle entre secciones ═══ -->
-            <div class="ad-container" aria-hidden="true">
-                <!-- AdSense: Rectangle 300x250 / Responsive -->
-                <!-- <ins class="adsbygoogle" data-ad-client="ca-pub-XXXX" data-ad-slot="XXXX" data-ad-format="auto"></ins> -->
-            </div>
-
-            <!-- ═══ SECCIÓN: CATÁLOGO DE JUEGOS ═══ -->
-            <section id="juegos" aria-labelledby="heading-juegos" class="max-w-6xl mx-auto mb-12">
-                <h2 id="heading-juegos" class="text-4xl font-bold text-white text-center mb-8 drop-shadow-lg">
-                    📚 Nuestros juegos educativos
-                </h2>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Matemáticas -->
-                    <a href="matematicas-menu.html" class="group transform transition-all duration-300 hover:scale-105">
-                        <div class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-2xl font-bold text-blue-600 mb-2">🔢 Juegos de Matemáticas Gratis</h3>
-                            <p class="text-gray-700 mb-3">
-                                Practica sumas, restas, multiplicaciones y divisiones con juegos como 
-                                Cálculo Mental, completa números y compara cantidades. 
-                                Desde nivel fácil hasta avanzado.
-                            </p>
-                            <span class="text-blue-500 font-semibold group-hover:underline">Ver juegos de mates →</span>
-                        </div>
-                    </a>
-
-                    <!-- Lengua -->
-                    <a href="lengua-menu.html" class="group transform transition-all duration-300 hover:scale-105">
-                        <div class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-2xl font-bold text-green-600 mb-2">📖 Juegos de Lenguaje para Niños</h3>
-                            <p class="text-gray-700 mb-3">
-                                Encuentra palabras en sopas de letras, completa palabras con las letras 
-                                que faltan y mejora tu vocabulario y ortografía jugando.
-                            </p>
-                            <span class="text-green-500 font-semibold group-hover:underline">Ver juegos de lengua →</span>
-                        </div>
-                    </a>
-
-                    <!-- Lógica -->
-                    <a href="logica-menu.html" class="group transform transition-all duration-300 hover:scale-105">
-                        <div class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-2xl font-bold text-purple-600 mb-2">🧩 Lógica y Patrones</h3>
-                            <p class="text-gray-700 mb-3">
-                                Desarrolla el pensamiento lógico reconociendo patrones, secuencias 
-                                y series. Ejercita tu memoria visual y razonamiento.
-                            </p>
-                            <span class="text-purple-500 font-semibold group-hover:underline">Ver juegos de lógica →</span>
-                        </div>
-                    </a>
-
-                    <!-- Mecanografía -->
-                    <a href="mecanografia-menu.html" class="group transform transition-all duration-300 hover:scale-105">
-                        <div class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-2xl font-bold text-orange-600 mb-2">⌨️ Mecanografía para Niños</h3>
-                            <p class="text-gray-700 mb-3">
-                                Aprende a escribir rápido con el teclado de forma divertida. 
-                                Practica con frases reales y mejora tu velocidad de escritura.
-                            </p>
-                            <span class="text-orange-500 font-semibold group-hover:underline">Ver juegos de mecanografía →</span>
-                        </div>
-                    </a>
-                </div>
-            </section>
-
-            <!-- ═══ SECCIÓN: BENEFICIOS (contenido SEO) ═══ -->
-            <section id="beneficios" aria-labelledby="heading-beneficios" class="max-w-6xl mx-auto mb-12">
-                <div class="bg-white/90 backdrop-blur rounded-3xl p-8 shadow-xl">
-                    <h2 id="heading-beneficios" class="text-3xl font-bold text-gray-800 mb-6 text-center">
-                        ¿Por qué aprender jugando? 🧠
-                    </h2>
-                    
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div class="text-center p-4">
-                            <div class="text-5xl mb-3">🎯</div>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Aprendizaje activo</h3>
-                            <p class="text-gray-600">
-                                Los juegos educativos online mantienen la atención de los niños 
-                                y convierten la práctica en una experiencia divertida y motivadora.
-                            </p>
-                        </div>
-                        <div class="text-center p-4">
-                            <div class="text-5xl mb-3">👨‍🏫</div>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Diseñado para usar en clase</h3>
-                            <p class="text-gray-600">
-                                El modo clase permite a profesores crear sesiones donde todos los alumnos 
-                                juegan a la vez con ranking en tiempo real y resultados comparables.
-                            </p>
-                        </div>
-                        <div class="text-center p-4">
-                            <div class="text-5xl mb-3">🔒</div>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Seguro y gratuito</h3>
-                            <p class="text-gray-600">
-                                Sin registro obligatorio, sin compras ni chat. 
-                                Un entorno seguro para que padres y profesores estén tranquilos.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-
-
-            <!-- ═══ SECCIÓN: FAQ (SEO + Rich Snippets) ═══ -->
-            <section id="faq" aria-labelledby="heading-faq" class="max-w-6xl mx-auto mb-12">
-                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 shadow-xl">
-                    <h2 id="heading-faq" class="text-3xl font-bold text-blue-600 mb-6 text-center">
-                        Preguntas frecuentes ❓
-                    </h2>
-                    
-                    <div class="space-y-4">
-                        <div class="bg-white p-6 rounded-xl shadow">
-                            <h3 class="text-lg font-bold text-gray-800 mb-2">¿Qué es el modo multijugador?</h3>
-                            <p class="text-gray-700">
-                                El modo multijugador te empareja automáticamente con otro jugador. 
-                                Ambos resolvéis las mismas operaciones al mismo tiempo y al final 
-                                se comparan los resultados. ¡Descubre quién es más rápido!
-                            </p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-xl shadow">
-                            <h3 class="text-lg font-bold text-gray-800 mb-2">¿Cómo funciona el modo clase?</h3>
-                            <p class="text-gray-700">
-                                El profesor o un alumno crea una sala con un código sencillo (por ejemplo "1" o "3B"). 
-                                Todos los alumnos se unen con ese código y juegan a la vez las mismas operaciones. 
-                                Al final se muestra un ranking completo de la clase.
-                            </p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-xl shadow">
-                            <h3 class="text-lg font-bold text-gray-800 mb-2">¿Necesito registrarme para jugar?</h3>
-                            <p class="text-gray-700">
-                                No. Todos los modos funcionan sin registro. Solo necesitas escribir tu nombre 
-                                para que aparezca en el ranking. No se guardan datos personales.
-                            </p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-xl shadow">
-                            <h3 class="text-lg font-bold text-gray-800 mb-2">¿Puedo usar los juegos en la escuela?</h3>
-                            <p class="text-gray-700">
-                                ¡Absolutamente! El modo clase está diseñado para usar en el aula. 
-                                Funciona en cualquier dispositivo con navegador: ordenadores, tablets, 
-                                chromebooks o pizarras digitales. No necesitas instalar nada.
-                            </p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-xl shadow">
-                            <h3 class="text-lg font-bold text-gray-800 mb-2">¿Los juegos son realmente gratis?</h3>
-                            <p class="text-gray-700">
-                                Sí, todos los juegos son 100% gratuitos. No hay suscripciones, 
-                                compras ni cargos ocultos. Nuestro objetivo es hacer que la educación 
-                                de calidad sea accesible para todos.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ═══ ENLACE AL INDEX CLÁSICO ═══ -->
-            <div class="text-center mb-8">
-                <a href="materias.html" class="text-white/70 hover:text-white underline text-sm transition">
-                    Ver juegos por materia
+                    <span class="card-cta">Empezar a jugar →</span>
                 </a>
+
+                <!-- MODO 2: MULTIJUGADOR -->
+                <div id="mode-multiplayer" class="hero-card bg-gradient-to-br from-orange-500 to-red-600 shadow-2xl glow-animation">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Multijugador</div>
+                    <p class="card-desc text-orange-100">Compite contra otro jugador en tiempo real</p>
+                    <div class="flex justify-center gap-2 text-xl mb-1">
+                        <span>⚡</span><span>🏆</span><span>🆚</span>
+                    </div>
+                    <span class="card-cta">Buscar partida →</span>
+                </div>
+
+                <!-- MODO 3: MODO CLASE -->
+                <div id="mode-classroom" class="hero-card bg-gradient-to-br from-green-500 to-emerald-700 shadow-2xl glow-animation">
+                    <div class="card-icon">🏫</div>
+                    <div class="card-title">Modo Clase</div>
+                    <p class="card-desc text-green-100">Toda la clase juega a la vez con ranking en vivo</p>
+                    <div class="flex justify-center gap-2 text-xl mb-1">
+                        <span>👨‍🏫</span><span>📊</span><span>🎓</span>
+                    </div>
+                    <span class="card-cta">Crear / Unirse →</span>
+                </div>
+
             </div>
 
-        </main>
-    </div>
+            <!-- Quick access links -->
+            <div class="flex justify-center gap-2 mt-3 flex-wrap px-2">
+                <a href="matematicas-menu.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-sm font-semibold transition">🔢 Mates</a>
+                <a href="lengua-menu.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-sm font-semibold transition">📚 Lengua</a>
+                <a href="logica-menu.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-sm font-semibold transition">🧩 Lógica</a>
+                <a href="mecanografia-menu.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-sm font-semibold transition">⌨️ Mecanografía</a>
+            </div>
+        </div>
 
-    <!-- ═══ FOOTER ═══ -->
-    <footer class="bg-gray-900 text-white py-8 mt-auto">
-      <div class="max-w-6xl mx-auto px-4">
-        <div class="flex justify-center gap-6 mb-6">
-          <a id="link-instagram" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Instagram" style="display:none">
-            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-          </a>
-          <a id="link-facebook" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Facebook" style="display:none">
-            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          </a>
-          <a id="link-youtube" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="YouTube" style="display:none">
-            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-          </a>
-          <a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros">
-            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg>
-          </a>
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+            <span class="scroll-indicator-text">Más información</span>
+            <svg class="scroll-indicator-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
         </div>
-        <div class="text-center text-sm text-gray-400 mb-4">
-          <a href="index.html" class="hover:text-white transition mx-2">Inicio</a>
-          <span>|</span>
-          <a href="materias.html" class="hover:text-white transition mx-2">Materias</a>
-          <span>|</span>
-          <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a>
-          <span>|</span>
-          <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a>
-          <span>|</span>
-          <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a>
-          <span>|</span>
-          <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
-        </div>
-        <div class="text-center text-sm text-gray-500">
-          © <span id="year"></span> Aprende y Juega - Juegos Educativos 🎓
-        </div>
-      </div>
-    </footer>
+    </section>
 
-    <!-- ═══ SCRIPT: Control de modos según feature flags ═══ -->
+    <!-- ╔═══════════════════════════════════════════╗ -->
+    <!-- ║  SECCIÓN 2: CONTENIDO SEO + ADSENSE       ║ -->
+    <!-- ╚═══════════════════════════════════════════╝ -->
+    <section id="seo-content" class="snap-seo">
+        <hr class="section-divider">
+        
+        <div class="bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400 py-12">
+            <main class="container mx-auto px-4">
+
+                <div class="ad-container" aria-hidden="true">
+                    <!-- AdSense: Rectangle 300x250 / Responsive -->
+                    <!-- <ins class="adsbygoogle" data-ad-client="ca-pub-XXXX" data-ad-slot="XXXX" data-ad-format="auto"></ins> -->
+                </div>
+
+                <!-- CATÁLOGO DE JUEGOS -->
+                <section id="juegos" aria-labelledby="heading-juegos" class="max-w-6xl mx-auto mb-12">
+                    <h2 id="heading-juegos" class="text-4xl font-bold text-white text-center mb-8 drop-shadow-lg">
+                        📚 Nuestros juegos educativos
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <a href="matematicas-menu.html" class="group transform transition-all duration-300 hover:scale-105">
+                            <div class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl">
+                                <h3 class="text-2xl font-bold text-blue-600 mb-2">🔢 Juegos de Matemáticas Gratis</h3>
+                                <p class="text-gray-700 mb-3">Practica sumas, restas, multiplicaciones y divisiones con juegos como Cálculo Mental, completa números y compara cantidades. Desde nivel fácil hasta avanzado.</p>
+                                <span class="text-blue-500 font-semibold group-hover:underline">Ver juegos de mates →</span>
+                            </div>
+                        </a>
+                        <a href="lengua-menu.html" class="group transform transition-all duration-300 hover:scale-105">
+                            <div class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl">
+                                <h3 class="text-2xl font-bold text-green-600 mb-2">📖 Juegos de Lenguaje para Niños</h3>
+                                <p class="text-gray-700 mb-3">Encuentra palabras en sopas de letras, completa palabras con las letras que faltan y mejora tu vocabulario y ortografía jugando.</p>
+                                <span class="text-green-500 font-semibold group-hover:underline">Ver juegos de lengua →</span>
+                            </div>
+                        </a>
+                        <a href="logica-menu.html" class="group transform transition-all duration-300 hover:scale-105">
+                            <div class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl">
+                                <h3 class="text-2xl font-bold text-purple-600 mb-2">🧩 Lógica y Patrones</h3>
+                                <p class="text-gray-700 mb-3">Desarrolla el pensamiento lógico reconociendo patrones, secuencias y series. Ejercita tu memoria visual y razonamiento.</p>
+                                <span class="text-purple-500 font-semibold group-hover:underline">Ver juegos de lógica →</span>
+                            </div>
+                        </a>
+                        <a href="mecanografia-menu.html" class="group transform transition-all duration-300 hover:scale-105">
+                            <div class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl">
+                                <h3 class="text-2xl font-bold text-orange-600 mb-2">⌨️ Mecanografía para Niños</h3>
+                                <p class="text-gray-700 mb-3">Aprende a escribir rápido con el teclado de forma divertida. Practica con frases reales y mejora tu velocidad de escritura.</p>
+                                <span class="text-orange-500 font-semibold group-hover:underline">Ver juegos de mecanografía →</span>
+                            </div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- BENEFICIOS -->
+                <section id="beneficios" aria-labelledby="heading-beneficios" class="max-w-6xl mx-auto mb-12">
+                    <div class="bg-white/90 backdrop-blur rounded-3xl p-8 shadow-xl">
+                        <h2 id="heading-beneficios" class="text-3xl font-bold text-gray-800 mb-6 text-center">¿Por qué aprender jugando? 🧠</h2>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="text-center p-4">
+                                <div class="text-5xl mb-3">🎯</div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Aprendizaje activo</h3>
+                                <p class="text-gray-600">Los juegos educativos online mantienen la atención de los niños y convierten la práctica en una experiencia divertida y motivadora.</p>
+                            </div>
+                            <div class="text-center p-4">
+                                <div class="text-5xl mb-3">👨‍🏫</div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Diseñado para usar en clase</h3>
+                                <p class="text-gray-600">El modo clase permite a profesores crear sesiones donde todos los alumnos juegan a la vez con ranking en tiempo real y resultados comparables.</p>
+                            </div>
+                            <div class="text-center p-4">
+                                <div class="text-5xl mb-3">🔒</div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Seguro y gratuito</h3>
+                                <p class="text-gray-600">Sin registro obligatorio, sin compras ni chat. Un entorno seguro para que padres y profesores estén tranquilos.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FAQ -->
+                <section id="faq" aria-labelledby="heading-faq" class="max-w-6xl mx-auto mb-12">
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 shadow-xl">
+                        <h2 id="heading-faq" class="text-3xl font-bold text-blue-600 mb-6 text-center">Preguntas frecuentes ❓</h2>
+                        <div class="space-y-4">
+                            <div class="bg-white p-6 rounded-xl shadow">
+                                <h3 class="text-lg font-bold text-gray-800 mb-2">¿Qué es el modo multijugador?</h3>
+                                <p class="text-gray-700">El modo multijugador te empareja automáticamente con otro jugador. Ambos resolvéis las mismas operaciones al mismo tiempo y al final se comparan los resultados. ¡Descubre quién es más rápido!</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow">
+                                <h3 class="text-lg font-bold text-gray-800 mb-2">¿Cómo funciona el modo clase?</h3>
+                                <p class="text-gray-700">El profesor o un alumno crea una sala con un código sencillo (por ejemplo "1" o "3B"). Todos los alumnos se unen con ese código y juegan a la vez las mismas operaciones. Al final se muestra un ranking completo de la clase.</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow">
+                                <h3 class="text-lg font-bold text-gray-800 mb-2">¿Necesito registrarme para jugar?</h3>
+                                <p class="text-gray-700">No. Todos los modos funcionan sin registro. Solo necesitas escribir tu nombre para que aparezca en el ranking. No se guardan datos personales.</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow">
+                                <h3 class="text-lg font-bold text-gray-800 mb-2">¿Puedo usar los juegos en la escuela?</h3>
+                                <p class="text-gray-700">¡Absolutamente! El modo clase está diseñado para usar en el aula. Funciona en cualquier dispositivo con navegador: ordenadores, tablets, chromebooks o pizarras digitales. No necesitas instalar nada.</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow">
+                                <h3 class="text-lg font-bold text-gray-800 mb-2">¿Los juegos son realmente gratis?</h3>
+                                <p class="text-gray-700">Sí, todos los juegos son 100% gratuitos. No hay suscripciones, compras ni cargos ocultos. Nuestro objetivo es hacer que la educación de calidad sea accesible para todos.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="text-center mb-8">
+                    <a href="materias.html" class="text-white/70 hover:text-white underline text-sm transition">Ver juegos por materia</a>
+                </div>
+            </main>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="bg-gray-900 text-white py-8">
+          <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-center gap-6 mb-6">
+              <a id="link-instagram" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Instagram" style="display:none">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              </a>
+              <a id="link-facebook" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Facebook" style="display:none">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              </a>
+              <a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg>
+              </a>
+            </div>
+            <div class="text-center text-sm text-gray-400 mb-4">
+              <a href="index.html" class="hover:text-white transition mx-2">Inicio</a> <span>|</span>
+              <a href="materias.html" class="hover:text-white transition mx-2">Materias</a> <span>|</span>
+              <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a> <span>|</span>
+              <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a> <span>|</span>
+              <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a> <span>|</span>
+              <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
+            </div>
+            <div class="text-center text-sm text-gray-500">© <span id="year"></span> Aprende y Juega - Juegos Educativos 🎓</div>
+          </div>
+        </footer>
+    </section>
+
+    <!-- Back to top button -->
+    <button id="back-to-top" class="back-to-top" aria-label="Volver arriba">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+    </button>
+
+    <script src="scroll-layout.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-
-      // ── Banner de desarrollo ──
-      if (isFeatureEnabled('showDevBanner')) {
+      if (typeof isFeatureEnabled === 'function' && isFeatureEnabled('showDevBanner')) {
         document.getElementById('dev-banner').style.display = 'block';
       }
-
-      // ── Modo Multijugador ──
       var multiCard = document.getElementById('mode-multiplayer');
-      if (isFeatureEnabled('multiplayer')) {
-        // Activar como enlace clicable
+      if (typeof isFeatureEnabled === 'function' && isFeatureEnabled('multiplayer')) {
         var multiLink = document.createElement('a');
         multiLink.href = 'multijugador/lobby.html';
         multiLink.className = multiCard.className;
@@ -483,10 +377,8 @@
       } else {
         multiCard.classList.add('mode-disabled');
       }
-
-      // ── Modo Clase ──
       var classCard = document.getElementById('mode-classroom');
-      if (isFeatureEnabled('classMode')) {
+      if (typeof isFeatureEnabled === 'function' && isFeatureEnabled('classMode')) {
         var classLink = document.createElement('a');
         classLink.href = 'clase/';
         classLink.className = classCard.className;
@@ -496,24 +388,10 @@
       } else {
         classCard.classList.add('mode-disabled');
       }
-
-      // ── Tracking ──
       if (typeof gtag === 'function') {
-        gtag('event', 'page_view', {
-          'page_title': 'Modo Juego - Nuevo Index',
-          'page_location': window.location.href
-        });
-      }
-
-      // ── Debug info ──
-      if (isFeatureEnabled('debugMode')) {
-        console.log('🎮 modo-juego.html cargado');
-        console.log('  Multiplayer:', isFeatureEnabled('multiplayer'));
-        console.log('  ClassMode:', isFeatureEnabled('classMode'));
-        console.log('  Para activar: añade ?ff_multiplayer=true&ff_classMode=true a la URL');
+        gtag('event', 'page_view', { 'page_title': 'Modo Juego - Nuevo Index', 'page_location': window.location.href });
       }
     });
     </script>
-
 </body>
 </html>
