@@ -9,6 +9,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <meta name="theme-color" content="#059669">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../scroll-layout.css">
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -22,6 +23,8 @@
         @keyframes slide-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.slide-up{animation:slide-up 0.4s ease-out}
         .student-card{transition:all 0.3s ease}
         .student-card.new{animation:slide-up 0.4s ease-out}
+        .wizard-back{display:inline-flex;align-items:center;gap:0.25rem;background:rgba(5,150,105,0.15);color:#059669;padding:0.35rem 0.75rem;border-radius:0.5rem;font-size:0.8rem;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;margin-bottom:0.5rem}
+        .wizard-back:hover{background:rgba(5,150,105,0.25)}
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600">
@@ -51,11 +54,13 @@
         </div>
 
         <div id="step-game" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
+            <button onclick="goBackClase('subject')" class="wizard-back">← Cambiar materia</button>
             <h2 class="text-2xl font-bold text-gray-800 mb-4">2️⃣ Elige el juego</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="game-grid"></div>
         </div>
 
         <div id="step-difficulty" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
+            <button onclick="goBackClase('game')" class="wizard-back">← Cambiar juego</button>
             <h2 class="text-xl font-bold text-gray-800 mb-4">3️⃣ Dificultad</h2>
             <div class="grid grid-cols-3 gap-3">
                 <button onclick="pickDifficulty('facil')" data-diff="facil" class="bg-green-50 hover:bg-green-100 border-2 border-green-200 rounded-xl p-4 text-center transition"><div class="text-3xl mb-1">😊</div><div class="font-bold text-green-700">Fácil</div></button>
@@ -65,6 +70,7 @@
         </div>
 
         <div id="step-options" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
+            <button onclick="goBackClase('difficulty')" class="wizard-back">← Cambiar dificultad</button>
             <h2 class="text-xl font-bold text-gray-800 mb-4">4️⃣ Opciones</h2>
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -220,8 +226,6 @@
 
     function pickSubject(s) {
       room.subject = s;
-      document.querySelectorAll('#subject-grid button').forEach(b => b.classList.remove('ring-4','ring-green-400','scale-105'));
-      document.querySelector(`[data-sub="${s}"]`).classList.add('ring-4','ring-green-400','scale-105');
       const games = GAMES[s] || [];
       document.getElementById('game-grid').innerHTML = games.map(g =>
         `<button onclick="pickGame('${g.id}')" data-game="${g.id}" class="bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-2xl p-5 text-left flex items-center gap-4 transition-all hover:scale-[1.02]">
@@ -229,7 +233,10 @@
           <div><div class="font-bold text-gray-800 text-base md:text-lg">${g.name}</div><div class="text-sm md:text-base text-gray-500">${g.desc}</div></div>
         </button>`
       ).join('');
+      // Wizard: hide subject, show game
+      document.getElementById('subject-grid').parentElement.classList.add('hidden');
       document.getElementById('step-game').classList.remove('hidden');
+      document.getElementById('step-game').classList.add('slide-up');
       document.getElementById('step-difficulty').classList.add('hidden');
       document.getElementById('step-options').classList.add('hidden');
     }
@@ -238,7 +245,10 @@
       room.game = id;
       document.querySelectorAll('#game-grid button').forEach(b => b.classList.remove('ring-4','ring-green-400','scale-105'));
       document.querySelector(`[data-game="${id}"]`)?.classList.add('ring-4','ring-green-400','scale-105');
+      // Wizard: hide game, show difficulty
+      document.getElementById('step-game').classList.add('hidden');
       document.getElementById('step-difficulty').classList.remove('hidden');
+      document.getElementById('step-difficulty').classList.add('slide-up');
       document.getElementById('step-options').classList.add('hidden');
     }
 
@@ -246,7 +256,29 @@
       room.difficulty = d;
       document.querySelectorAll('[data-diff]').forEach(b => b.classList.remove('ring-4','ring-green-400','scale-105'));
       document.querySelector(`[data-diff="${d}"]`).classList.add('ring-4','ring-green-400','scale-105');
+      // Wizard: hide difficulty, show options
+      document.getElementById('step-difficulty').classList.add('hidden');
       document.getElementById('step-options').classList.remove('hidden');
+      document.getElementById('step-options').classList.add('slide-up');
+    }
+
+    function goBackClase(step) {
+      if (step === 'subject') {
+        room.subject = null; room.game = null; room.difficulty = null;
+        document.getElementById('step-game').classList.add('hidden');
+        document.getElementById('step-difficulty').classList.add('hidden');
+        document.getElementById('step-options').classList.add('hidden');
+        document.getElementById('subject-grid').parentElement.classList.remove('hidden');
+      } else if (step === 'game') {
+        room.game = null; room.difficulty = null;
+        document.getElementById('step-difficulty').classList.add('hidden');
+        document.getElementById('step-options').classList.add('hidden');
+        document.getElementById('step-game').classList.remove('hidden');
+      } else if (step === 'difficulty') {
+        room.difficulty = null;
+        document.getElementById('step-options').classList.add('hidden');
+        document.getElementById('step-difficulty').classList.remove('hidden');
+      }
     }
 
     function createRoom() {

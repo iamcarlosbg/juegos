@@ -18,44 +18,20 @@
     <meta name="twitter:description" id="tw-desc" content="Compite en juegos educativos contra otros jugadores o reta a un amigo.">
     <meta name="twitter:image" id="tw-image" content="https://aprendeyjuega.com/imagenes/preview-general.png">
 
-    <!-- OG dinámico: si la URL tiene ?reto=, ajustar imagen y texto según materia -->
     <script>
     (function() {
       var params = new URLSearchParams(window.location.search);
       var reto = params.get('reto');
       var materia = params.get('materia');
       if (!reto) return;
-      
-      var OG_IMAGES = {
-        matematicas: 'preview-matematicas.png',
-        lengua: 'preview-lengua.png',
-        logica: 'preview-logica.png',
-        mecanografia: 'preview-mecanografia.png'
-      };
-      var OG_TITLES = {
-        matematicas: 'Te retan a un duelo de Matematicas!',
-        lengua: 'Te retan a un duelo de Lengua!',
-        logica: 'Te retan a un duelo de Logica!',
-        mecanografia: 'Te retan a un duelo de Escritura!'
-      };
-
+      var OG_IMAGES = { matematicas:'preview-matematicas.png', lengua:'preview-lengua.png', logica:'preview-logica.png', mecanografia:'preview-mecanografia.png' };
+      var OG_TITLES = { matematicas:'Te retan a un duelo de Matematicas!', lengua:'Te retan a un duelo de Lengua!', logica:'Te retan a un duelo de Logica!', mecanografia:'Te retan a un duelo de Escritura!' };
       var img = OG_IMAGES[materia] || 'preview-reto.png';
       var title = OG_TITLES[materia] || 'Te retan a un duelo! Crees que puedes ganar?';
       var desc = 'Acepta el reto y compite en tiempo real en aprendeyjuega.com';
       var imgUrl = 'https://aprendeyjuega.com/imagenes/' + img;
-
-      // Update meta tags
-      var updates = {
-        'og-title': title, 'og-desc': desc, 'og-image': imgUrl,
-        'tw-title': title, 'tw-desc': desc, 'tw-image': imgUrl
-      };
-      Object.keys(updates).forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) {
-          var attr = el.getAttribute('property') ? 'content' : 'content';
-          el.setAttribute('content', updates[id]);
-        }
-      });
+      var updates = { 'og-title':title, 'og-desc':desc, 'og-image':imgUrl, 'tw-title':title, 'tw-desc':desc, 'tw-image':imgUrl };
+      Object.keys(updates).forEach(function(id) { var el=document.getElementById(id); if(el) el.setAttribute('content',updates[id]); });
     })();
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -65,6 +41,7 @@
     {"@context":"https://schema.org","@type":"WebPage","name":"Multijugador — Juegos Educativos en Tiempo Real","description":"Compite contra otros jugadores en juegos educativos de matemáticas, lengua y lógica.","url":"https://aprendeyjuega.com/multijugador/lobby.html","isPartOf":{"@type":"WebSite","name":"Aprende y Juega","url":"https://aprendeyjuega.com"}}
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../scroll-layout.css">
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -76,180 +53,208 @@
     <style>
         @keyframes pulse-ring{0%{transform:scale(0.9);opacity:1}50%{transform:scale(1.1);opacity:0.5}100%{transform:scale(0.9);opacity:1}}.pulse-ring{animation:pulse-ring 2s ease-in-out infinite}
         @keyframes searching-dots{0%,20%{content:'.'}40%{content:'..'}60%,100%{content:'...'}}.searching::after{content:'';animation:searching-dots 1.5s infinite steps(1)}
-        @keyframes slide-up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}.slide-up{animation:slide-up 0.4s ease-out forwards}
+        @keyframes slide-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.slide-up{animation:slide-up 0.35s ease-out forwards}
         .game-option{transition:all 0.25s ease}.game-option:hover{transform:translateY(-4px)}
         @keyframes live-dot{0%,100%{opacity:1}50%{opacity:0.3}}.live-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;animation:live-dot 1.5s ease infinite}
+        .wizard-back{display:inline-flex;align-items:center;gap:0.25rem;background:rgba(255,255,255,0.15);color:white;padding:0.35rem 0.75rem;border-radius:0.5rem;font-size:0.8rem;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;margin-bottom:0.75rem}
+        .wizard-back:hover{background:rgba(255,255,255,0.3)}
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-orange-400 via-red-400 to-pink-500">
     <div id="dev-banner" style="display:none;" class="bg-yellow-400 text-black text-center py-2 font-bold text-sm">⚠️ MODO MULTIJUGADOR EN PRUEBAS</div>
-    <div class="container mx-auto px-4 py-6 max-w-4xl">
-        <div class="flex items-center justify-between mb-6">
-            <a href="../index.html" class="bg-white/90 text-orange-600 px-4 py-2 rounded-xl font-bold hover:bg-white transition shadow-lg text-sm">🏠 Inicio</a>
-            <h1 class="text-2xl md:text-3xl font-bold text-white drop-shadow-lg text-center">👥 Multijugador en Tiempo Real</h1>
-            <div class="w-20"></div>
+
+    <!-- ═══ HERO: Pantalla completa con wizard ═══ -->
+    <section class="snap-hero bg-gradient-to-br from-orange-400 via-red-400 to-pink-500">
+      <div class="snap-hero-inner" style="max-width:50rem; justify-content:flex-start; padding-top:0.75rem;">
+        <!-- Nav -->
+        <div class="flex items-center justify-between w-full flex-shrink-0 mb-1">
+            <a href="../index.html" class="hero-nav-btn text-orange-600 text-sm">🏠 Inicio</a>
+            <h1 class="text-xl md:text-2xl font-bold text-white drop-shadow-lg">👥 Multijugador</h1>
+            <div class="w-16"></div>
         </div>
 
-        <!-- ═══ PANTALLA 1: SELECCIÓN ═══ -->
-        <div id="screen-select" class="slide-up">
-            <div class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-2">Compite contra otros jugadores en juegos educativos</h2>
-                <p class="text-gray-600 text-sm leading-relaxed">El modo multijugador te permite enfrentarte a otros jugadores en tiempo real. Ambos resolvéis exactamente las mismas operaciones al mismo tiempo y al final se comparan los resultados. Elige una materia, un juego y la dificultad para buscar un oponente aleatorio, únete directamente a alguien que ya esté esperando, o <strong>reta a un amigo</strong> enviándole un enlace directo.</p>
-            </div>
-            <!-- Jugadores esperando (visible siempre, se filtra al seleccionar) -->
-            <div id="step-waiting-players" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold text-gray-800"><span class="live-dot mr-2"></span> Jugadores esperando ahora</h2>
-                    <span class="text-sm text-gray-400" id="waiting-count">0 en cola</span>
+        <div id="screen-select" class="w-full flex-1 flex flex-col gap-2 overflow-hidden">
+            <!-- Jugadores esperando (siempre visible, compacto) -->
+            <div id="step-waiting-players" class="bg-white/95 backdrop-blur rounded-xl p-3 shadow-xl flex-shrink-0">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-sm font-bold text-gray-800"><span class="live-dot mr-1"></span> Jugadores esperando</h2>
+                    <span class="text-xs text-gray-400" id="waiting-count">0 en cola</span>
                 </div>
-                <div id="waiting-list" class="space-y-2 max-h-72 overflow-y-auto">
-                    <p class="text-gray-400 text-sm text-center py-4" id="waiting-empty">Cargando...</p>
+                <div id="waiting-list" class="space-y-1 max-h-28 overflow-y-auto">
+                    <p class="text-gray-400 text-xs text-center py-2" id="waiting-empty">Cargando...</p>
                 </div>
             </div>
 
-            <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">1️⃣ Elige la materia</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="subject-grid">
-                    <button onclick="selectSubject('matematicas')" data-subject="matematicas" class="game-option bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border-2 border-blue-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">🔢</div><div class="font-bold text-blue-700 text-base md:text-lg">Matemáticas</div></button>
-                    <button onclick="selectSubject('lengua')" data-subject="lengua" class="game-option bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border-2 border-green-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">📖</div><div class="font-bold text-green-700 text-base md:text-lg">Lengua</div></button>
-                    <button onclick="selectSubject('logica')" data-subject="logica" class="game-option bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border-2 border-purple-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">🧩</div><div class="font-bold text-purple-700 text-base md:text-lg">Lógica</div></button>
-                    <button onclick="selectSubject('mecanografia')" data-subject="mecanografia" class="game-option bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 border-2 border-orange-200 rounded-2xl p-5 md:p-6 text-center transition-all hover:scale-105"><div class="text-5xl md:text-6xl mb-2">⌨️</div><div class="font-bold text-orange-700 text-base md:text-lg">Mecanografía</div></button>
+            <!-- WIZARD STEP 1: Elige materia -->
+            <div id="wizard-subject" class="bg-white/95 backdrop-blur rounded-xl p-4 shadow-xl">
+                <h2 class="text-lg font-bold text-gray-800 mb-3 text-center">1️⃣ Elige la materia</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="subject-grid">
+                    <button onclick="selectSubject('matematicas')" data-subject="matematicas" class="game-option bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border-2 border-blue-200 rounded-xl p-4 text-center transition-all hover:scale-105"><div class="text-4xl md:text-5xl mb-1">🔢</div><div class="font-bold text-blue-700 text-sm md:text-base">Matemáticas</div></button>
+                    <button onclick="selectSubject('lengua')" data-subject="lengua" class="game-option bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border-2 border-green-200 rounded-xl p-4 text-center transition-all hover:scale-105"><div class="text-4xl md:text-5xl mb-1">📖</div><div class="font-bold text-green-700 text-sm md:text-base">Lengua</div></button>
+                    <button onclick="selectSubject('logica')" data-subject="logica" class="game-option bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border-2 border-purple-200 rounded-xl p-4 text-center transition-all hover:scale-105"><div class="text-4xl md:text-5xl mb-1">🧩</div><div class="font-bold text-purple-700 text-sm md:text-base">Lógica</div></button>
+                    <button onclick="selectSubject('mecanografia')" data-subject="mecanografia" class="game-option bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 border-2 border-orange-200 rounded-xl p-4 text-center transition-all hover:scale-105"><div class="text-4xl md:text-5xl mb-1">⌨️</div><div class="font-bold text-orange-700 text-sm md:text-base">Mecanografía</div></button>
                 </div>
             </div>
 
-            <div id="step-game" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">2️⃣ Elige el juego</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="game-grid"></div>
+            <!-- WIZARD STEP 2: Elige juego (hidden initially) -->
+            <div id="wizard-game" class="hidden bg-white/95 backdrop-blur rounded-xl p-4 shadow-xl">
+                <button onclick="goBackTo('subject')" class="wizard-back">← Cambiar materia</button>
+                <h2 class="text-lg font-bold text-gray-800 mb-3 text-center">2️⃣ Elige el juego</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="game-grid"></div>
             </div>
-            <div id="step-difficulty" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">3️⃣ Elige la dificultad</h2>
-                <div class="grid grid-cols-3 gap-4" id="difficulty-grid">
-                    <button onclick="selectDifficulty('facil')" data-diff="facil" class="game-option bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border-2 border-green-200 rounded-2xl p-5 text-center transition-all hover:scale-105"><div class="text-4xl mb-2">😊</div><div class="font-bold text-green-700 text-base md:text-lg">Fácil</div></button>
-                    <button onclick="selectDifficulty('medio')" data-diff="medio" class="game-option bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 border-2 border-yellow-200 rounded-2xl p-5 text-center transition-all hover:scale-105"><div class="text-4xl mb-2">🤔</div><div class="font-bold text-yellow-700 text-base md:text-lg">Medio</div></button>
-                    <button onclick="selectDifficulty('dificil')" data-diff="dificil" class="game-option bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border-2 border-red-200 rounded-2xl p-5 text-center transition-all hover:scale-105"><div class="text-4xl mb-2">🔥</div><div class="font-bold text-red-700 text-base md:text-lg">Difícil</div></button>
+
+            <!-- WIZARD STEP 3: Dificultad + Nombre (hidden initially) -->
+            <div id="wizard-play" class="hidden bg-white/95 backdrop-blur rounded-xl p-4 shadow-xl">
+                <button onclick="goBackTo('game')" class="wizard-back">← Cambiar juego</button>
+                <h2 class="text-lg font-bold text-gray-800 mb-3 text-center">3️⃣ Dificultad y nombre</h2>
+                <div class="grid grid-cols-3 gap-3 mb-4" id="difficulty-grid">
+                    <button onclick="selectDifficulty('facil')" data-diff="facil" class="game-option bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border-2 border-green-200 rounded-xl p-3 text-center transition-all hover:scale-105"><div class="text-3xl mb-1">😊</div><div class="font-bold text-green-700 text-sm">Fácil</div></button>
+                    <button onclick="selectDifficulty('medio')" data-diff="medio" class="game-option bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 border-2 border-yellow-200 rounded-xl p-3 text-center transition-all hover:scale-105"><div class="text-3xl mb-1">🤔</div><div class="font-bold text-yellow-700 text-sm">Medio</div></button>
+                    <button onclick="selectDifficulty('dificil')" data-diff="dificil" class="game-option bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border-2 border-red-200 rounded-xl p-3 text-center transition-all hover:scale-105"><div class="text-3xl mb-1">🔥</div><div class="font-bold text-red-700 text-sm">Difícil</div></button>
+                </div>
+                <div id="step-name-area" class="hidden">
+                    <div class="flex gap-2 max-w-md mx-auto mb-3">
+                        <input type="text" id="player-name" maxlength="15" placeholder="Tu nombre..." class="flex-1 px-3 py-2 border-2 border-orange-300 rounded-lg text-base font-bold text-center focus:outline-none focus:border-orange-500" onkeydown="if(event.key==='Enter') joinQueue()">
+                    </div>
+                    <div class="flex gap-2 justify-center flex-wrap">
+                        <button onclick="joinQueue()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-5 py-2 rounded-lg text-sm hover:from-orange-600 hover:to-red-600 transition shadow-lg">🔍 Buscar oponente</button>
+                        <button onclick="createChallenge()" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold px-5 py-2 rounded-lg text-sm hover:from-purple-600 hover:to-indigo-700 transition shadow-lg">🔗 Retar amigo</button>
+                    </div>
                 </div>
             </div>
-            <div id="step-name" class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl mb-6 hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">4️⃣ Tu nombre</h2>
-                <div class="flex gap-3 max-w-md mx-auto mb-4">
-                    <input type="text" id="player-name" maxlength="15" placeholder="Escribe tu nombre..." class="flex-1 px-4 py-3 border-2 border-orange-300 rounded-xl text-lg font-bold text-center focus:outline-none focus:border-orange-500" onkeydown="if(event.key==='Enter') joinQueue()">
-                </div>
-                <div class="flex gap-3 justify-center flex-wrap">
-                    <button onclick="joinQueue()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl text-lg hover:from-orange-600 hover:to-red-600 transition shadow-lg">🔍 Buscar oponente</button>
-                    <button onclick="createChallenge()" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold px-6 py-3 rounded-xl text-lg hover:from-purple-600 hover:to-indigo-700 transition shadow-lg">🔗 Retar a un amigo</button>
-                </div>
-            </div>
-            <!-- SEO sections -->
-            <section class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-3">¿Cómo funciona el modo multijugador?</h2>
-                <div class="grid md:grid-cols-3 gap-4 text-sm text-gray-600">
-                    <div><h3 class="font-bold text-gray-800 mb-1">🔍 Buscar oponente</h3><p>Elige tu materia, juego y dificultad. El sistema te empareja automáticamente con otro jugador que esté buscando. Si no encuentra a nadie con tu mismo nivel en 10 segundos, amplía la búsqueda a todos los niveles y juega al nivel más bajo de los dos.</p></div>
-                    <div><h3 class="font-bold text-gray-800 mb-1">🔗 Retar a un amigo</h3><p>Genera un enlace único y envíalo por WhatsApp, correo o donde quieras. Cuando tu amigo abra el enlace, se conectará directamente contigo y empezaréis a jugar sin esperas.</p></div>
-                    <div><h3 class="font-bold text-gray-800 mb-1">⚡ Partida en tiempo real</h3><p>Ambos jugadores resolvéis las mismas operaciones al mismo tiempo. Ves la puntuación de tu rival en directo. Gana quien consiga más puntos antes de acabar el tiempo o las preguntas.</p></div>
-                </div>
-            </section>
-            <section class="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl mb-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-3">Juegos educativos multijugador disponibles</h2>
-                <div class="grid md:grid-cols-2 gap-3 text-sm text-gray-600">
-                    <div><h3 class="font-bold text-blue-700 mb-1">🔢 Matemáticas</h3><p>Cálculo Mental, Jerarquía de Operaciones, Mayor o Menor y Completa el Número. Practica sumas, restas, multiplicaciones y divisiones compitiendo contra otro jugador en tiempo real.</p></div>
-                    <div><h3 class="font-bold text-green-700 mb-1">📖 Lengua</h3><p>Ordena la Palabra y Completa la Letra. Mejora vocabulario y ortografía en modo competitivo contra otros jugadores.</p></div>
-                    <div><h3 class="font-bold text-purple-700 mb-1">🧩 Lógica</h3><p>Seguir Patrones. Compite memorizando y repitiendo secuencias de colores cada vez más complejas.</p></div>
-                    <div><h3 class="font-bold text-orange-700 mb-1">⌨️ Mecanografía</h3><p>Práctica de Escritura. Escribe frases a contrarreloj y descubre quién teclea más rápido y con menos errores.</p></div>
-                </div>
-            </section>
-            <section class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 shadow-xl mb-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-3">Preguntas frecuentes sobre el multijugador</h2>
-                <div class="space-y-3 text-sm">
-                    <div class="bg-white p-4 rounded-xl"><h3 class="font-bold text-gray-800 mb-1">¿Necesito registrarme para jugar en multijugador?</h3><p class="text-gray-600">No. Solo necesitas escribir tu nombre antes de buscar partida. No guardamos datos personales.</p></div>
-                    <div class="bg-white p-4 rounded-xl"><h3 class="font-bold text-gray-800 mb-1">¿Qué pasa si no hay nadie esperando?</h3><p class="text-gray-600">Puedes esperar a que alguien se una, o enviar un enlace de reto a un amigo para jugar directamente con él sin esperas.</p></div>
-                    <div class="bg-white p-4 rounded-xl"><h3 class="font-bold text-gray-800 mb-1">¿Puedo jugar multijugador en el móvil?</h3><p class="text-gray-600">Sí, funciona en cualquier dispositivo con navegador: móvil, tablet, ordenador o chromebook. No necesitas instalar nada.</p></div>
-                </div>
-            </section>
+        </div>
+
+        <!-- Scroll to more info -->
+        <div class="scroll-indicator flex-shrink-0">
+            <span class="scroll-indicator-text">Más información</span>
+            <svg class="scroll-indicator-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
         </div>
 
         <!-- ═══ PANTALLA 2: BUSCANDO ═══ -->
-        <div id="screen-searching" class="hidden">
-            <div class="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-xl text-center">
-                <div class="pulse-ring inline-block mb-6"><div class="w-32 h-32 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto"><span class="text-6xl">👥</span></div></div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-2"><span class="searching">Buscando oponente</span></h2>
-                <p class="text-gray-500 mb-2" id="search-info"></p>
-                <p class="text-gray-400 text-sm mb-6">Tiempo buscando: <span id="search-seconds">0</span>s</p>
-                <button onclick="cancelSearch()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-6 py-3 rounded-xl transition">✕ Cancelar</button>
+        <div id="screen-searching" class="hidden absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-xl text-center max-w-md w-full">
+                <div class="pulse-ring inline-block mb-6"><div class="w-24 h-24 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto"><span class="text-5xl">👥</span></div></div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2"><span class="searching">Buscando oponente</span></h2>
+                <p class="text-gray-500 mb-2 text-sm" id="search-info"></p>
+                <p class="text-gray-400 text-xs mb-4">Tiempo: <span id="search-seconds">0</span>s</p>
+                <button onclick="cancelSearch()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-5 py-2 rounded-lg transition text-sm">✕ Cancelar</button>
             </div>
         </div>
 
         <!-- ═══ PANTALLA 3: ESPERANDO AMIGO ═══ -->
-        <div id="screen-challenge" class="hidden">
-            <div class="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-xl text-center">
-                <div class="text-5xl mb-4">🔗</div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Enlace de reto creado!</h2>
-                <p class="text-gray-500 mb-4">Envía este enlace a tu amigo para jugar juntos:</p>
-                <div class="bg-gray-100 rounded-xl p-3 mb-4 max-w-lg mx-auto">
-                    <input type="text" id="challenge-url" readonly class="w-full bg-transparent text-center text-sm font-mono text-gray-700 focus:outline-none">
+        <div id="screen-challenge" class="hidden absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-xl text-center max-w-md w-full">
+                <div class="text-4xl mb-3">🔗</div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">¡Enlace de reto creado!</h2>
+                <p class="text-gray-500 mb-3 text-sm">Envía este enlace a tu amigo:</p>
+                <div class="bg-gray-100 rounded-lg p-2 mb-3"><input type="text" id="challenge-url" readonly class="w-full bg-transparent text-center text-xs font-mono text-gray-700 focus:outline-none"></div>
+                <div class="flex gap-2 justify-center flex-wrap mb-4">
+                    <button onclick="copyChallengeLink()" id="btn-copy-challenge" class="bg-gray-700 hover:bg-gray-800 text-white font-bold px-4 py-2 rounded-lg transition text-sm">📋 Copiar</button>
+                    <button onclick="shareChallengeWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg transition text-sm">💬 WhatsApp</button>
                 </div>
-                <div class="flex gap-3 justify-center flex-wrap mb-6">
-                    <button onclick="copyChallengeLink()" id="btn-copy-challenge" class="bg-gray-700 hover:bg-gray-800 text-white font-bold px-5 py-2 rounded-xl transition text-sm">📋 Copiar enlace</button>
-                    <button onclick="shareChallengeWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-2 rounded-xl transition text-sm">💬 WhatsApp</button>
-                </div>
-                <div class="pulse-ring inline-block mb-4"><div class="w-20 h-20 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto"><span class="text-3xl">⏳</span></div></div>
-                <p class="text-gray-500 text-sm mb-2"><span class="searching">Esperando a que tu amigo se una</span></p>
-                <p class="text-gray-400 text-xs mb-4">El enlace caduca en 10 minutos</p>
-                <button onclick="cancelChallenge()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-6 py-3 rounded-xl transition">✕ Cancelar reto</button>
+                <div class="pulse-ring inline-block mb-3"><div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto"><span class="text-2xl">⏳</span></div></div>
+                <p class="text-gray-500 text-xs mb-1"><span class="searching">Esperando a tu amigo</span></p>
+                <p class="text-gray-400 text-xs mb-3">Caduca en 10 min</p>
+                <button onclick="cancelChallenge()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-5 py-2 rounded-lg transition text-sm">✕ Cancelar</button>
             </div>
         </div>
 
         <!-- ═══ PANTALLA 4: MATCHED ═══ -->
-        <div id="screen-matched" class="hidden">
-            <div class="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-xl text-center">
-                <div class="text-5xl mb-4">⚡</div>
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">¡Oponente encontrado!</h2>
-                <div class="flex items-center justify-center gap-6 mb-6">
-                    <div class="text-center"><div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2"><span class="text-3xl">🧑</span></div><p class="font-bold text-gray-800" id="match-player1">Tú</p></div>
-                    <div class="text-4xl font-black text-orange-500">VS</div>
-                    <div class="text-center"><div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2"><span class="text-3xl">🧑</span></div><p class="font-bold text-gray-800" id="match-player2">Oponente</p></div>
+        <div id="screen-matched" class="hidden absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-xl text-center max-w-md w-full">
+                <div class="text-4xl mb-3">⚡</div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">¡Oponente encontrado!</h2>
+                <div class="flex items-center justify-center gap-6 mb-4">
+                    <div class="text-center"><div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1"><span class="text-2xl">🧑</span></div><p class="font-bold text-gray-800 text-sm" id="match-player1">Tú</p></div>
+                    <div class="text-3xl font-black text-orange-500">VS</div>
+                    <div class="text-center"><div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-1"><span class="text-2xl">🧑</span></div><p class="font-bold text-gray-800 text-sm" id="match-player2">Oponente</p></div>
                 </div>
-                <p class="text-xl text-gray-600 mb-2">La partida empieza en...</p>
-                <p class="text-5xl font-black text-orange-500" id="countdown">3</p>
+                <p class="text-lg text-gray-600 mb-1">Empieza en...</p>
+                <p class="text-4xl font-black text-orange-500" id="countdown">3</p>
             </div>
         </div>
-    </div>
-
-    <footer class="bg-gray-900 text-white py-8 mt-8">
-      <div class="max-w-6xl mx-auto px-4">
-        <div class="flex justify-center gap-6 mb-6"><a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg></a></div>
-        <div class="text-center text-sm text-gray-400 mb-4">
-          <a href="../index.html" class="hover:text-white transition mx-2">Inicio</a><span>|</span>
-          <a href="../materias.html" class="hover:text-white transition mx-2">Materias</a><span>|</span>
-          <a href="../puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a><span>|</span>
-          <a href="../sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a><span>|</span>
-          <a href="../privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
-        </div>
-        <div class="text-center text-sm text-gray-500">© <span id="year"></span> Aprende y Juega 🎓</div>
       </div>
-    </footer>
+    </section>
 
+    <!-- ═══ SEO SECTION ═══ -->
+    <section id="seo-content" class="snap-seo">
+        <hr class="section-divider">
+        <div class="bg-white py-8">
+            <div class="max-w-4xl mx-auto px-4">
+                <section class="mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-3">Compite contra otros jugadores en juegos educativos</h2>
+                    <p class="text-gray-600 text-sm leading-relaxed">El modo multijugador te permite enfrentarte a otros jugadores en tiempo real. Ambos resolvéis exactamente las mismas operaciones al mismo tiempo y al final se comparan los resultados. Elige una materia, un juego y la dificultad para buscar un oponente aleatorio, únete directamente a alguien que ya esté esperando, o <strong>reta a un amigo</strong> enviándole un enlace directo.</p>
+                </section>
+                <section class="mb-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-3">¿Cómo funciona el modo multijugador?</h2>
+                    <div class="grid md:grid-cols-3 gap-4 text-sm text-gray-600">
+                        <div><h3 class="font-bold text-gray-800 mb-1">🔍 Buscar oponente</h3><p>Elige tu materia, juego y dificultad. El sistema te empareja automáticamente con otro jugador.</p></div>
+                        <div><h3 class="font-bold text-gray-800 mb-1">🔗 Retar a un amigo</h3><p>Genera un enlace único y envíalo por WhatsApp o correo. Tu amigo se conectará directamente contigo.</p></div>
+                        <div><h3 class="font-bold text-gray-800 mb-1">⚡ Partida en tiempo real</h3><p>Ambos resolvéis las mismas operaciones. Ves la puntuación del rival en directo.</p></div>
+                    </div>
+                </section>
+                <section class="mb-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-3">Juegos multijugador disponibles</h2>
+                    <div class="grid md:grid-cols-2 gap-3 text-sm text-gray-600">
+                        <div><h3 class="font-bold text-blue-700 mb-1">🔢 Matemáticas</h3><p>Cálculo Mental, Jerarquía de Operaciones, Mayor o Menor y Completa el Número.</p></div>
+                        <div><h3 class="font-bold text-green-700 mb-1">📖 Lengua</h3><p>Ordena la Palabra y Completa la Letra.</p></div>
+                        <div><h3 class="font-bold text-purple-700 mb-1">🧩 Lógica</h3><p>Seguir Patrones.</p></div>
+                        <div><h3 class="font-bold text-orange-700 mb-1">⌨️ Mecanografía</h3><p>Práctica de Escritura.</p></div>
+                    </div>
+                </section>
+                <section class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 shadow-xl">
+                    <h2 class="text-lg font-bold text-gray-800 mb-3">Preguntas frecuentes</h2>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-white p-4 rounded-xl"><h3 class="font-bold text-gray-800 mb-1">¿Necesito registrarme?</h3><p class="text-gray-600">No. Solo escribe tu nombre antes de buscar partida.</p></div>
+                        <div class="bg-white p-4 rounded-xl"><h3 class="font-bold text-gray-800 mb-1">¿Qué pasa si no hay nadie?</h3><p class="text-gray-600">Puedes esperar o enviar un enlace de reto a un amigo.</p></div>
+                        <div class="bg-white p-4 rounded-xl"><h3 class="font-bold text-gray-800 mb-1">¿Funciona en móvil?</h3><p class="text-gray-600">Sí, en cualquier dispositivo con navegador.</p></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <footer class="bg-gray-900 text-white py-8">
+          <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-center gap-6 mb-6"><a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg></a></div>
+            <div class="text-center text-sm text-gray-400 mb-4">
+              <a href="../index.html" class="hover:text-white transition mx-2">Inicio</a><span>|</span>
+              <a href="../materias.html" class="hover:text-white transition mx-2">Materias</a><span>|</span>
+              <a href="../puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a><span>|</span>
+              <a href="../sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a><span>|</span>
+              <a href="../privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
+            </div>
+            <div class="text-center text-sm text-gray-500">© <span id="year"></span> Aprende y Juega 🎓</div>
+          </div>
+        </footer>
+    </section>
+
+    <button id="back-to-top" class="back-to-top" aria-label="Volver arriba">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+    </button>
+
+    <script src="../scroll-layout.js"></script>
     <script>
     var MULTIPLAYER_GAMES = {
       matematicas: [
-        { id: 'invasores-matematicos', name: 'Cálculo Mental', emoji: '🧠', desc: 'Resuelve operaciones rápidamente' },
-        { id: 'jerarquia-operaciones', name: 'Jerarquía Operaciones', emoji: '🧮', desc: 'Resuelve operaciones con jerarquía (+, -, ×, ÷)' },
-        { id: 'mayor-menor', name: 'Mayor o Menor', emoji: '⚖️', desc: 'Compara números y operaciones' },
-        { id: 'completa-numero', name: 'Completa el Número', emoji: '🔢', desc: 'Encuentra el número que falta' }
+        { id:'invasores-matematicos', name:'Cálculo Mental', emoji:'🧠', desc:'Resuelve operaciones rápidamente' },
+        { id:'jerarquia-operaciones', name:'Jerarquía Operaciones', emoji:'🧮', desc:'Resuelve operaciones con jerarquía' },
+        { id:'mayor-menor', name:'Mayor o Menor', emoji:'⚖️', desc:'Compara números y operaciones' },
+        { id:'completa-numero', name:'Completa el Número', emoji:'🔢', desc:'Encuentra el número que falta' }
       ],
       lengua: [
-        { id: 'sopa-letras', name: 'Ordena la Palabra', emoji: '🔤', desc: 'Descifra las letras desordenadas' },
-        { id: 'completa-letra', name: 'Completa la Letra', emoji: '✏️', desc: 'Completa la palabra con la letra correcta' }
+        { id:'sopa-letras', name:'Ordena la Palabra', emoji:'🔤', desc:'Descifra las letras desordenadas' },
+        { id:'completa-letra', name:'Completa la Letra', emoji:'✏️', desc:'Completa la palabra con la letra correcta' }
       ],
       logica: [
-        { id: 'seguir-patrones', name: 'Seguir Patrones', emoji: '🧩', desc: 'Memoriza y repite secuencias' }
+        { id:'seguir-patrones', name:'Seguir Patrones', emoji:'🧩', desc:'Memoriza y repite secuencias' }
       ],
       mecanografia: [
-        { id: 'practica-escritura', name: 'Práctica de Escritura', emoji: '⌨️', desc: 'Escribe frases correctamente' }
+        { id:'practica-escritura', name:'Práctica de Escritura', emoji:'⌨️', desc:'Escribe frases correctamente' }
       ]
     };
 
-    var DIFFICULTY_ORDER = ['facil', 'medio', 'dificil'];
-    var DIFFICULTY_LABELS = { facil: 'Fácil', medio: 'Medio', dificil: 'Difícil' };
+    var DIFFICULTY_ORDER = ['facil','medio','dificil'];
+    var DIFFICULTY_LABELS = { facil:'Fácil', medio:'Medio', dificil:'Difícil' };
     var GAME_NAMES = {};
     Object.keys(MULTIPLAYER_GAMES).forEach(function(s) {
       MULTIPLAYER_GAMES[s].forEach(function(g) { GAME_NAMES[g.id] = g; });
@@ -257,16 +262,39 @@
     var FLEX_SEARCH_DELAY = 10;
 
     var lobbyState = {
-      subject: null, game: null, difficulty: null,
-      playerName: null, playerId: null,
-      searchTimer: null, searchSeconds: 0,
-      queueRef: null, assignRef: null,
-      flexActive: false, flexListeners: [],
-      challengeRef: null, challengeId: null,
-      waitingListener: null
+      subject:null, game:null, difficulty:null,
+      playerName:null, playerId:null,
+      searchTimer:null, searchSeconds:0,
+      queueRef:null, assignRef:null,
+      flexActive:false, flexListeners:[],
+      challengeRef:null, challengeId:null,
+      waitingListener:null
     };
 
     var rtdb = null;
+
+    // ═══ WIZARD NAVIGATION ═══
+    function showWizardStep(step) {
+      document.getElementById('wizard-subject').classList.add('hidden');
+      document.getElementById('wizard-game').classList.add('hidden');
+      document.getElementById('wizard-play').classList.add('hidden');
+      document.getElementById('wizard-' + step).classList.remove('hidden');
+      document.getElementById('wizard-' + step).classList.add('slide-up');
+    }
+
+    function goBackTo(step) {
+      if (step === 'subject') {
+        lobbyState.subject = null; lobbyState.game = null; lobbyState.difficulty = null;
+        showWizardStep('subject');
+        renderFilteredWaiting();
+      } else if (step === 'game') {
+        lobbyState.game = null; lobbyState.difficulty = null;
+        document.getElementById('step-name-area').classList.add('hidden');
+        document.querySelectorAll('#difficulty-grid button').forEach(function(b){b.classList.remove('ring-4','ring-orange-400','scale-105');});
+        showWizardStep('game');
+        renderFilteredWaiting();
+      }
+    }
 
     // ═══ INIT ═══
     window.addEventListener('load', function() {
@@ -309,11 +337,11 @@
     function joinChallenge(cid, cd) {
       var matchId = 'M_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
       var ops = generateOperationsForGame(lobbyState.game, lobbyState.difficulty, 20);
-      var md = { matchId: matchId, players: {}, operations: ops,
-        config: { subject: lobbyState.subject, game: lobbyState.game, difficulty: lobbyState.difficulty, totalOperations: ops.length, timeLimitSeconds: 120 },
-        status: 'active', createdAt: firebase.database.ServerValue.TIMESTAMP };
-      md.players[cd.hostId] = { name: cd.hostName, score: 0, current: 0, finished: false, answers: {} };
-      md.players[lobbyState.playerId] = { name: lobbyState.playerName, score: 0, current: 0, finished: false, answers: {} };
+      var md = { matchId:matchId, players:{}, operations:ops,
+        config:{ subject:lobbyState.subject, game:lobbyState.game, difficulty:lobbyState.difficulty, totalOperations:ops.length, timeLimitSeconds:120 },
+        status:'active', createdAt:firebase.database.ServerValue.TIMESTAMP };
+      md.players[cd.hostId] = { name:cd.hostName, score:0, current:0, finished:false, answers:{} };
+      md.players[lobbyState.playerId] = { name:lobbyState.playerName, score:0, current:0, finished:false, answers:{} };
       var up = {};
       up['matches/' + matchId] = md;
       up['challenges/' + cid + '/status'] = 'matched';
@@ -327,23 +355,18 @@
       });
     }
 
-    // ═══ SELECT SUBJECT ═══
+    // ═══ SELECT SUBJECT (WIZARD) ═══
     function selectSubject(subject) {
       lobbyState.subject = subject; lobbyState.game = null; lobbyState.difficulty = null;
-      document.querySelectorAll('#subject-grid button').forEach(function(b) { b.classList.remove('ring-4','ring-orange-400','scale-105'); });
-      document.querySelector('[data-subject="'+subject+'"]').classList.add('ring-4','ring-orange-400','scale-105');
       var games = MULTIPLAYER_GAMES[subject] || [];
       document.getElementById('game-grid').innerHTML = games.map(function(g) {
-        return '<button onclick="selectGame(\''+g.id+'\')" data-game="'+g.id+'" class="game-option bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-2xl p-5 text-left flex items-center gap-4 transition-all hover:scale-[1.02]"><span class="text-4xl md:text-5xl">'+g.emoji+'</span><div><div class="font-bold text-gray-800 text-base md:text-lg">'+g.name+'</div><div class="text-sm md:text-base text-gray-500">'+g.desc+'</div></div></button>';
+        return '<button onclick="selectGame(\''+g.id+'\')" data-game="'+g.id+'" class="game-option bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl p-4 text-left flex items-center gap-3 transition-all hover:scale-[1.02]"><span class="text-3xl md:text-4xl">'+g.emoji+'</span><div><div class="font-bold text-gray-800 text-sm md:text-base">'+g.name+'</div><div class="text-xs text-gray-500">'+g.desc+'</div></div></button>';
       }).join('');
-      document.getElementById('step-game').classList.remove('hidden');
-      document.getElementById('step-game').classList.add('slide-up');
-      document.getElementById('step-difficulty').classList.add('hidden');
-      document.getElementById('step-name').classList.add('hidden');
+      showWizardStep('game');
       showWaitingPlayers(subject);
     }
 
-    // ═══ WAITING PLAYERS LIST (global, with filtering) ═══
+    // ═══ WAITING PLAYERS ═══
     function initWaitingPlayers() {
       if (!rtdb) return;
       var qRef = rtdb.ref('matchmaking/queue');
@@ -352,39 +375,32 @@
         var all = snapshot.val() || {};
         Object.keys(all).forEach(function(qk) {
           var parts = qk.split('_'); var diff = parts.pop(); var gid = parts.join('_');
-          var players = all[qk];
-          // Find which subject this game belongs to
           var sub = null;
           Object.keys(MULTIPLAYER_GAMES).forEach(function(s) {
             MULTIPLAYER_GAMES[s].forEach(function(g) { if (g.id === gid) sub = s; });
           });
+          var players = all[qk];
           Object.keys(players).forEach(function(pid) {
-            lobbyState.allWaiting.push({ id: pid, name: players[pid].name, game: gid, subject: sub, difficulty: diff, joinedAt: players[pid].joinedAt });
+            lobbyState.allWaiting.push({ id:pid, name:players[pid].name, game:gid, subject:sub, difficulty:diff, joinedAt:players[pid].joinedAt });
           });
         });
         renderFilteredWaiting();
       });
-      lobbyState.waitingListener = { ref: qRef, fn: fn };
+      lobbyState.waitingListener = { ref:qRef, fn:fn };
     }
 
     function renderFilteredWaiting() {
       var all = lobbyState.allWaiting || [];
       var filtered = all;
-
-      // Filter by subject if selected
       if (lobbyState.subject) {
         var gamesInSubject = (MULTIPLAYER_GAMES[lobbyState.subject]||[]).map(function(g){return g.id;});
         filtered = filtered.filter(function(p) { return gamesInSubject.indexOf(p.game) !== -1; });
       }
-      // Filter by game if selected
       if (lobbyState.game) {
         filtered = filtered.filter(function(p) { return p.game === lobbyState.game; });
       }
-
       renderWaitingList(filtered);
     }
-
-    // Kept for compatibility
     function showWaitingPlayers(subject) { renderFilteredWaiting(); }
 
     function renderWaitingList(players) {
@@ -392,55 +408,45 @@
       document.getElementById('waiting-count').textContent = players.length + ' en cola';
       if (players.length === 0) {
         var msg = lobbyState.subject ? 'No hay nadie esperando. ¡Sé el primero!' : 'No hay jugadores esperando ahora mismo.';
-        list.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">' + msg + '</p>';
+        list.innerHTML = '<p class="text-gray-400 text-xs text-center py-2">' + msg + '</p>';
         return;
       }
-
-      // Group by subject
-      var SUBJECT_LABELS = { matematicas: '🔢 Matemáticas', lengua: '📖 Lengua', logica: '🧩 Lógica', mecanografia: '⌨️ Mecanografía' };
+      var SUBJECT_LABELS = { matematicas:'🔢 Mates', lengua:'📖 Lengua', logica:'🧩 Lógica', mecanografia:'⌨️ Mecano' };
       var grouped = {};
-      players.forEach(function(p) {
-        var s = p.subject || 'otro';
-        if (!grouped[s]) grouped[s] = [];
-        grouped[s].push(p);
-      });
-
+      players.forEach(function(p) { var s=p.subject||'otro'; if(!grouped[s]) grouped[s]=[]; grouped[s].push(p); });
       var html = '';
       Object.keys(grouped).forEach(function(sub) {
-        if (!lobbyState.subject) {
-          html += '<div class="text-xs font-bold text-gray-500 uppercase mt-2 mb-1">' + (SUBJECT_LABELS[sub] || sub) + '</div>';
-        }
+        if (!lobbyState.subject) html += '<div class="text-xs font-bold text-gray-500 uppercase mt-1 mb-0.5">' + (SUBJECT_LABELS[sub]||sub) + '</div>';
         grouped[sub].forEach(function(p) {
-          var gi = GAME_NAMES[p.game]; var gn = gi?gi.name:p.game; var ge = gi?gi.emoji:'🎮';
-          var dl = DIFFICULTY_LABELS[p.difficulty]||p.difficulty;
-          var dc = p.difficulty==='facil'?'green':p.difficulty==='medio'?'yellow':'red';
-          html += '<div class="flex items-center justify-between bg-gray-50 rounded-xl p-3 border border-gray-100">' +
-            '<div class="flex items-center gap-3"><span class="text-xl">' + ge + '</span>' +
-            '<div><div class="font-bold text-gray-800 text-sm">' + p.name + '</div>' +
+          var gi=GAME_NAMES[p.game]; var gn=gi?gi.name:p.game; var ge=gi?gi.emoji:'🎮';
+          var dl=DIFFICULTY_LABELS[p.difficulty]||p.difficulty;
+          var dc=p.difficulty==='facil'?'green':p.difficulty==='medio'?'yellow':'red';
+          html += '<div class="flex items-center justify-between bg-gray-50 rounded-lg p-2 border border-gray-100">' +
+            '<div class="flex items-center gap-2"><span class="text-lg">' + ge + '</span>' +
+            '<div><div class="font-bold text-gray-800 text-xs">' + p.name + '</div>' +
             '<div class="text-xs text-gray-500">' + gn + ' · <span class="text-' + dc + '-600">' + dl + '</span></div></div></div>' +
             '<button onclick="joinSpecificPlayer(\'' + p.id + '\',\'' + p.game + '\',\'' + p.difficulty + '\')" ' +
-            'class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-1 rounded-lg text-sm transition">⚡ Unirse</button></div>';
+            'class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-2 py-1 rounded text-xs transition">⚡ Unirse</button></div>';
         });
       });
       list.innerHTML = html;
     }
 
-    // ═══ JOIN SPECIFIC PLAYER ═══
     function joinSpecificPlayer(tid, gid, diff) {
       var name = document.getElementById('player-name').value.trim();
       if (!name) {
-        document.getElementById('step-name').classList.remove('hidden');
+        // Show name input
+        showWizardStep('play');
+        document.getElementById('step-name-area').classList.remove('hidden');
         document.getElementById('player-name').focus();
         document.getElementById('player-name').classList.add('border-red-500');
         document.getElementById('player-name').placeholder = '¡Escribe tu nombre primero!';
-        document.getElementById('step-name').scrollIntoView({behavior:'smooth'});
         return;
       }
       lobbyState.playerName = name.substring(0,15).toUpperCase();
       lobbyState.playerId = 'PLY_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
       lobbyState.game = gid; lobbyState.difficulty = diff;
       localStorage.setItem('mp_playerName', lobbyState.playerName);
-
       var qp = 'matchmaking/queue/'+gid+'_'+diff;
       lobbyState.queueRef = rtdb.ref(qp+'/'+lobbyState.playerId);
       lobbyState.queueRef.set({ name:lobbyState.playerName, joinedAt:firebase.database.ServerValue.TIMESTAMP, subject:lobbyState.subject, game:gid, difficulty:diff });
@@ -451,7 +457,6 @@
       lobbyState.assignRef = rtdb.ref('matchmaking/assignments/'+lobbyState.playerId);
       lobbyState.assignRef.on('value', function(s){ var m=s.val(); if(m) onMatchFound(m); });
       lobbyState.assignRef.onDisconnect().remove();
-
       document.getElementById('screen-select').classList.add('hidden');
       document.getElementById('screen-searching').classList.remove('hidden');
       document.getElementById('search-info').textContent = gid+' · '+diff;
@@ -459,22 +464,20 @@
       lobbyState.searchTimer = setInterval(function(){ lobbyState.searchSeconds++; document.getElementById('search-seconds').textContent=lobbyState.searchSeconds; },1000);
     }
 
-    // ═══ SELECT GAME / DIFFICULTY ═══
+    // ═══ SELECT GAME / DIFFICULTY (WIZARD) ═══
     function selectGame(gid) {
       lobbyState.game = gid; lobbyState.difficulty = null;
-      document.querySelectorAll('#game-grid button').forEach(function(b){b.classList.remove('ring-4','ring-orange-400','scale-105');});
-      var s = document.querySelector('[data-game="'+gid+'"]'); if(s) s.classList.add('ring-4','ring-orange-400','scale-105');
-      document.getElementById('step-difficulty').classList.remove('hidden');
-      document.getElementById('step-difficulty').classList.add('slide-up');
-      document.getElementById('step-name').classList.add('hidden');
+      document.getElementById('step-name-area').classList.add('hidden');
+      document.querySelectorAll('#difficulty-grid button').forEach(function(b){b.classList.remove('ring-4','ring-orange-400','scale-105');});
+      showWizardStep('play');
       renderFilteredWaiting();
     }
     function selectDifficulty(d) {
       lobbyState.difficulty = d;
       document.querySelectorAll('#difficulty-grid button').forEach(function(b){b.classList.remove('ring-4','ring-orange-400','scale-105');});
       document.querySelector('[data-diff="'+d+'"]').classList.add('ring-4','ring-orange-400','scale-105');
-      document.getElementById('step-name').classList.remove('hidden');
-      document.getElementById('step-name').classList.add('slide-up');
+      document.getElementById('step-name-area').classList.remove('hidden');
+      document.getElementById('step-name-area').classList.add('slide-up');
       document.getElementById('player-name').focus();
     }
 
@@ -488,7 +491,6 @@
       lobbyState.playerId = 'PLY_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
       lobbyState.flexActive = false; lobbyState.flexListeners = [];
       localStorage.setItem('mp_playerName', lobbyState.playerName);
-
       document.getElementById('screen-select').classList.add('hidden');
       document.getElementById('screen-searching').classList.remove('hidden');
       document.getElementById('search-info').textContent = lobbyState.game+' · '+lobbyState.difficulty;
@@ -499,7 +501,6 @@
         var botWait = (typeof SITE_CONFIG !== 'undefined' && SITE_CONFIG.features && SITE_CONFIG.features.botWaitSeconds) || 30;
         if (lobbyState.searchSeconds>=botWait) startBotMatch();
       },1000);
-
       var qk = lobbyState.game+'_'+lobbyState.difficulty;
       var qp = 'matchmaking/queue/'+qk;
       lobbyState.queueRef = rtdb.ref(qp+'/'+lobbyState.playerId);
@@ -513,10 +514,9 @@
       lobbyState.assignRef.onDisconnect().remove();
     }
 
-    // ═══ FLEX SEARCH ═══
     function startFlexSearch() {
       lobbyState.flexActive = true;
-      document.getElementById('search-info').innerHTML = lobbyState.game+' · <span class="text-yellow-500 font-bold">buscando en todos los niveles...</span>';
+      document.getElementById('search-info').innerHTML = lobbyState.game+' · <span class="text-yellow-500 font-bold">todos los niveles...</span>';
       DIFFICULTY_ORDER.forEach(function(d) {
         if (d===lobbyState.difficulty) return;
         var r = rtdb.ref('matchmaking/queue/'+lobbyState.game+'_'+d);
@@ -524,7 +524,6 @@
         lobbyState.flexListeners.push({ref:r,listener:l});
       });
     }
-
     function handleQueueSnapshot(snap, qp, diff) {
       var pl = snap.val(); if(!pl) return;
       var ids = Object.keys(pl);
@@ -533,7 +532,6 @@
         if (sorted[0]===lobbyState.playerId) createMatch(sorted[0],sorted[1],pl[sorted[0]],pl[sorted[1]],qp,null,diff);
       }
     }
-
     function handleCrossLevelSnapshot(snap, oqp, od) {
       var op = snap.val(); if(!op) return;
       var ids = Object.keys(op);
@@ -548,7 +546,6 @@
       }
     }
 
-    // ═══ CREATE MATCH ═══
     function createMatch(hid, gid, hd, gd, hqp, gqp, mdiff) {
       var mid = 'M_'+Date.now()+'_'+Math.random().toString(36).substr(2,8);
       var fd = mdiff || lobbyState.difficulty;
@@ -567,7 +564,6 @@
       rtdb.ref().update(up).then(function(){ console.log('✅ Match:',mid,fd); });
     }
 
-    // ═══ CHALLENGE (retar amigo) ═══
     function createChallenge() {
       var name = document.getElementById('player-name').value.trim();
       if (!name) { document.getElementById('player-name').classList.add('border-red-500'); return; }
@@ -584,7 +580,6 @@
         status:'waiting', createdAt:firebase.database.ServerValue.TIMESTAMP
       });
       lobbyState.challengeRef.onDisconnect().update({status:'expired'});
-      // Build URL preserving feature flags
       var base = window.location.origin+window.location.pathname+'?reto='+cid+'&materia='+lobbyState.subject;
       var cur = new URLSearchParams(window.location.search);
       cur.forEach(function(v,k){ if(k.startsWith('ff_')) base+='&'+k+'='+v; });
@@ -594,12 +589,11 @@
       document.getElementById('screen-select').classList.add('hidden');
       document.getElementById('screen-challenge').classList.remove('hidden');
     }
-
     function copyChallengeLink() {
       var url = document.getElementById('challenge-url').value;
       navigator.clipboard.writeText(url).then(function(){
         var b=document.getElementById('btn-copy-challenge'); b.textContent='✅ ¡Copiado!';
-        setTimeout(function(){b.innerHTML='📋 Copiar enlace';},2000);
+        setTimeout(function(){b.innerHTML='📋 Copiar';},2000);
       });
     }
     function shareChallengeWhatsApp() {
@@ -615,7 +609,6 @@
       document.getElementById('screen-select').classList.remove('hidden');
     }
 
-    // ═══ MATCH FOUND ═══
     function onMatchFound(mid) {
       clearInterval(lobbyState.searchTimer);
       lobbyState.flexListeners.forEach(function(i){i.ref.off('value',i.listener);}); lobbyState.flexListeners=[];
@@ -640,7 +633,6 @@
       });
     }
 
-    // ═══ CANCEL SEARCH ═══
     function cancelSearch() {
       clearInterval(lobbyState.searchTimer);
       if(lobbyState.queueRef) lobbyState.queueRef.remove();
@@ -652,124 +644,34 @@
     }
 
     // ═══ GENERATORS ═══
-    // Fisher-Yates shuffle utility
-    function shuffleArr(arr) {
-      var a=[].concat(arr);
-      for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
-      return a;
-    }
-
+    function shuffleArr(arr) { var a=[].concat(arr); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
     function generateOperationsForGame(game, diff, count) {
-      var ops=[];
-      for(var i=0;i<count;i++){
-        var op;
-        switch(game){
-          case 'invasores-matematicos':case 'completa-numero': op=genMath(diff);break;
-          case 'jerarquia-operaciones': op=genJerarquia(diff);break;
-          case 'mayor-menor': op=genCompare(diff);break;
-          case 'sopa-letras': op=genSopa(diff,i);break;
-          case 'completa-letra': op=genLetter(diff,i);break;
-          case 'seguir-patrones': op=genPattern(diff,i);break;
-          case 'practica-escritura': op=genTyping(diff,i);break;
-          default: op=genMath(diff);
-        }
-        op.id=i+1; ops.push(op);
-      }
-      return ops;
+      var ops=[]; for(var i=0;i<count;i++){ var op;
+        switch(game){ case 'invasores-matematicos':case 'completa-numero':op=genMath(diff);break; case 'jerarquia-operaciones':op=genJerarquia(diff);break; case 'mayor-menor':op=genCompare(diff);break; case 'sopa-letras':op=genSopa(diff,i);break; case 'completa-letra':op=genLetter(diff,i);break; case 'seguir-patrones':op=genPattern(diff,i);break; case 'practica-escritura':op=genTyping(diff,i);break; default:op=genMath(diff); }
+        op.id=i+1; ops.push(op); } return ops;
     }
-    function genMath(d){
-      var r=d==='facil'?9:d==='medio'?50:99, ts=d==='facil'?['suma','resta']:['suma','resta','multiplicar'];
-      var t=ts[Math.floor(Math.random()*ts.length)], a,b,ans,txt;
-      if(t==='suma'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*r)+1;ans=a+b;txt=a+' + '+b;}
-      else if(t==='resta'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*a)+1;ans=a-b;txt=a+' - '+b;}
-      else{a=Math.floor(Math.random()*10)+1;b=Math.floor(Math.random()*10)+1;ans=a*b;txt=a+' × '+b;}
-      return{type:'math',text:txt+' = ?',answer:ans};
-    }
-    // Jerarquía de operaciones: a ± (b × c) o a ± (b ÷ c), resultado >= 0
-    function genJerarquia(d){
-      var max=d==='facil'?5:d==='medio'?10:15;
-      var rng=function(){return Math.floor(Math.random()*max)+1;};
-      var useDiv=(d==='dificil'&&Math.random()<0.4);
-      var useSub=Math.random()<0.5;
-      var a,b,c,pr,txt,ans;
-      if(useDiv){
-        c=Math.floor(Math.random()*(max-1))+2;
-        var q=rng(); b=c*q; pr=q;
-      } else {
-        b=rng(); c=rng(); pr=b*c;
-      }
-      if(useSub){
-        a=pr+Math.floor(Math.random()*max); ans=a-pr;
-        txt=a+(useDiv?' - '+b+' ÷ '+c:' - '+b+' × '+c);
-      } else {
-        a=rng(); ans=a+pr;
-        txt=a+(useDiv?' + '+b+' ÷ '+c:' + '+b+' × '+c);
-      }
-      return{type:'math',text:txt+' = ?',answer:ans};
-    }
-    function genCompare(d){
-      var r=d==='facil'?20:d==='medio'?50:100;
-      var l=Math.floor(Math.random()*r)+1,ri=Math.floor(Math.random()*r)+1;
-      if(Math.random()>0.2&&l===ri) ri=l+Math.floor(Math.random()*5)+1;
-      return{type:'compare',left:l,right:ri,text:l+' ___ '+ri,answer:l>ri?'>':l<ri?'<':'='};
-    }
-    function genLetter(d,i){
-      var pool=PALABRAS_LENGUA[d]||PALABRAS_LENGUA.facil;
-      var item=pool[Math.floor(Math.random()*pool.length)];
-      var word=item.palabra;
-      var hi=Math.floor(Math.random()*word.length);
-      return{type:'letter',text:word.substring(0,hi)+'_'+word.substring(hi+1),answer:word[hi],fullWord:word,hint:item.pista};
-    }
-    function genSopa(d,i){
-      var pool=PALABRAS_LENGUA[d]||PALABRAS_LENGUA.facil;
-      var item=pool[Math.floor(Math.random()*pool.length)];
-      var word=item.palabra;
-      var shuffled=word.split('').sort(function(){return Math.random()-0.5;}).join('');
-      if(shuffled===word) shuffled=word.split('').reverse().join('');
-      return{type:'sopa',text:shuffled,hint:item.pista,answer:word};
-    }
-    function genPattern(d,i){
-      var c=['🔴','🔵','🟢','🟡','🟣','🟠'],len=d==='facil'?3:d==='medio'?4:5,p=[];
-      for(var j=0;j<len;j++) p.push(c[Math.floor(Math.random()*c.length)]);
-      return{type:'pattern',sequence:p,text:p.join(' ')+' → ?',answer:p[0]};
-    }
-    function genTyping(d,i){
-      var ph={facil:['El sol brilla hoy','Mi gato duerme','La luna es bonita','El perro corre','Hoy es un buen día','Me gusta jugar','El cielo es azul','La flor es roja','El agua está fría','Yo como fruta'],
-        medio:['Los pájaros cantan en el árbol','Mi hermana lee un libro grande','El mar tiene olas enormes','Jugamos en el parque con amigos','La profesora explica la lección','El tren llega a las ocho','Necesito un lápiz y una goma','Mañana vamos de excursión','El viento mueve las hojas','Estudiamos para el examen'],
-        dificil:['La biblioteca municipal cierra los domingos','Los científicos descubrieron una nueva especie','El campeonato internacional comienza mañana','La temperatura ha descendido esta semana','El restaurante ofrece platos vegetarianos']};
-      var l=ph[d]||ph.facil; var item=l[Math.floor(Math.random()*l.length)]; return{type:'typing',text:item,answer:item};
-    }
+    function genMath(d){ var r=d==='facil'?9:d==='medio'?50:99, ts=d==='facil'?['suma','resta']:['suma','resta','multiplicar']; var t=ts[Math.floor(Math.random()*ts.length)], a,b,ans,txt; if(t==='suma'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*r)+1;ans=a+b;txt=a+' + '+b;} else if(t==='resta'){a=Math.floor(Math.random()*r)+1;b=Math.floor(Math.random()*a)+1;ans=a-b;txt=a+' - '+b;} else{a=Math.floor(Math.random()*10)+1;b=Math.floor(Math.random()*10)+1;ans=a*b;txt=a+' × '+b;} return{type:'math',text:txt+' = ?',answer:ans}; }
+    function genJerarquia(d){ var max=d==='facil'?5:d==='medio'?10:15; var rng=function(){return Math.floor(Math.random()*max)+1;}; var useDiv=(d==='dificil'&&Math.random()<0.4); var useSub=Math.random()<0.5; var a,b,c,pr,txt,ans; if(useDiv){c=Math.floor(Math.random()*(max-1))+2;var q=rng();b=c*q;pr=q;} else{b=rng();c=rng();pr=b*c;} if(useSub){a=pr+Math.floor(Math.random()*max);ans=a-pr;txt=a+(useDiv?' - '+b+' ÷ '+c:' - '+b+' × '+c);} else{a=rng();ans=a+pr;txt=a+(useDiv?' + '+b+' ÷ '+c:' + '+b+' × '+c);} return{type:'math',text:txt+' = ?',answer:ans}; }
+    function genCompare(d){ var r=d==='facil'?20:d==='medio'?50:100; var l=Math.floor(Math.random()*r)+1,ri=Math.floor(Math.random()*r)+1; if(Math.random()>0.2&&l===ri) ri=l+Math.floor(Math.random()*5)+1; return{type:'compare',left:l,right:ri,text:l+' ___ '+ri,answer:l>ri?'>':l<ri?'<':'='}; }
+    function genLetter(d,i){ var pool=PALABRAS_LENGUA[d]||PALABRAS_LENGUA.facil; var item=pool[Math.floor(Math.random()*pool.length)]; var word=item.palabra; var hi=Math.floor(Math.random()*word.length); return{type:'letter',text:word.substring(0,hi)+'_'+word.substring(hi+1),answer:word[hi],fullWord:word,hint:item.pista}; }
+    function genSopa(d,i){ var pool=PALABRAS_LENGUA[d]||PALABRAS_LENGUA.facil; var item=pool[Math.floor(Math.random()*pool.length)]; var word=item.palabra; var shuffled=word.split('').sort(function(){return Math.random()-0.5;}).join(''); if(shuffled===word) shuffled=word.split('').reverse().join(''); return{type:'sopa',text:shuffled,hint:item.pista,answer:word}; }
+    function genPattern(d,i){ var c=['🔴','🔵','🟢','🟡','🟣','🟠'],len=d==='facil'?3:d==='medio'?4:5,p=[]; for(var j=0;j<len;j++) p.push(c[Math.floor(Math.random()*c.length)]); return{type:'pattern',sequence:p,text:p.join(' ')+' → ?',answer:p[0]}; }
+    function genTyping(d,i){ var ph={facil:['El sol brilla hoy','Mi gato duerme','La luna es bonita','El perro corre','Hoy es un buen día','Me gusta jugar','El cielo es azul','La flor es roja','El agua está fría','Yo como fruta'], medio:['Los pájaros cantan en el árbol','Mi hermana lee un libro grande','El mar tiene olas enormes','Jugamos en el parque con amigos','La profesora explica la lección','El tren llega a las ocho','Necesito un lápiz y una goma','Mañana vamos de excursión','El viento mueve las hojas','Estudiamos para el examen'], dificil:['La biblioteca municipal cierra los domingos','Los científicos descubrieron una nueva especie','El campeonato internacional comienza mañana','La temperatura ha descendido esta semana','El restaurante ofrece platos vegetarianos']}; var l=ph[d]||ph.facil; var item=l[Math.floor(Math.random()*l.length)]; return{type:'typing',text:item,answer:item}; }
 
-    // ═══ BOT MATCH AFTER 30s ═══
     function startBotMatch() {
       clearInterval(lobbyState.searchTimer);
       if(lobbyState.queueRef) lobbyState.queueRef.remove();
       lobbyState.flexListeners.forEach(function(i){i.ref.off('value',i.listener);});
-
-      var mid = 'M_BOT_'+Date.now()+'_'+Math.random().toString(36).substr(2,8);
-      var botId = 'BOT_'+Date.now();
-      var ops = generateOperationsForGame(lobbyState.game, lobbyState.difficulty, 20);
-
-      var md = { matchId:mid, players:{}, operations:ops,
-        config:{subject:lobbyState.subject,game:lobbyState.game,difficulty:lobbyState.difficulty,totalOperations:ops.length,timeLimitSeconds:120},
-        status:'active', isBot:true, createdAt:firebase.database.ServerValue.TIMESTAMP };
-      md.players[lobbyState.playerId] = {name:lobbyState.playerName, score:0, current:0, finished:false, answers:{}};
-      md.players[botId] = {name:'Bot 🤖', score:0, current:0, finished:false, answers:{}, isBot:true};
-
-      var up = {};
-      up['matches/'+mid] = md;
-      up['matchmaking/assignments/'+lobbyState.playerId] = mid;
-
-      rtdb.ref().update(up).then(function(){
-        sessionStorage.setItem('mp_matchId',mid);
-        sessionStorage.setItem('mp_playerId',lobbyState.playerId);
-        sessionStorage.setItem('mp_game',lobbyState.game);
-        sessionStorage.setItem('mp_isBot','true');
-        onMatchFound(mid);
-      });
+      var mid='M_BOT_'+Date.now()+'_'+Math.random().toString(36).substr(2,8);
+      var botId='BOT_'+Date.now();
+      var ops=generateOperationsForGame(lobbyState.game,lobbyState.difficulty,20);
+      var md={matchId:mid,players:{},operations:ops,config:{subject:lobbyState.subject,game:lobbyState.game,difficulty:lobbyState.difficulty,totalOperations:ops.length,timeLimitSeconds:120},status:'active',isBot:true,createdAt:firebase.database.ServerValue.TIMESTAMP};
+      md.players[lobbyState.playerId]={name:lobbyState.playerName,score:0,current:0,finished:false,answers:{}};
+      md.players[botId]={name:'Bot 🤖',score:0,current:0,finished:false,answers:{},isBot:true};
+      var up={};up['matches/'+mid]=md;up['matchmaking/assignments/'+lobbyState.playerId]=mid;
+      rtdb.ref().update(up).then(function(){sessionStorage.setItem('mp_matchId',mid);sessionStorage.setItem('mp_playerId',lobbyState.playerId);sessionStorage.setItem('mp_game',lobbyState.game);sessionStorage.setItem('mp_isBot','true');onMatchFound(mid);});
     }
 
-    // ═══ CLEANUP ═══
     window.addEventListener('beforeunload', function(){
       if(lobbyState.queueRef) lobbyState.queueRef.remove();
       if(lobbyState.assignRef) lobbyState.assignRef.remove();
