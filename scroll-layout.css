@@ -1,26 +1,23 @@
-/* ═══════════════════════════════════════════════
-   SCROLL-SNAP LAYOUT SYSTEM — Aprende y Juega
-   Two-section vertical snap: Hero (100vh) + SEO content
-   SEO-safe: No hidden content, no cloaking
-   ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   SCROLL-SNAP LAYOUT — Aprende y Juega
+   Hero (100vh, sin scroll) + SEO (scrollable)
+   ═══════════════════════════════════════════════════ */
 
-/* ── Scroll Snap Container ── */
+/* ── Activar snap en el HTML ── */
 html.has-snap {
     scroll-snap-type: y proximity;
+    overflow-y: scroll;
     scroll-behavior: smooth;
 }
 
-/* ── Hero Section (zona jugable) ── */
+/* ── HERO: pantalla completa, sin scroll ── */
 .snap-hero {
-    min-height: 100vh;
-    min-height: 100dvh;
     scroll-snap-align: start;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    box-sizing: border-box;
-    padding-bottom: 3.5rem;
 }
 
 .snap-hero-inner {
@@ -29,283 +26,365 @@ html.has-snap {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+    max-height: 100dvh;
+    overflow: hidden;
+}
+
+/* ── NAV dentro del hero ── */
+.hero-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     width: 100%;
-    max-width: 80rem;
+    max-width: 64rem;
+    padding: 0 0.5rem;
+    flex-shrink: 0;
+}
+
+.hero-nav-btn {
+    background: rgba(255,255,255,0.9);
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.hero-nav-btn:hover {
+    background: white;
+    transform: translateY(-1px);
+}
+
+/* ── GRID DE CARDS ── */
+.hero-cards-grid {
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+    flex: 1;
+    align-content: center;
+    max-width: 64rem;
     margin: 0 auto;
-    padding: 1rem;
 }
 
-/* ── SEO Section (zona contenido) ── */
-.snap-seo {
-    scroll-snap-align: start;
-    position: relative;
-}
+/* Columnas según tipo */
+.hero-cards-grid.two-cols { grid-template-columns: 1fr 1fr; max-width: 48rem; }
+.hero-cards-grid.three-cols { grid-template-columns: repeat(3, 1fr); }
+.hero-cards-grid.four-cols { grid-template-columns: repeat(4, 1fr); }
 
-/* ── Scroll Indicator (bouncing chevron) ── */
-.scroll-indicator {
-    position: absolute;
-    bottom: 0.75rem;
-    left: 50%;
-    transform: translateX(-50%);
-    cursor: pointer;
-    z-index: 20;
+/* ── HERO CARD ── */
+.hero-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
-    animation: snap-bounce 2s ease-in-out infinite;
-    opacity: 0.85;
-    transition: opacity 0.3s;
+    justify-content: center;
+    text-align: center;
+    padding: 1rem 0.75rem;
+    border-radius: 1.25rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    min-height: 0;
+    overflow: hidden;
+}
+.hero-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
 }
 
-.scroll-indicator:hover {
-    opacity: 1;
+.card-icon {
+    font-size: clamp(2rem, 5vmin, 3.5rem);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+.card-title {
+    font-size: clamp(0.85rem, 2vmin, 1.25rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.15rem;
+}
+.card-desc {
+    font-size: clamp(0.65rem, 1.5vmin, 0.85rem);
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+    opacity: 0.8;
 }
 
+/* ── SCROLL INDICATOR (bottom of hero) ── */
+.scroll-indicator {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    transition: opacity 0.4s;
+}
 .scroll-indicator-text {
+    display: block;
+    color: rgba(255,255,255,0.7);
     font-size: 0.75rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    margin-bottom: 0.15rem;
 }
-
 .scroll-indicator-chevron {
-    width: 2rem;
-    height: 2rem;
-    color: rgba(255, 255, 255, 0.9);
-    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+    width: 1.5rem;
+    height: 1.5rem;
+    color: rgba(255,255,255,0.7);
+    margin: 0 auto;
+    animation: bounce-chevron 2s ease-in-out infinite;
+}
+@keyframes bounce-chevron {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
 }
 
-@keyframes snap-bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(8px); }
+/* ── SEO SECTION ── */
+.snap-seo {
+    scroll-snap-align: start;
+    min-height: 50vh;
+    padding-bottom: 0;
 }
 
-/* ── "Back to top" button in SEO zone ── */
+.section-divider {
+    border: none;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    margin: 0;
+}
+
+/* ── BACK TO TOP ── */
 .back-to-top {
     position: fixed;
     bottom: 1.5rem;
     right: 1.5rem;
     width: 3rem;
     height: 3rem;
-    border-radius: 50%;
-    background: rgba(147, 51, 234, 0.9);
+    background: rgba(0,0,0,0.6);
     color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    z-index: 50;
     opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s, transform 0.3s;
-    border: none;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    z-index: 50;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
-
 .back-to-top.visible {
     opacity: 1;
-    pointer-events: auto;
+    transform: translateY(0);
 }
-
 .back-to-top:hover {
+    background: rgba(0,0,0,0.8);
     transform: scale(1.1);
-    background: rgba(147, 51, 234, 1);
 }
-
 .back-to-top svg {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
-/* ── Section Divider ── */
-.section-divider {
-    height: 4px;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(255,255,255,0.4) 20%, 
-        rgba(255,255,255,0.6) 50%, 
-        rgba(255,255,255,0.4) 80%, 
-        transparent 100%
-    );
-    margin: 0;
-    border: none;
-}
-
-/* ── Mobile Optimizations ── */
-@media (max-width: 768px) {
-    .snap-hero {
-        padding-bottom: 3rem;
-    }
-    
-    .snap-hero-inner {
-        padding: 0.5rem;
-        justify-content: flex-start;
-        padding-top: 0.5rem;
-    }
-    
-    .scroll-indicator {
-        bottom: 0.5rem;
-    }
-    
-    .back-to-top {
-        bottom: 1rem;
-        right: 1rem;
-        width: 2.5rem;
-        height: 2.5rem;
-    }
-}
-
-/* ── Reduce motion for accessibility ── */
-@media (prefers-reduced-motion: reduce) {
-    html.has-snap {
-        scroll-behavior: auto;
-    }
-    .scroll-indicator {
-        animation: none;
-    }
-}
-
-/* ── Hero compact styles for fitting in 100vh ── */
-.hero-title-compact {
-    font-size: clamp(2rem, 6vw, 4rem);
-    line-height: 1.1;
-    margin-bottom: 0.5rem;
-}
-
-.hero-subtitle-compact {
-    font-size: clamp(0.9rem, 2.5vw, 1.25rem);
-    margin-bottom: 1rem;
-    max-width: 36rem;
-}
-
-.hero-cards-grid {
+/* ── INDEX: Cards de modo de juego (3 cards) ── */
+.mode-cards-wrapper {
     display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
     width: 100%;
-    max-width: 72rem;
+    max-width: 64rem;
+    flex: 1;
+    align-content: center;
+    padding: 0 0.5rem;
 }
-
-/* Index: 3 cols for modes */
-.hero-cards-grid.three-cols {
-    grid-template-columns: repeat(3, 1fr);
-}
-
-/* Materias: 2x2 grid */
-.hero-cards-grid.two-cols {
-    grid-template-columns: repeat(2, 1fr);
-}
-
-/* Menu pages: flexible */
-.hero-cards-grid.four-cols {
-    grid-template-columns: repeat(4, 1fr);
-}
-
-@media (max-width: 1024px) {
-    .hero-cards-grid.four-cols {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .hero-cards-grid.three-cols {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
-    .hero-cards-grid.two-cols {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
-    .hero-cards-grid.four-cols {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-    }
-}
-
-/* ── Compact Card Styles for Hero ── */
-.hero-card {
-    border-radius: 1.25rem;
-    padding: 1.25rem;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
+.mode-card-link {
     display: flex;
     flex-direction: column;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.mode-card-link:hover {
+    transform: translateY(-6px) scale(1.02);
+}
+.mode-card-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* ── MATERIAS: 4 cards con banner ── */
+.materias-hero {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+}
+.materias-banner {
+    flex-shrink: 0;
+    min-height: 50px;
+}
+.materias-grid-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+}
+.materias-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+    max-width: 48rem;
+    max-height: 100%;
+}
+.materia-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border-radius: 1.5rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     min-height: 0;
+    overflow: hidden;
 }
-
-.hero-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+.materia-card:hover {
+    transform: translateY(-6px) scale(1.03);
 }
-
-.hero-card .card-icon {
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
+.materia-icon {
+    font-size: clamp(2.5rem, 8vmin, 5rem);
     line-height: 1;
+    margin-bottom: 0.3rem;
 }
-
-.hero-card .card-title {
-    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+.materia-title {
+    font-size: clamp(1.2rem, 3vmin, 2rem);
     font-weight: 800;
     color: white;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
+}
+.materia-subtitle {
+    font-size: clamp(0.7rem, 1.5vmin, 1rem);
+    opacity: 0.85;
 }
 
-.hero-card .card-desc {
-    font-size: clamp(0.75rem, 1.5vw, 0.875rem);
-    opacity: 0.9;
-    line-height: 1.3;
-    margin-bottom: 0.5rem;
+/* ── WIZARD STEP (lobby/clase) ── */
+.wizard-step {
+    transition: all 0.3s ease;
 }
-
-.hero-card .card-cta {
-    display: inline-block;
-    background: rgba(255,255,255,0.2);
-    color: white;
-    font-weight: 700;
-    padding: 0.375rem 1rem;
-    border-radius: 9999px;
-    font-size: 0.85rem;
+.wizard-step.hidden {
+    display: none !important;
 }
-
-@media (max-width: 768px) {
-    .hero-card {
-        padding: 1rem;
-        border-radius: 1rem;
-    }
-    .hero-card .card-icon {
-        font-size: 2.25rem;
-        margin-bottom: 0.25rem;
-    }
+.wizard-step.slide-up {
+    animation: slide-up 0.35s ease-out forwards;
 }
-
-/* ── Nav bar compact ── */
-.hero-nav {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    margin-bottom: 0.5rem;
+@keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-
-.hero-nav-btn {
-    background: rgba(255,255,255,0.9);
-    padding: 0.5rem 1rem;
-    border-radius: 0.75rem;
-    font-weight: 700;
-    font-size: 1rem;
-    transition: background 0.2s;
-    text-decoration: none;
+.wizard-back-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+}
+.wizard-back-btn:hover {
+    background: rgba(255,255,255,0.35);
 }
 
-.hero-nav-btn:hover {
-    background: white;
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+    .snap-hero-inner {
+        padding: 0.35rem 0.5rem;
+        gap: 0.35rem;
+    }
+    .hero-cards-grid {
+        gap: 0.5rem;
+    }
+    .hero-cards-grid.four-cols {
+        grid-template-columns: 1fr 1fr;
+    }
+    .hero-card {
+        padding: 0.6rem 0.5rem;
+        border-radius: 1rem;
+    }
+    .card-icon { font-size: clamp(1.5rem, 6vmin, 2.5rem); }
+    .card-title { font-size: clamp(0.7rem, 2.5vmin, 1rem); }
+    .card-desc { font-size: clamp(0.6rem, 2vmin, 0.75rem); }
+    
+    .mode-cards-wrapper {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+        padding: 0 0.5rem;
+    }
+    .mode-card-inner {
+        padding: 1rem 0.75rem;
+        border-radius: 1.25rem;
+        flex-direction: row;
+        gap: 0.75rem;
+        text-align: left;
+    }
+    .mode-card-icon {
+        font-size: 2.5rem;
+        flex-shrink: 0;
+    }
+
+    .materias-grid {
+        gap: 0.6rem;
+    }
+    .materia-card {
+        padding: 0.75rem 0.5rem;
+        border-radius: 1.25rem;
+    }
+    .materia-icon { font-size: clamp(2rem, 7vmin, 3.5rem); }
+    .materia-title { font-size: clamp(1rem, 2.5vmin, 1.5rem); }
+
+    .back-to-top {
+        width: 2.5rem;
+        height: 2.5rem;
+        bottom: 1rem;
+        right: 1rem;
+    }
+}
+
+@media (max-height: 600px) {
+    .snap-hero-inner {
+        padding: 0.25rem 0.5rem;
+        gap: 0.25rem;
+    }
+    .card-icon { font-size: 1.5rem; }
+    .card-title { font-size: 0.75rem; }
+    .card-desc { display: none; }
+    .hero-card { padding: 0.5rem; }
+    .mode-card-inner { padding: 0.75rem; }
+    .materia-card { padding: 0.5rem; }
+    .materia-icon { font-size: 2rem; }
+    .scroll-indicator { padding: 0.25rem 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scroll-indicator-chevron,
+    .hero-card,
+    .mode-card-link,
+    .materia-card {
+        animation: none;
+        transition: none;
+    }
 }

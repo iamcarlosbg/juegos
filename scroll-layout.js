@@ -1,66 +1,37 @@
-/* ═══════════════════════════════════════════════
-   SCROLL-SNAP LAYOUT JS — Aprende y Juega
-   Handles: scroll indicator, back-to-top button, snap activation
-   ═══════════════════════════════════════════════ */
-
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // ── Enable snap on html ──
+/* ═══ SCROLL-SNAP LAYOUT JS ═══ */
+(function() {
+    // Activate snap on html
     document.documentElement.classList.add('has-snap');
-    
-    // ── Scroll Indicator (click to go to SEO section) ──
-    var indicator = document.querySelector('.scroll-indicator');
-    var seoSection = document.getElementById('seo-content');
-    
-    if (indicator && seoSection) {
-        indicator.addEventListener('click', function() {
-            seoSection.scrollIntoView({ behavior: 'smooth' });
+
+    // Scroll indicator → jump to SEO
+    var ind = document.querySelector('.scroll-indicator');
+    if (ind) {
+        ind.addEventListener('click', function() {
+            var seo = document.getElementById('seo-content');
+            if (seo) seo.scrollIntoView({ behavior: 'smooth' });
         });
     }
-    
-    // ── Back to Top Button ──
-    var backBtn = document.getElementById('back-to-top');
-    var heroSection = document.querySelector('.snap-hero');
-    
-    if (backBtn && heroSection) {
-        // Show/hide based on scroll position
-        var heroHeight = heroSection.offsetHeight;
-        var ticking = false;
-        
+
+    // Back-to-top button
+    var btn = document.getElementById('back-to-top');
+    if (btn) {
+        var hero = document.querySelector('.snap-hero') || document.querySelector('.materias-hero');
         window.addEventListener('scroll', function() {
-            if (!ticking) {
-                window.requestAnimationFrame(function() {
-                    if (window.scrollY > heroHeight * 0.5) {
-                        backBtn.classList.add('visible');
-                    } else {
-                        backBtn.classList.remove('visible');
-                    }
-                    
-                    // Hide scroll indicator when past hero
-                    if (indicator) {
-                        if (window.scrollY > heroHeight * 0.3) {
-                            indicator.style.opacity = '0';
-                            indicator.style.pointerEvents = 'none';
-                        } else {
-                            indicator.style.opacity = '';
-                            indicator.style.pointerEvents = '';
-                        }
-                    }
-                    
-                    ticking = false;
-                });
-                ticking = true;
+            var threshold = hero ? hero.offsetHeight * 0.5 : 400;
+            if (window.scrollY > threshold) {
+                btn.classList.add('visible');
+                if (ind) ind.style.opacity = '0';
+            } else {
+                btn.classList.remove('visible');
+                if (ind) ind.style.opacity = '1';
             }
-        }, { passive: true });
-        
-        backBtn.addEventListener('click', function() {
-            heroSection.scrollIntoView({ behavior: 'smooth' });
+        });
+        btn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
-    
-    // ── Set current year in footer ──
-    var yearEl = document.getElementById('year');
-    if (yearEl) {
-        yearEl.textContent = new Date().getFullYear();
-    }
-});
+
+    // Set footer year
+    var y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+})();

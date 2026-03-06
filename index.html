@@ -78,18 +78,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="scroll-layout.css">
     <style>
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .float-animation { animation: float 3s ease-in-out infinite; }
-        
         @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); }
-            50% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.5); }
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.6); }
         }
         .glow-animation { animation: pulse-glow 2s ease-in-out infinite; }
-
+        
+        /* Modo deshabilitado */
         .mode-disabled {
             opacity: 0.5;
             pointer-events: none;
@@ -104,7 +99,7 @@
             background: rgba(0,0,0,0.8);
             color: white;
             padding: 0.5rem 1rem;
-            border-radius: 1rem;
+            border-radius: 0.75rem;
             font-size: 1rem;
             font-weight: bold;
             z-index: 10;
@@ -144,96 +139,95 @@
         ⚠️ VERSIÓN BETA — Estás viendo el nuevo diseño en pruebas
     </div>
 
-    <!-- ╔═══════════════════════════════════════════╗ -->
-    <!-- ║  SECCIÓN 1: ZONA JUGABLE (100vh)          ║ -->
-    <!-- ╚═══════════════════════════════════════════╝ -->
+    <!-- ═══ HERO: Pantalla completa con modos de juego ═══ -->
     <section class="snap-hero bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400">
-        <div class="snap-hero-inner">
-
-            <header class="text-center mb-3 float-animation">
-                <h1 class="hero-title-compact text-white font-bold drop-shadow-lg">
+        <div class="snap-hero-inner" style="max-width: 64rem; margin: 0 auto;">
+            <!-- Title -->
+            <div class="text-center flex-shrink-0">
+                <h1 class="text-4xl md:text-6xl font-bold text-white mb-1 drop-shadow-lg">
                     🎓 Aprende y Juega
                 </h1>
-                <p class="hero-subtitle-compact text-white/90 font-semibold drop-shadow-md mx-auto">
-                    Juegos educativos online gratis. ¡Elige cómo quieres jugar!
+                <p class="text-base md:text-xl text-white font-semibold drop-shadow-md max-w-2xl mx-auto">
+                    ¡Elige cómo quieres jugar!
                 </p>
-            </header>
-
-            <h2 class="text-xl md:text-2xl font-bold text-white text-center mb-3 drop-shadow-lg">
-                🎯 Elige tu modo de juego
-            </h2>
-
-            <div class="hero-cards-grid three-cols px-2" style="max-width: 64rem;">
-                
-                <!-- MODO 1: JUGAR SOLO -->
-                <a href="materias.html" id="mode-solo" class="hero-card bg-gradient-to-br from-blue-500 to-blue-700 shadow-2xl glow-animation">
-                    <div class="card-icon">🎮</div>
-                    <div class="card-title">Jugar Solo</div>
-                    <p class="card-desc text-blue-100">Elige tu materia favorita y practica a tu ritmo</p>
-                    <div class="flex justify-center gap-2 text-xl mb-1">
-                        <span>🔢</span><span>📚</span><span>🧩</span><span>⌨️</span>
-                    </div>
-                    <span class="card-cta">Empezar a jugar →</span>
-                </a>
-
-                <!-- MODO 2: MULTIJUGADOR -->
-                <div id="mode-multiplayer" class="hero-card bg-gradient-to-br from-orange-500 to-red-600 shadow-2xl glow-animation">
-                    <div class="card-icon">👥</div>
-                    <div class="card-title">Multijugador</div>
-                    <p class="card-desc text-orange-100">Compite contra otro jugador en tiempo real</p>
-                    <div class="flex justify-center gap-2 text-xl mb-1">
-                        <span>⚡</span><span>🏆</span><span>🆚</span>
-                    </div>
-                    <span class="card-cta">Buscar partida →</span>
-                </div>
-
-                <!-- MODO 3: MODO CLASE -->
-                <div id="mode-classroom" class="hero-card bg-gradient-to-br from-green-500 to-emerald-700 shadow-2xl glow-animation">
-                    <div class="card-icon">🏫</div>
-                    <div class="card-title">Modo Clase</div>
-                    <p class="card-desc text-green-100">Toda la clase juega a la vez con ranking en vivo</p>
-                    <div class="flex justify-center gap-2 text-xl mb-1">
-                        <span>👨‍🏫</span><span>📊</span><span>🎓</span>
-                    </div>
-                    <span class="card-cta">Crear / Unirse →</span>
-                </div>
-
             </div>
 
-            <!-- Quick access links -->
-            <div class="flex justify-center gap-2 mt-3 flex-wrap px-2">
-                <a href="matematicas-menu.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-sm font-semibold transition">🔢 Mates</a>
-                <a href="lengua-menu.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-sm font-semibold transition">📚 Lengua</a>
-                <a href="logica-menu.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-sm font-semibold transition">🧩 Lógica</a>
-                <a href="mecanografia-menu.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-sm font-semibold transition">⌨️ Mecanografía</a>
+            <!-- 3 Mode Cards -->
+            <div class="mode-cards-wrapper">
+                <!-- JUGAR SOLO -->
+                <a href="materias.html" id="mode-solo" class="mode-card-link">
+                    <div class="mode-card-inner bg-gradient-to-br from-blue-500 to-blue-700 glow-animation">
+                        <div class="mode-card-icon text-5xl md:text-6xl">🎮</div>
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-bold text-white mb-1">Jugar Solo</h2>
+                            <p class="text-blue-100 text-sm md:text-base mb-2">
+                                Elige tu materia y practica con juegos interactivos.
+                            </p>
+                            <div class="flex justify-center md:justify-start gap-2 text-2xl mb-2">
+                                <span>🔢</span><span>📚</span><span>🧩</span><span>⌨️</span>
+                            </div>
+                            <span class="inline-block bg-white/20 text-white font-bold py-1 px-4 rounded-full text-sm">
+                                Empezar →
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- MULTIJUGADOR -->
+                <div id="mode-multiplayer" class="mode-card-link">
+                    <div class="mode-card-inner bg-gradient-to-br from-orange-500 to-red-600 glow-animation">
+                        <div class="mode-card-icon text-5xl md:text-6xl">👥</div>
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-bold text-white mb-1">Multijugador</h2>
+                            <p class="text-orange-100 text-sm md:text-base mb-2">
+                                Compite contra otro jugador en tiempo real.
+                            </p>
+                            <div class="flex justify-center md:justify-start gap-2 text-2xl mb-2">
+                                <span>⚡</span><span>🏆</span><span>🆚</span>
+                            </div>
+                            <span class="inline-block bg-white/20 text-white font-bold py-1 px-4 rounded-full text-sm">
+                                Buscar partida →
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODO CLASE -->
+                <div id="mode-classroom" class="mode-card-link">
+                    <div class="mode-card-inner bg-gradient-to-br from-green-500 to-emerald-700 glow-animation">
+                        <div class="mode-card-icon text-5xl md:text-6xl">🏫</div>
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-bold text-white mb-1">Modo Clase</h2>
+                            <p class="text-green-100 text-sm md:text-base mb-2">
+                                Toda la clase juega a la vez con ranking en tiempo real.
+                            </p>
+                            <div class="flex justify-center md:justify-start gap-2 text-2xl mb-2">
+                                <span>👨‍🏫</span><span>📊</span><span>🎓</span>
+                            </div>
+                            <span class="inline-block bg-white/20 text-white font-bold py-1 px-4 rounded-full text-sm">
+                                Crear / Unirse →
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Scroll Indicator -->
+        <!-- Scroll indicator -->
         <div class="scroll-indicator">
             <span class="scroll-indicator-text">Más información</span>
-            <svg class="scroll-indicator-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
+            <svg class="scroll-indicator-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
         </div>
     </section>
 
-    <!-- ╔═══════════════════════════════════════════╗ -->
-    <!-- ║  SECCIÓN 2: CONTENIDO SEO + ADSENSE       ║ -->
-    <!-- ╚═══════════════════════════════════════════╝ -->
+    <!-- ═══ SEO SECTION ═══ -->
     <section id="seo-content" class="snap-seo">
         <hr class="section-divider">
-        
-        <div class="bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400 py-12">
-            <main class="container mx-auto px-4">
+        <main class="bg-white/10 py-8">
+            <div class="max-w-6xl mx-auto px-4">
 
-                <div class="ad-container" aria-hidden="true">
-                    <!-- AdSense: Rectangle 300x250 / Responsive -->
-                    <!-- <ins class="adsbygoogle" data-ad-client="ca-pub-XXXX" data-ad-slot="XXXX" data-ad-format="auto"></ins> -->
-                </div>
-
-                <!-- CATÁLOGO DE JUEGOS -->
-                <section id="juegos" aria-labelledby="heading-juegos" class="max-w-6xl mx-auto mb-12">
+                <!-- Catálogo de juegos -->
+                <section id="juegos" aria-labelledby="heading-juegos" class="mb-12">
                     <h2 id="heading-juegos" class="text-4xl font-bold text-white text-center mb-8 drop-shadow-lg">
                         📚 Nuestros juegos educativos
                     </h2>
@@ -269,10 +263,17 @@
                     </div>
                 </section>
 
-                <!-- BENEFICIOS -->
-                <section id="beneficios" aria-labelledby="heading-beneficios" class="max-w-6xl mx-auto mb-12">
+                <!-- Ad slot -->
+                <div class="ad-container" aria-hidden="true">
+                    <!-- AdSense: Rectangle 300x250 / Responsive -->
+                </div>
+
+                <!-- Beneficios -->
+                <section id="beneficios" aria-labelledby="heading-beneficios" class="mb-12">
                     <div class="bg-white/90 backdrop-blur rounded-3xl p-8 shadow-xl">
-                        <h2 id="heading-beneficios" class="text-3xl font-bold text-gray-800 mb-6 text-center">¿Por qué aprender jugando? 🧠</h2>
+                        <h2 id="heading-beneficios" class="text-3xl font-bold text-gray-800 mb-6 text-center">
+                            ¿Por qué aprender jugando? 🧠
+                        </h2>
                         <div class="grid md:grid-cols-3 gap-6">
                             <div class="text-center p-4">
                                 <div class="text-5xl mb-3">🎯</div>
@@ -294,7 +295,7 @@
                 </section>
 
                 <!-- FAQ -->
-                <section id="faq" aria-labelledby="heading-faq" class="max-w-6xl mx-auto mb-12">
+                <section id="faq" aria-labelledby="heading-faq" class="mb-12">
                     <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 shadow-xl">
                         <h2 id="heading-faq" class="text-3xl font-bold text-blue-600 mb-6 text-center">Preguntas frecuentes ❓</h2>
                         <div class="space-y-4">
@@ -325,8 +326,8 @@
                 <div class="text-center mb-8">
                     <a href="materias.html" class="text-white/70 hover:text-white underline text-sm transition">Ver juegos por materia</a>
                 </div>
-            </main>
-        </div>
+            </div>
+        </main>
 
         <!-- FOOTER -->
         <footer class="bg-gray-900 text-white py-8">
@@ -338,16 +339,19 @@
               <a id="link-facebook" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Facebook" style="display:none">
                 <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
               </a>
+              <a id="link-youtube" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="YouTube" style="display:none">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              </a>
               <a id="link-amazon" href="" target="_blank" rel="noopener" class="hover:scale-110 transform transition" title="Libros">
                 <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.82 8 12 11.82 5.18 8 12 4.18zM5 9.82L11 13v7.18L5 17V9.82zm14 0V17l-6 3.18V13l6-3.18z"/></svg>
               </a>
             </div>
             <div class="text-center text-sm text-gray-400 mb-4">
-              <a href="index.html" class="hover:text-white transition mx-2">Inicio</a> <span>|</span>
-              <a href="materias.html" class="hover:text-white transition mx-2">Materias</a> <span>|</span>
-              <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a> <span>|</span>
-              <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a> <span>|</span>
-              <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a> <span>|</span>
+              <a href="index.html" class="hover:text-white transition mx-2">Inicio</a><span>|</span>
+              <a href="materias.html" class="hover:text-white transition mx-2">Materias</a><span>|</span>
+              <a href="sobre-nosotros.html" class="hover:text-white transition mx-2">Sobre Nosotros</a><span>|</span>
+              <a href="contacto.html" class="hover:text-white transition mx-2">Síguenos</a><span>|</span>
+              <a href="puntuaciones.html" class="hover:text-white transition mx-2">Puntuaciones</a><span>|</span>
               <a href="privacidad.html" class="hover:text-white transition mx-2">Privacidad</a>
             </div>
             <div class="text-center text-sm text-gray-500">© <span id="year"></span> Aprende y Juega - Juegos Educativos 🎓</div>
@@ -355,7 +359,6 @@
         </footer>
     </section>
 
-    <!-- Back to top button -->
     <button id="back-to-top" class="back-to-top" aria-label="Volver arriba">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
     </button>
@@ -363,11 +366,11 @@
     <script src="scroll-layout.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-      if (typeof isFeatureEnabled === 'function' && isFeatureEnabled('showDevBanner')) {
+      if (isFeatureEnabled('showDevBanner')) {
         document.getElementById('dev-banner').style.display = 'block';
       }
       var multiCard = document.getElementById('mode-multiplayer');
-      if (typeof isFeatureEnabled === 'function' && isFeatureEnabled('multiplayer')) {
+      if (isFeatureEnabled('multiplayer')) {
         var multiLink = document.createElement('a');
         multiLink.href = 'multijugador/lobby.html';
         multiLink.className = multiCard.className;
@@ -378,7 +381,7 @@
         multiCard.classList.add('mode-disabled');
       }
       var classCard = document.getElementById('mode-classroom');
-      if (typeof isFeatureEnabled === 'function' && isFeatureEnabled('classMode')) {
+      if (isFeatureEnabled('classMode')) {
         var classLink = document.createElement('a');
         classLink.href = 'clase/';
         classLink.className = classCard.className;
@@ -389,7 +392,7 @@
         classCard.classList.add('mode-disabled');
       }
       if (typeof gtag === 'function') {
-        gtag('event', 'page_view', { 'page_title': 'Modo Juego - Nuevo Index', 'page_location': window.location.href });
+        gtag('event', 'page_view', {'page_title': 'Modo Juego - Nuevo Index', 'page_location': window.location.href});
       }
     });
     </script>
